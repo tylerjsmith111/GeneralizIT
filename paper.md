@@ -21,7 +21,6 @@ affiliations:
     index: 2
   - name: University of Calgary, Calgary, Canada
     index: 3
-
 date: 27 November 2024
 bibliography: paper.bib
 ---
@@ -61,7 +60,7 @@ Table 1: Summary of available software for G-Theory analyses
 | **gtheory**          | R package                                                                                          | Raw data                   | N                | Y                          | Y             |
 | **GeneralizIT**      | Python package                                                                                     | Raw data                   | N                | N                          | Y             |
 
----
+
 
 **Notes:**
 - (a) Unbalanced designs refer to unequal numbers of observations per group.
@@ -70,7 +69,7 @@ Table 1: Summary of available software for G-Theory analyses
 - (d) Limited missing data handling available in SAS.
 - (e) SPSS provides extensive missing data handling options.
 
----
+
 The `GeneralizIT` Python package addresses this critical need by offering a user-friendly platform that simplifies the application of G-Theory in research and practice. By automating the calculation of variance components, generalizability coefficients, and dependability indices, GeneralizIT makes this sophisticated theory accessible to a broad range of disciplines, including education, psychology, healthcare, and the social sciences. The package supports crossed experimental designs for any number of facets enabling users to conduct detailed reliability analyses without extensive coding knowledge. Additionally, its built-in visualization and reporting tools provide clear, interpretable outputs, further enhancing its utility.
 
 In a research landscape where measurement reliability is paramount for producing valid, evidence-based conclusions, GeneralizIT fills an urgent need for a computationally efficient and accessible solution. It democratizes the use of G-Theory, allowing researchers to obtain more reliable insights even from complex, small, or large datasets.
