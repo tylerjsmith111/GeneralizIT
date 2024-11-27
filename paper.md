@@ -50,24 +50,27 @@ However, its inherent complexity often limits its accessibility, particularly fo
 
 Currently, no Python-based package exists for conducting Generalizability Theory (G-Theory) analyses. The current implementations require proprietary or specialized statistical software such as SAS, SPSS, EduG, G-String-MV [@bloch:2012], [@bloch:2024], or the R package `gtheory` [@moore:2016]. **Table 1** provides an updated summary of the available software for G-Theory analyses [@briesch:2014]. These tools require steep learning curves that may not be accessible to the growing number of Python-based researchers, leaving many relying on less robust methods for reliability analysis.
 
-| **Software**    | **Availability**                                                      | **Input**                          | **Missing Data** | **Unbalanced<sup>a</sup> Designs** | **D Studies** |
-|------------------|----------------------------------------------------------------------|------------------------------------|------------------------------|------------------------------------|----------------------------|
-| G_String_MV <sup>b</sup>          | Free download from [https://github.com/G-String-Legacy/GS_MV/releases](https://github.com/G-String-Legacy/GS_MV/releases) | Raw data           | N<sup>c</sup>                            | Y                                  | Y                          |                                 | N                          |
-| SAS VARCOMP      | Included in SAS Package                                              | Raw data                          | Y<sup>d</sup>               | Y                                  | N                          |
-| SPSS VARCOMP     | Included in SPSS Advanced Statistics option                          | Raw data                          | Y<sup>e</sup>               | Y                                  | N                          |
-| EduG             | Free download from [http://www.irdp.ch/edumetrie/englishprogram.htm](http://www.irdp.ch/edumetrie/englishprogram.htm) | Raw data or sums of squares        | N                            | N                                  | Y                          |
-| `gtheory`             | R package | Raw data       | N                            | Y                                  | Y                          |
-| `GeneralizIT`            | Python Package | Raw data       | N                            | N                                  | Y                          |
+Table 1: Summary of available software for G-Theory analyses
 
-**Note:**  
-a. Balanced design indicates that each level of the nesting facet includes the same number of levels of the nested facet (e.g., the same number of observations within each day).\
-b. Built upon urGENOVA.\
-c. Mean substitution if missing data detected prior to analysis.\
-d. Listwise deletion for particular dependent variable missing.\
-e. Listwise deletion if any dependent variable values missing.
+| **Software**        | **Availability**                                                                                     | **Input**                    | **Missing Data** | **Unbalanced Designs (a)** | **D Studies** |
+|----------------------|-----------------------------------------------------------------------------------------------------|------------------------------|------------------|----------------------------|---------------|
+| **G_String_MV (b)**  | Free download from [GitHub](https://github.com/G-String-Legacy/GS_MV/releases)                      | Raw data                   | N (c)            | Y                          | Y             |
+| **SAS VARCOMP**      | Included in SAS Package                                                                             | Raw data                   | Y (d)            | Y                          | N             |
+| **SPSS VARCOMP**     | Included in SPSS Advanced Statistics option                                                         | Raw data                   | Y (e)            | Y                          | N             |
+| **EduG**             | Free download from [IRD](http://www.irdp.ch/edumetrie/englishprogram.htm)                           | Raw data or sums of squares | N                | N                          | Y             |
+| **gtheory**          | R package                                                                                          | Raw data                   | N                | Y                          | Y             |
+| **GeneralizIT**      | Python package                                                                                     | Raw data                   | N                | N                          | Y             |
 
+---
 
+**Notes:**
+- (a) Unbalanced designs refer to unequal numbers of observations per group.
+- (b) G_String_MV is legacy software designed for multivariate G-theory analysis.
+- (c) Missing data handling is not supported.
+- (d) Limited missing data handling available in SAS.
+- (e) SPSS provides extensive missing data handling options.
 
+---
 The `GeneralizIT` Python package addresses this critical need by offering a user-friendly platform that simplifies the application of G-Theory in research and practice. By automating the calculation of variance components, generalizability coefficients, and dependability indices, GeneralizIT makes this sophisticated theory accessible to a broad range of disciplines, including education, psychology, healthcare, and the social sciences. The package supports crossed experimental designs for any number of facets enabling users to conduct detailed reliability analyses without extensive coding knowledge. Additionally, its built-in visualization and reporting tools provide clear, interpretable outputs, further enhancing its utility.
 
 In a research landscape where measurement reliability is paramount for producing valid, evidence-based conclusions, GeneralizIT fills an urgent need for a computationally efficient and accessible solution. It democratizes the use of G-Theory, allowing researchers to obtain more reliable insights even from complex, small, or large datasets.
