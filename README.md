@@ -21,12 +21,7 @@ To use this library, the following dependencies are installed alongside the pack
 
 - `pandas`
 - `numpy`
-- `re`
 - `scipy`
-- `itertools`
-- `typing`
-- `unittest`
-- `itertools`
 
 ## Usage
 
