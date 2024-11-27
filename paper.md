@@ -53,20 +53,24 @@ Table 1: Summary of available software for G-Theory analyses
 
 | **Software**        | **Availability**                                                                                     | **Input**                    | **Missing Data** | **Unbalanced Designs (a)** | **D Studies** |
 |----------------------|-----------------------------------------------------------------------------------------------------|------------------------------|------------------|----------------------------|---------------|
-| **G_String_MV (b)**  | Free download from [GitHub](https://github.com/G-String-Legacy/GS_MV/releases)                      | Raw data                   | N (c)            | Y                          | Y             |
-| **SAS VARCOMP**      | Included in SAS Package                                                                             | Raw data                   | Y (d)            | Y                          | N             |
-| **SPSS VARCOMP**     | Included in SPSS Advanced Statistics option                                                         | Raw data                   | Y (e)            | Y                          | N             |
-| **EduG**             | Free download from [IRD](http://www.irdp.ch/edumetrie/englishprogram.htm)                           | Raw data or sums of squares | N                | N                          | Y             |
-| **gtheory**          | R package                                                                                          | Raw data                   | N                | Y                          | Y             |
-| **GeneralizIT**      | Python package                                                                                     | Raw data                   | N                | N                          | Y             |
+| G-String MV (b)  | Free download from [GitHub](https://github.com/G-String-Legacy/GS_MV/releases)                      | Raw data                   | N (c)            | Y                          | Y             |
+| SAS VARCOMP     | Included in SAS Package                                                                             | Raw data                   | Y (d)            | Y                          | N             |
+| SPSS VARCOMP    | Included in SPSS Advanced Statistics option                                                         | Raw data                   | Y (e)            | Y                          | N             |
+| EduG            | Free download from [IRD](http://www.irdp.ch/edumetrie/englishprogram.htm)                           | Raw data or sums of squares | N                | N                          | Y             |
+| gtheory         | R package                                                                                          | Raw data                   | N                | Y                          | Y             |
+| `GeneralizIT`      | Python package                                                                                     | Raw data                   | N                | N                          | Y             |
 
 
 
 **Notes:**
-- (a) Unbalanced designs refer to unequal numbers of observations per group.
+- (a) Unbalanced designs refer to unequal numbers of observations per group. 
+
 - (b) G_String_MV is legacy software designed for multivariate G-theory analysis.
+
 - (c) Missing data handling is not supported.
+
 - (d) Limited missing data handling available in SAS.
+
 - (e) SPSS provides extensive missing data handling options.
 
 
