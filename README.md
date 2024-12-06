@@ -16,6 +16,9 @@ It is particularly useful for researchers and practitioners who work with multi-
 - **Summaries:** Provides concise summaries for ANOVA, G coefficients, and D studies.
 
 ## Installation
+```python
+pip install generalizit
+```
 
 To use this library, the following dependencies are installed alongside the package:
 
