@@ -146,9 +146,9 @@ The `input_str` parameter specifies the research design. Supported formats inclu
 
 ## Notes
 
-- Ensure your data is preprocessed to include only the necessary facets and the response variable.
+- Ensure your data is preprocessed to be balanced without missing data.
+- Include only the necessary facets and the response variable.
 - Column names should match those specified in the research design.
-- Use the `_clean_data` method to automate column renaming and pruning.
 
 ## License
 
