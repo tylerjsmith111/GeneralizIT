@@ -8,8 +8,7 @@
 
 import pandas as pd
 import numpy as np
-from design import Design
-
+from .design import Design
 
 class Design5(Design):
     def __init__(self, data, corollary_df):
@@ -145,8 +144,8 @@ class Design5(Design):
         
         self._calculate_degrees_of_freedom()
         self._calculate_T_values()
-        self._calculate_SS_values()
-        self._calculate_MS_values()
+        self._calculate_sums_of_squares()
+        self._calculate_mean_squares()
         self._calculate_variance()
         
         # Compile ANOVA table

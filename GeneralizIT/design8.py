@@ -6,7 +6,7 @@
 # In this case, p is independent, while n_levels for h is nested within p, and i is nested within h.
 # ----------- #
 
-from GeneralizIT.design import Design
+from generalizit.design import Design
 import pandas as pd
 import numpy as np
 
@@ -136,8 +136,8 @@ class Design8(Design):
         
         self._calculate_degrees_of_freedom()
         self._calculate_T_values()
-        self._calculate_SS_values()
-        self._calculate_MS_values()
+        self._calculate_sums_of_squares()
+        self._calculate_mean_squares()
         self._calculate_variance()
         
         # Compile ANOVA table

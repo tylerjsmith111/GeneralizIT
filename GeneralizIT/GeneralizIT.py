@@ -1,14 +1,14 @@
 import re
 import numpy as np
 import pandas as pd
-from GeneralizIT.design2 import Design2
-from GeneralizIT.design4 import Design4
-from GeneralizIT.design5 import Design5
-from GeneralizIT.design6 import Design6
-from GeneralizIT.design7 import Design7
-from GeneralizIT.design8 import Design8
-from GeneralizIT.designcrossed import DesignCrossed
-from GeneralizIT.design_utils import *
+from .design2 import Design2
+from .design4 import Design4
+from .design5 import Design5
+from .design6 import Design6
+from .design7 import Design7
+from .design8 import Design8
+from .designcrossed import DesignCrossed
+from .design_utils import parse_facets, match_research_design, validate_research_design
 
 class GeneralizIT:
     def __init__(self, data: pd.DataFrame, design_str: str, response: str):
@@ -72,8 +72,6 @@ class GeneralizIT:
         
         # Combine factors and response variable into a single list
         vars = list(facets) + ['Response']
-        
-        print(vars)
         
         # Create a list of columns to drop
         drop_cols = [col for col in data.columns if col not in vars]

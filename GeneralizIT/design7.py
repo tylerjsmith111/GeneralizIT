@@ -6,7 +6,7 @@
 # In this case, p is independent, while n_levels for i and h are the number of unique values for each level of p.
 # ----------- #
 
-from design import Design
+from .design import Design
 import pandas as pd
 import numpy as np
 
@@ -141,8 +141,8 @@ class Design7(Design):
         
         self._calculate_degrees_of_freedom()
         self._calculate_T_values()
-        self._calculate_SS_values()
-        self._calculate_MS_values()
+        self._calculate_sums_of_squares()
+        self._calculate_mean_squares()
         self._calculate_variance()
         
         # Compile ANOVA table

@@ -2,7 +2,7 @@
 # Description:
 # This script performs the ANOVA test on the A4 dataset.
 # Synthetic Data Set # 4
-# the design is person x (r:t)
+# the design is p x (i:h)
 # When you have nesting the number of levels for the nested factor is the number of unique values for each of the primary factor levels.
 # In this case, persons is independent so that would just be n_persons = 10.
 # Since t is a primary factor, n_t = 3
@@ -15,7 +15,7 @@ import numpy as np
 # ---------------- #
 # Let's inherit from the Design class
 # ---------------- #
-from design import Design
+from .design import Design
 
 class Design4(Design):
     def __init__(self, data, corollary_df):
@@ -83,7 +83,7 @@ class Design4(Design):
         }
 
     
-    def _calculate_SS_values(self):
+    def _calculate_sums_of_squares(self):
         # ---------------- #
         # Perform the ANOVA
         # a     SS(a)
@@ -103,7 +103,7 @@ class Design4(Design):
             f'{self.corollary_df["p"]} x ({self.corollary_df["i"]}:{self.corollary_df["h"]})': self.T[f'{self.corollary_df["p"]} x ({self.corollary_df["i"]}:{self.corollary_df["h"]})'] - self.T[f'{self.corollary_df["p"]} x {self.corollary_df["h"]}'] - self.T[f'{self.corollary_df["i"]}:{self.corollary_df["h"]}'] + self.T[self.corollary_df['h']]
         }
 
-    def _calculate_MS_values(self):
+    def _calculate_mean_squares(self):
         # ---------------- #
         # MS(a) = SS(a)/deg_freedom(a)
         # ---------------- #
@@ -131,8 +131,8 @@ class Design4(Design):
          
         self._calculate_degrees_of_freedom()
         self._calculate_T_values()
-        self._calculate_SS_values()
-        self._calculate_MS_values()
+        self._calculate_sums_of_squares()
+        self._calculate_mean_squares()
         self._calculate_variance()
         
         # Compile ANOVA table
@@ -206,56 +206,4 @@ class Design4(Design):
             g_coeff_df.loc[i] = [key, '---', random_effects, rho, phi]
             
         return g_coeff_df
-            
-# if __name__ == '__main__':
-#     # Load the csv file syndata4.csv
-#     df = pd.read_csv('syndata4.csv')
-
-#     print(df.head())
-
-#     # New DataFrame with columns 'person', 't', 'r', 'Response'
-#     new_data = {
-#         'person': [],
-#         't': [],
-#         'r': [],
-#         'Response': []
-#     }
-
-#     # Populate the new DataFrame
-#     for person in range(1, 11):
-#         for t in [1, 2, 3]:  # Assuming 't1', 't2', 't3'
-#             for r in range(1, 13):  # Assuming 'r1' to 'r12'
-#                 key = f't{t}_r{r}'
-#                 # check if the key exists
-#                 if key in df.columns:
-#                     response = df.at[person-1, key]
-#                     new_data['person'].append(person)
-#                     new_data['t'].append(t)
-#                     new_data['r'].append(r)
-#                     new_data['Response'].append(response)
-
-#     # Convert to DataFrame
-#     formatted_df = pd.DataFrame(new_data)
-
-#     print(formatted_df.head(10))
-
-#     # Create the corollary df
-#     corollary_df, design_num = parse_facets('person x (r:t)')
-#     print(f"The corollary_df is: {corollary_df}")
-#     print(f"The design number is: {design_num}")
-    
-#     # Create the Design4 object
-#     design = Design4(formatted_df, corollary_df)
-    
-#     # Calculate the ANOVA
-#     design.calculate_anova()
-    
-#     # Calculate the G coefficients
-#     design.g_coeffs()
-    
-#     # Print the ANOVA table
-#     design.anova_summary()
-    
-#     # Print the G coefficients
-#     design.g_coeff_summary()
     

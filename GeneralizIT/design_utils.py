@@ -1,7 +1,7 @@
 import re
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict
 
-def match_research_design(input_string: str) -> Optional[int]:
+def match_research_design(input_string: str) -> tuple[str, list] | tuple[int, list] | tuple[None, list]:
     """
     Matches a string input of a research design to one of 8 predefined designs.
     
@@ -102,7 +102,7 @@ def match_research_design(input_string: str) -> Optional[int]:
         raise ValueError("Invalid input: No operators detected. Must use ':' or 'x'.")
     # Check for a fully crossed design
     elif colon_count == 0 and cross_count > 0:
-        print(f"Fully Crossed Design")
+        print(f"Fully Crossed Design: {normalized_input}")
         return 'crossed', get_facets(normalized_input)
 
     # Validate no empty facets between operators

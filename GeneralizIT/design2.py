@@ -8,15 +8,14 @@
 # Since r is nested within t, we must consider the number of unique values for r within each level of t.
 # ----------- #
 
-import pandas as pd
 import numpy as np
-import scipy.stats as stats
-from design_utils import parse_facets
+import pandas as pd
 
 # ---------------- #
 # Inherit from the Design class
 # ---------------- #
-from design import Design
+from .design import Design
+
 
 class Design2(Design):
     def __init__(self, data, corollary_df):
@@ -45,7 +44,6 @@ class Design2(Design):
         p_name = self.corollary_df['p']
         i_name = self.corollary_df['i']
         n_i = self.data.groupby(p_name)[i_name].nunique()
-        print(n_i)
         # Check that the number of unique values are the same for each level of t
         if len(n_i.unique()) > 1:
             raise ValueError(f'The number of unique values for {self.corollary_df["i"]} within each level of {self.corollary_df["h"]} are not the same.')
@@ -215,47 +213,3 @@ class Design2(Design):
             g_coeff_df.loc[i] = [key, '---', random_effects, rho, phi]
             
         return g_coeff_df
-        
-        
-        
-# if __name__ == "__main__":
-#     # Load the csv file syndata2.csv
-#     df = pd.read_csv('syndata2.csv')
-
-#     print(df.head())
-
-#     # New DataFrame with columns 'person', 't', 'r', 'Response'
-#     new_data = {
-#         'person': [],
-#         'item': [],
-#         'Response': []
-#     }
-
-#     # Populate the new DataFrame
-#     for person in range(1, 11):
-#         for item in range(1, 9):
-#             key = f'personi_item{item}'
-            
-#             if key in df.columns:
-#                 response = df.at[person-1, key]
-#                 new_data['person'].append(person)
-#                 new_data['item'].append((person-1)*8 + item)
-#                 new_data['Response'].append(response)
-
-#     # Convert to DataFrame
-#     formatted_df = pd.DataFrame(new_data)
-
-#     print(formatted_df.head(10))
-
-#     # Create the corollary df
-#     corollary_df, design_num = parse_facets('item:person')
-#     print(f"The corollary_df is: {corollary_df}")
-#     print(f"The design number is: {design_num}")
-#     design2 = Design2(formatted_df, corollary_df)
-    
-#     design2.calculate_anova()
-    
-#     design2.g_coeffs()
-    
-#     design2.g_coeff_summary()
-#     design2.anova_summary()

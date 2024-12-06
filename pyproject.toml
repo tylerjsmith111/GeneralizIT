@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["generalizit"]
+
+[project]
+name = "generalizit"
+version = "0.0.3"
+description = "Generalizability theory fully crossed and nested"
+keywords = ["generalizability theory", "crossed", "nested"]
+readme = "README.md"
+authors = [
+    {name = "Tyler Smith", email = "tyler.js.smith111@gmail.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+dependencies = [
+    "numpy>=1.21.0",
+    "pandas>=1.3.0",
+    "scipy>=1.7.0"
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+adopts = "--tb=short"
+testpaths = ["tests"]
+
+[project.urls]
+Issues = "https://pypi.org/project/generalizit/issues"
+Homepage = "https://pypi.org/project/generalizit"

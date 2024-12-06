@@ -6,7 +6,6 @@
 import pandas as pd
 import numpy as np
 from itertools import product
-from itertools import product
 from scipy.stats import norm
 import copy
 import re
@@ -29,50 +28,111 @@ class Design:
         
     def get_unique_levels(self):
         pass
-    
-    def calculate_anova(self):
-        pass
-    
+
     def _calculate_degrees_of_freedom(self):
         pass
-    
+
     def _calculate_T_values(self):
         pass
-    
+
     def _calculate_sums_of_squares(self):
         pass
-    
+
     def _calculate_mean_squares(self):
         pass
-    
+
     def _calculate_variance(self):
         pass
+
+    def calculate_anova(self):
+
+        """
+        Calculate the Analysis of Variance (ANOVA) table for the given data.
+        This method calculates the overall mean, variance components, sum of squares,
+        degrees of freedom, and mean square for the data. It compiles these values into
+        an ANOVA table and calculates the variance components using corrected formulas.
+
+        Attributes:
+            pd.DataFrame: A DataFrame containing the ANOVA table with the following columns:
+                - 'Source of Variation': The source of variance.
+                - 'Degrees of Freedom': The degrees of freedom for each source of variance.
+                - 'Sum of Squares': The sum of squares for each source of variance.
+                - 'Mean Square': The mean square for each source of variance.
+                - 'Variance Component': The variance component for each source of variance.
+        Note:
+            Hypothesis testing is not an integral part of Generalizability Theory (G-Theory),
+            thus no F-Statistic is calculated in this method.
+        """
+
+        # Let's calculate the variance components using the general formulas
+        self._calculate_degrees_of_freedom()
+        self._calculate_T_values()
+        self._calculate_sums_of_squares()
+        self._calculate_mean_squares()
+        self._calculate_variance()
+
+        # Compile ANOVA table
+        self.anova_table = pd.DataFrame({
+            'Source of Variation': list(self.deg_freedom.keys()),
+            'Degrees of Freedom': list(self.deg_freedom.values()),
+            'Sum of Squares': list(self.SS.values()),
+            'Mean Square': list(self.MS.values()),
+            'Variance Component': list(self.variances.values())
+        })  # Hypothesis Testing is not an integral part of G-Theory thus no F-Statistic is calculated
     
     def _calculate_g_coeffs(self):
         pass
-    
-    def g_coeffs(self):
+
+    def g_coeffs(self, **kwargs):
         """
-        Calculate G coefficients for the given data.
-        This method calculates the G coefficients (rho^2 and phi^2) based on the provided data.
-        It constructs Tau, delta, and Delta dictionaries using the variances and levels from the corollary dataframe.
-        The G coefficients are then computed and stored in a DataFrame.
-        The G coefficients are calculated as follows:
-        - Tau(a): Variance of the source of variation 'a'.
-        - delta(a): Sum of the variances of the interactions involving 'a' divided by the levels of the other factors.
-        - Delta(a): Sum of delta(a) and the variances of the other factors divided by their respective levels.
-        The G coefficients (rho^2 and phi^2) are computed using the formulas:
-        - rho^2 = Tau(a) / (Tau(a) + delta(a))
-        - phi^2 = Tau(a) / (Tau(a) + Delta(a))
-        The results are stored in a DataFrame with the following columns:
-        - 'Source of Variation': The source of variation (e.g., 'p', 'h').
-        - 'Fixed': Placeholder for fixed effects (currently set to '---').
-        - 'Random': The random effects (other variables not the object of measurement).
-        - 'rho^2': The calculated rho^2 value.
-        - 'phi^2': The calculated phi^2 value.
-        Attributes:
-        - g_coeff_table: DataFrame containing the G coefficients.
+        Calculate G-coefficients for various scenarios of fixed and random facets.
+        This method creates a table of all rho^2 and phi^2 values for each potential object of measurement assuming facets are random.
+        For fully crossed designs, coefficients for potential fixed facets and iteraction effects are also calculated.
+        The G-coefficients are stored in `self.g_coeff_table`.
+        Parameters:
+        -----------
+        **kwargs : dict
+            Optional keyword arguments.
+            - variance_dictionary (dict): A dictionary containing variance components. If provided, this dictionary will be used instead of the ANOVA table.
+        Raises:
+        -------
+        ValueError:
+            - If a variance component key from the provided dictionary is not found in the source of variance.
+            - If the ANOVA table is empty and no variance dictionary is provided.
+            - If the 'Total' key exists in the variance dictionary, it will be removed.
+            - If any variance component is negative, it will be clipped to 0 and a warning will be printed.
+        Notes:
+        ------
+        - If 'variance_dictionary' is provided in kwargs, it will be used as the source of variance components.
+        - If 'variance_dictionary' is not provided, the method will use the ANOVA table to create the variance dictionary.
+        - The method ensures that all variance components are non-negative by clipping any negative values to 0.
+        - The resulting G-coefficients are stored in `self.g_coeff_table` using the `g_coeff_general` method.
         """
+        if 'variance_dictionary' in kwargs:
+            variance_dict = kwargs['variance_dictionary']
+            print("Using User Provided Variance Dictionary")
+            for key in variance_dict.keys():
+                if key not in self.variances.keys():
+                    raise ValueError(
+                        f"Variance component '{key}' not found in the source of variance. Please check the variance dictionary and try again.")
+            variance_dict = {re.sub(r"\s+", " ", key.strip().lower()): value for key, value in variance_dict.items()}
+            self.variances = variance_dict
+        else:
+            if self.anova_table is None:
+                raise ValueError(
+                    "Please calculate the ANOVA table using the calculate_anova method before calculating the G-coefficients.")
+
+        # Drop 'Total' from the dictionary if it exists
+        if 'Total' in self.variances.keys():
+            self.variances.pop('Total')
+
+        # Clip any variance components that are negative to 0
+        for key, value in self.variances.items():
+            if value < 0:
+                self.variances[key] = 0
+                print(f"Warning: Variance component for '{key}' was negative and has been clipped to 0.")
+
+        # Store the G-coefficients in a table
         self.g_coeff_table = self._calculate_g_coeffs()
         
     # ----------------- D STUDY -----------------
