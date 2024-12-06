@@ -46,10 +46,10 @@ With built-in visualization tools and detailed reporting functions, `GeneralizIT
 
 # Statement of need
 
-Generalizability Theory (G-Theory) offers a powerful extension to Classical Test Theory by enabling the estimation of multiple sources of error variance, providing a more nuanced and comprehensive approach to assessing measurement reliability `[@brennan:2010]`.
-However, its inherent complexity often limits its accessibility, particularly for researchers who lack advanced statistical training or coding expertise `[@teker:2015]`. This presents a significant barrier to its widespread adoption. 
+Generalizability Theory (G-Theory) offers a powerful extension to Classical Test Theory by enabling the estimation of multiple sources of error variance, providing a more nuanced and comprehensive approach to assessing measurement reliability [@brennan:2010].
+However, its inherent complexity often limits its accessibility, particularly for researchers who lack advanced statistical training or coding expertise [@teker:2015]. This presents a significant barrier to its widespread adoption. 
 
-Currently, no Python-based package exists for conducting Generalizability Theory (G-Theory) analyses. The current implementations require proprietary or specialized statistical software such as SAS, SPSS, EduG, G-String-MV `[@bloch:2012], [@bloch:2024]`, or the R package `gtheory` `[@moore:2016]`. **Table 1** provides an updated summary of the available software for G-Theory analyses `[@briesch:2014]`. These tools require steep learning curves that may not be accessible to the growing number of Python-based researchers, leaving many relying on less robust methods for reliability analysis.
+Currently, no Python-based package exists for conducting Generalizability Theory (G-Theory) analyses. The current implementations require proprietary or specialized statistical software such as SAS, SPSS, EduG, G-String-MV [@bloch:2012], [@bloch:2024], or the R package `gtheory` [@moore:2016]. **Table 1** provides an updated summary of the available software for G-Theory analyses [@briesch:2014]. These tools require steep learning curves that may not be accessible to the growing number of Python-based researchers, leaving many relying on less robust methods for reliability analysis.
 
 Table 1: Summary of available software for G-Theory analyses
 
@@ -82,7 +82,7 @@ The `GeneralizIT` Python package addresses this critical need by offering a user
 In a research landscape where measurement reliability is paramount for producing valid, evidence-based conclusions, GeneralizIT fills an urgent need for a computationally efficient and accessible solution. It democratizes the use of G-Theory, allowing researchers to obtain more reliable insights even from complex, small, or large datasets.
 
 # Methods
-The package relies on equations from `[@brennan:2001]` and `[@cardinet:1976]` to calculate variance components, generalizability and dependability coefficients, confidence intervals, and D-Studies. The following sections provide an overview of the key equations and methods used in GeneralizIT.
+The package relies on equations from [@brennan:2001] and [@cardinet:1976] to calculate variance components, generalizability and dependability coefficients, confidence intervals, and D-Studies. The following sections provide an overview of the key equations and methods used in GeneralizIT.
 
 ## Fully Crossed Designs
 
@@ -146,7 +146,7 @@ $$
 $$  
 
 ## Nested Designs
-`GeneralizIT` allows for designs with nesting for designs with 1 object of measurement and 1 or 2 facets of differentiation. For these designs, the user provided string is compared to tables in appendix A and B of `@brennan:2001` to properly calculate variance components.
+`GeneralizIT` allows for designs with nesting for designs with 1 object of measurement and 1 or 2 facets of differentiation. For these designs, the user provided string is compared to tables in appendix A and B of @brennan:2001 to properly calculate variance components.
 
 ## Generalizability Coefficient $E\rho^2$ and Dependability Coefficient $\Phi$
 $$
@@ -197,7 +197,7 @@ Where $n$ is the levels for each facet, $\bar{X}\_{aBC}$ is the expected score o
 pip install generalizit
 ```
 
-The package is open-source and available on GitHub at [https://github.com/tylerjsmith111/GeneralizIT](GeneralizIT). In addition to the code, the repository includes detailed documentation and synthetic datasets from `@brennan:2001` to facilitate user testing and validation.
+The package is open-source and available on GitHub at [https://github.com/tylerjsmith111/GeneralizIT](GeneralizIT). In addition to the code, the repository includes detailed documentation and synthetic datasets from @brennan:2001 to facilitate user testing and validation.
 
 # Conclusion
 
