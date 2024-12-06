@@ -7,20 +7,22 @@ tags:
 authors:
   - name: Tyler J. Smith
     orcid: 0009-0003-6761-0540
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
+    affiliation: "1, 2, 3" # (Multiple affiliations must be quoted)
   - name: Theresa Kline
-    affiliation: 3
+    affiliation: 4
   - name: Adrienne Kline
     orcid: 0000-0002-0052-0685
     corresponding: true # (This is how to denote the corresponding author)
-    affiliation: "1, 2"
+    affiliation: "1, 2, 3"
 affiliations:
   - name: Center for Artificial Intelligence, Northwestern Medicine, Chicago, IL, USA
     index: 1
-  - name: Northwestern University, Chicago, IL, USA
+  - name: Division of Cardiac Surgery, Northwestern University, Chicago, IL, USA
     index: 2
-  - name: University of Calgary, Calgary, Canada
+  - name: Dept. of Electrical and Computer Engineering, Northwestern University, Chicago, IL, USA
     index: 3
+  - name: University of Calgary, Calgary, Canada
+    index: 4
 date: 27 November 2024
 bibliography: paper.bib
 ---
@@ -44,10 +46,10 @@ With built-in visualization tools and detailed reporting functions, `GeneralizIT
 
 # Statement of need
 
-Generalizability Theory (G-Theory) offers a powerful extension to Classical Test Theory by enabling the estimation of multiple sources of error variance, providing a more nuanced and comprehensive approach to assessing measurement reliability [@brennan:2010].
-However, its inherent complexity often limits its accessibility, particularly for researchers who lack advanced statistical training or coding expertise [@teker:2015]. This presents a significant barrier to its widespread adoption. 
+Generalizability Theory (G-Theory) offers a powerful extension to Classical Test Theory by enabling the estimation of multiple sources of error variance, providing a more nuanced and comprehensive approach to assessing measurement reliability `[@brennan:2010]`.
+However, its inherent complexity often limits its accessibility, particularly for researchers who lack advanced statistical training or coding expertise `[@teker:2015]`. This presents a significant barrier to its widespread adoption. 
 
-Currently, no Python-based package exists for conducting Generalizability Theory (G-Theory) analyses. The current implementations require proprietary or specialized statistical software such as SAS, SPSS, EduG, G-String-MV [@bloch:2012], [@bloch:2024], or the R package `gtheory` [@moore:2016]. **Table 1** provides an updated summary of the available software for G-Theory analyses [@briesch:2014]. These tools require steep learning curves that may not be accessible to the growing number of Python-based researchers, leaving many relying on less robust methods for reliability analysis.
+Currently, no Python-based package exists for conducting Generalizability Theory (G-Theory) analyses. The current implementations require proprietary or specialized statistical software such as SAS, SPSS, EduG, G-String-MV `[@bloch:2012], [@bloch:2024]`, or the R package `gtheory` `[@moore:2016]`. **Table 1** provides an updated summary of the available software for G-Theory analyses `[@briesch:2014]`. These tools require steep learning curves that may not be accessible to the growing number of Python-based researchers, leaving many relying on less robust methods for reliability analysis.
 
 Table 1: Summary of available software for G-Theory analyses
 
@@ -79,137 +81,8 @@ The `GeneralizIT` Python package addresses this critical need by offering a user
 
 In a research landscape where measurement reliability is paramount for producing valid, evidence-based conclusions, GeneralizIT fills an urgent need for a computationally efficient and accessible solution. It democratizes the use of G-Theory, allowing researchers to obtain more reliable insights even from complex, small, or large datasets.
 
-# Usage
-
-GeneralizIT is designed to be user-friendly and accessible to researchers across disciplines. The package provides a simple interface for conducting Generalizability Theory analyses, including calculating variance components, generalizability and dependability coefficients, conducting D-Studies, and generating confidence intervals. The following sections outline the key functionalities of `GeneralizIT`:
-
-- [Installation](#installation)
-- [Input Data](#input-data)
-- [Calculating Variance Components](#calculating-variance-components)
-- [Generalizability and Dependability Coefficients](#generalizability-and-dependability-coefficients)
-- [D-Studies](#d-studies)
-- [Confidence Intervals](#confidence-intervals)
-- [Summary Statistics](#summary-statistics)
-
-## Installation
-Install GeneralizIT package using pip:
-```bash
-$ pip install generalizit
-```
-
-## Input Data
-### Importing the package
-```python
-from generalizit import GeneralizIT
-```
-### Preparing the data
-Data should be input as a flat Pandas DataFrame with columns representing the facets and response.
-For example, a csv dataset with facets `Person`, `Item`, and `Rater` and a response column can read in as follows:
-```python
-# read in the data
-data = pd.read_csv('data.csv')
-# print(data.head(8))
-# print(data.tail(8))
-```
-
-  ```markdown
-  | Person | i | o | Response |
-  |--------|---|---|----------|
-  |      1 | 1 | 1 |        2 |
-  |      1 | 2 | 1 |        6 |
-  |      1 | 3 | 1 |        7 |
-  |      1 | 4 | 1 |        5 |
-  |      1 | 1 | 2 |        2 |
-  |      1 | 2 | 2 |        5 |
-  |      1 | 3 | 2 |        5 |
-  |      1 | 4 | 2 |        5 |
-  ...
-  |     10 | 1 | 1 |        6 |
-  |     10 | 2 | 1 |        8 |
-  |     10 | 3 | 1 |        7 |
-  |     10 | 4 | 1 |        6 |
-  |     10 | 1 | 2 |        6 |
-  |     10 | 2 | 2 |        8 |
-  |     10 | 3 | 2 |        8 |
-  |     10 | 4 | 2 |        6 |
-  ```
-Conversely, if the design was nested such as `person x (rater:item)`, raters are nested under item and should be identified uniquely either by delineation `item1_rater1` or unique numbering as below:
-
-``` markdown
-| Person | item | rater | Response |
-|--------|------|-------|----------|
-|      1 |    1 |     1 |        2 |
-|      1 |    1 |     2 |        6 |
-|      1 |    1 |     3 |        7 |
-|      1 |    1 |     4 |        5 |
-|      1 |    2 |     5 |        2 |
-|      1 |    2 |     6 |        5 |
-|      1 |    2 |     7 |        5 |
-|      1 |    2 |     8 |        5 |
-|      1 |    3 |     9 |        6 |
-|      1 |    3 |    10 |        8 |
-|      1 |    3 |    11 |        7 |
-|      1 |    3 |    12 |        6 |
-|      2 |    1 |     1 |        6 |
-|      2 |    1 |     2 |        8 |
-|      2 |    1 |     3 |        8 |
-|      2 |    1 |     4 |        6 |
-...
-```
-### Initialize the GeneralizIT Class
-```python
-# Create a Generalizability object
-GT = GeneralizIT(data=data, design_str='person x i x o', response='Response')
-```
-**Note:** 
-- The `data` parameter should be a Pandas DataFrame containing the data as described above. The data must be balanced, fully crossed, and must not contain missing values.
-- The `design_str` parameter should be a string representing the design of the study. For designs with crossed facets, the facets should be separated by ' x ', as shown in the example above. For nested designs, the facets should be separated by ':'. If there is a mixed design it is important to include "()" around the appropriate facets. For example, a mixed design with a nested facet could be written as `Person x Item:Rater`. However the interpretations `Person x (Item:Rater)` or `(Person x Item):Rater`, result in different designs and different calculations, thus it is important to be explicit in the design string.
-- The `response` parameter should be a string representing the column name of the response variable in the data.
-
-## Calculating Variance Components
-Variance components including SS, MS, and $\sigma^2$ for each facet and combination of facet interactions can be calculated using the `calculate_anova()` method.
-```python
-# Calculate variance components
-GT.calculate_anova()
-```
-
-## Generalizability and Dependability Coefficients
-Calculate generalizability, $E\rho^2$, and dependability, $\Phi$, coefficients using the `g_coeffs()` method.
-```python
-# Differentiation table for generalizability and dependability coefficients
-GT.g_coeffs()
-```
-
-## D-Studies
-Conduct D-Studies to estimate the reliability of measurement instruments under different designs and/or differing levels using the `calculate_d_study()` method.
-```python
-# Perform a D-Study
-GT.d_study(levels = {'Person': [10, 20], 'i': [4, 8], 'o': [1, 2]})
-```
-**Note:**
-- `levels` is a dictionary with keys as the facets and values as a list of potential levels for each facet.
-
-## Confidence Intervals
-Calculate confidence intervals for the expected values of each facet using the `calculate_confidence_intervals()` method.
-```python
-# Get the confidence intervals for each potential object of measurement's mean scores
-GT.calculate_confidence_intervals(alpha=0.05)
-```
-**Note:**
-- `alpha` is the significance level for the confidence intervals. Default is 0.05.
-
-## Summary Statistics
-Print summary statistics including ANOVA table (`df`, `T`, `SS`, `MS`, $\sigma^2$), G coefficents table, D-Study tables, and confidence intervals using the following methods:
-```python
-# Summary Statistics
-GT.anova_summary()  # Print ANOVA table
-GT.g_coeff_summary()  # Print differentiation table
-GT.d_study_summary()  # Print D-Study results
-GT.confidence_intervals_summary()  # Print confidence intervals
-```
-
 # Methods
-The package relies on equations from [@brennan:2001] and [@cardinet:1976] to calculate variance components, generalizability and dependability coefficients, confidence intervals, and D-Studies. The following sections provide an overview of the key equations and methods used in GeneralizIT.
+The package relies on equations from `[@brennan:2001]` and `[@cardinet:1976]` to calculate variance components, generalizability and dependability coefficients, confidence intervals, and D-Studies. The following sections provide an overview of the key equations and methods used in GeneralizIT.
 
 ## Fully Crossed Designs
 
@@ -273,7 +146,7 @@ $$
 $$  
 
 ## Nested Designs
-`GeneralizIT` allows for designs with nesting for designs with 1 object of measurement and 1 or 2 facets of differentiation. For these designs, the user provided string is compared to tables in appendix A and B of @brennan:2001 to properly calculate variance components.
+`GeneralizIT` allows for designs with nesting for designs with 1 object of measurement and 1 or 2 facets of differentiation. For these designs, the user provided string is compared to tables in appendix A and B of `@brennan:2001` to properly calculate variance components.
 
 ## Generalizability Coefficient $E\rho^2$ and Dependability Coefficient $\Phi$
 $$
@@ -316,6 +189,15 @@ $$
 
 Where $n$ is the levels for each facet, $\bar{X}\_{aBC}$ is the expected score of object of measurement $a$ with respect to facets $b$ and $c$, and $z\_{\frac{\alpha}{2}}$ is the z-score for the desired confidence level.
 
+
+# Code Usage and Availability
+`GeneralizIT` is available on PyPI and can be installed using pip:
+
+```bash
+pip install generalizit
+```
+
+The package is open-source and available on GitHub at [https://github.com/tylerjsmith111/GeneralizIT](GeneralizIT). In addition to the code, the repository includes detailed documentation and synthetic datasets from `@brennan:2001` to facilitate user testing and validation.
 
 # Conclusion
 
