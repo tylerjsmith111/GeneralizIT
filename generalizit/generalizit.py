@@ -1,14 +1,9 @@
 import re
+from typing import Tuple
 import numpy as np
 import pandas as pd
-from .design2 import Design2
-from .design4 import Design4
-from .design5 import Design5
-from .design6 import Design6
-from .design7 import Design7
-from .design8 import Design8
-from .designcrossed import DesignCrossed
-from .design_utils import parse_facets, match_research_design, validate_research_design
+from generalizit.design import Design
+from generalizit.design_utils import parse_facets, match_research_design, validate_research_design
 
 class GeneralizIT:
     def __init__(self, data: pd.DataFrame, design_str: str, response: str):
@@ -21,33 +16,20 @@ class GeneralizIT:
             validate_research_design(design_num)
         except ValueError as e:
             raise ValueError(e)
-        
-        # Parse the facets if the design number is not "crossed"
-        if design_num != "crossed":
-            corollary_df = parse_facets(design_num=design_num, design_facets=facets)
-            
-        # clean the data
-        data = self._clean_data(data, facets, response)
-            
+
+        variance_tuple_dictionary = parse_facets(design_num=design_num, design_facets=facets)
+
+        data, missing_data = self._clean_data(data=data, facets=facets, response=response)
+
         # Initialize the design class based on the research design
-        if design_num == 2:
-            self.design = Design2(data, corollary_df)
-        elif design_num == 4:
-            self.design = Design4(data, corollary_df)
-        elif design_num == 5:
-            self.design = Design5(data, corollary_df)
-        elif design_num == 6:
-            self.design = Design6(data, corollary_df)
-        elif design_num == 7:
-            self.design = Design7(data, corollary_df)
-        elif design_num == 8:
-            self.design = Design8(data, corollary_df)
-        elif design_num == "crossed":
-            self.design = DesignCrossed(data)
-        else:
-            raise ValueError("Invalid research design please check the input string")
+        self.design = Design(
+            data=data,
+            variance_tuple_dictionary=variance_tuple_dictionary,
+            missing_data=missing_data,
+            response_col=response
+        )
             
-    def _clean_data(self, data: pd.DataFrame, facets: list[str], response: str) -> pd.DataFrame:
+    def _clean_data(self, data: pd.DataFrame, facets: list[str], response: str) -> Tuple[pd.DataFrame, bool]:
         """
         Prunes the input DataFrame by dropping columns that are not in the list of facets or the response variable. 
         
@@ -60,9 +42,8 @@ class GeneralizIT:
 
         Returns:
             pd.DataFrame: The pruned DataFrame containing only the columns specified in facets and the response variable.
+            bool: A boolean indicating whether there are missing values in the data.
         """
-        
-        
         for col in data.columns:
             if col != response:
                 data = data.rename(columns={col: re.sub(r"\s+", " ", col.strip().lower())})  # Normalize the column names
@@ -71,10 +52,10 @@ class GeneralizIT:
                 data = data.rename(columns={col: 'Response'})  # Rename the response variable to 'Response' for consistency
         
         # Combine factors and response variable into a single list
-        vars = list(facets) + ['Response']
+        variables = list(facets) + ['Response']
         
         # Create a list of columns to drop
-        drop_cols = [col for col in data.columns if col not in vars]
+        drop_cols = [col for col in data.columns if col not in variables]
         
         # Create a warning message if any columns are dropped
         if len(drop_cols) > 0:
@@ -84,14 +65,21 @@ class GeneralizIT:
         
         # Drop the columns
         data = data.drop(columns=drop_cols)
-        
-        return data
+
+        # Check for missing values
+        if data.isnull().values.any():
+            print("Warning: Missing values detected in the data.")
+            missing_data = True
+        else:
+            missing_data = False
+
+        return data, missing_data
     
     def calculate_anova(self):
         # Calculate the ANOVA table
         self.design.calculate_anova()
     
-    def g_coeffs(self):
+    def calculate_g_coefficients(self):
         # First check that the ANOVA table has been calculated
         if self.design.anova_table is None:
             raise RuntimeError("ANOVA table must be calculated first. Please run the calculate_anova() method.")
@@ -124,10 +112,18 @@ class GeneralizIT:
         
         # Print the ANOVA table
         self.design.anova_summary()
+
+    def variance_summary(self):
+        # First check that the ANOVA table has been calculated
+        if self.design.anova_table is None:
+            raise RuntimeError("ANOVA table must be calculated first. Please run the calculate_anova() method.")
+
+        # Print the variance components
+        self.design.variance_summary()
     
-    def g_coeff_summary(self):
+    def g_coefficients_summary(self):
         # First check that the G coefficients have been calculated
-        if self.design.g_coeff_table is None:
+        if self.design.g_coeffs_table is None:
             raise RuntimeError("G coefficients must be calculated first. Please run the g_coeffs() method.")
         
         # Print the G coefficients
@@ -148,155 +144,5 @@ class GeneralizIT:
         
         # Print the confidence intervals
         self.design.confidence_intervals_summary()
-
-if __name__ == "__main__":
-    # ---------------------------------------------------------
-    # SYNTHETIC DATA FROM BRENNAN (2001) - SYTNHETIC DATA SET NO. 3
-
-    data = {
-        'Person': range(1, 11),
-        'O1_i1': [2, 4, 5, 5, 4, 4, 2, 3, 0, 6],
-        'O1_i2': [6, 5, 5, 9, 3, 4, 6, 4, 5, 8],
-        'O1_i3': [7, 6, 4, 8, 5, 4, 6, 4, 4, 7],
-        'O1_i4': [5, 7, 6, 6, 6, 7, 5, 5, 5, 6],
-        'O2_i1': [2, 6, 5, 5, 4, 6, 2, 6, 5, 6],
-        'O2_i2': [5, 7, 4, 7, 5, 4, 7, 6, 5, 8],
-        'O2_i3': [5, 5, 5, 7, 6, 7, 7, 6, 5, 8],
-        'O2_i4': [5, 7, 5, 6, 4, 8, 5, 4, 3, 6]
-    }
-
-    # Create a DataFrame
-    df = pd.DataFrame(data)
-
-    print(df.head(10))
-
-    # New DataFrame with 'Person', 'i', 'o', and 'Response'
-    new_data = {
-        'Person': [],
-        'i': [],
-        'o': [],
-        'Response': []
-    }
-
-    # Populate the new DataFrame
-    for person in range(1, 11):
-        for o in [1, 2]:  # Assuming 'O1' and 'O2'
-            for i in range(1, 5):  # Assuming 'i1', 'i2', 'i3', 'i4'
-                key = f'O{o}_i{i}'
-                response = df.at[person-1, key]
-                new_data['Person'].append(person)
-                new_data['i'].append(i)
-                new_data['o'].append(o)
-                new_data['Response'].append(response)
-
-    # Convert to DataFrame
-    formatted_df = pd.DataFrame(new_data)
-
-    print(formatted_df.head(8))
-    print(formatted_df.tail(8))
-    
-    GT = GeneralizIT(data=formatted_df, design_str='Person x i x o', response='Response')
-    
-    GT.calculate_anova()
-    GT.g_coeffs()
-    
-    GT.anova_summary()
-    GT.g_coeff_summary()
-    
-    GT.calculate_d_study(levels={'Person': None, 'i': [4, 8], 'o': [1, 2]})
-    GT.d_study_summary()
-    
-    GT.calculate_confidence_intervals(alpha=0.05)
-    GT.confidence_intervals_summary()
-    
-    # # ---------------------------------------------------------
-    # Synthetic Data Set No. 2 from Brennan (2001)
-    
-    # Load the csv file syndata2.csv
-    df = pd.read_csv('syndata2.csv')
-
-    print(df.head())
-
-    # New DataFrame with columns 'person', 'item', 'Response'
-    new_data = {
-        'person': [],
-        'item': [],
-        'Response': []
-    }
-
-    # Populate the new DataFrame
-    for person in range(1, 11):
-        for item in range(1, 9):
-            key = f'personi_item{item}'
-            
-            if key in df.columns:
-                response = df.at[person-1, key]
-                new_data['person'].append(person)
-                new_data['item'].append((person-1)*8 + item)
-                new_data['Response'].append(response)
-
-    # Convert to DataFrame
-    formatted_df = pd.DataFrame(new_data)
-
-    print(formatted_df.head(10))
-
-    GT = GeneralizIT(data=formatted_df, design_str='item:person', response='Response')
-    
-    GT.calculate_anova()
-    GT.g_coeffs()
-    
-    GT.anova_summary()
-    GT.g_coeff_summary()
-    
-    GT.calculate_confidence_intervals(alpha=0.05)
-    GT.confidence_intervals_summary()
-    
-    # # ---------------------------------------------------------
-    # # Synthetic Data Set No. 4 from Brennan (2001)
-    # # Load the csv file syndata4.csv
-    # df = pd.read_csv('syndata4.csv')
-
-    # print(df.head())
-
-    # # New DataFrame with columns 'person', 't', 'r', 'Response'
-    # new_data = {
-    #     'person': [],
-    #     't': [],
-    #     'r': [],
-    #     'Response': []
-    # }
-
-    # # Populate the new DataFrame
-    # for person in range(1, 11):
-    #     for t in [1, 2, 3]:  # Assuming 't1', 't2', 't3'
-    #         for r in range(1, 13):  # Assuming 'r1' to 'r12'
-    #             key = f't{t}_r{r}'
-    #             # check if the key exists
-    #             if key in df.columns:
-    #                 response = df.at[person-1, key]
-    #                 new_data['person'].append(person)
-    #                 new_data['t'].append(t)
-    #                 new_data['r'].append(r)
-    #                 new_data['Response'].append(response)
-
-    # # Convert to DataFrame
-    # formatted_df = pd.DataFrame(new_data)
-
-    # print(formatted_df.head(10))
-
-    # # Initialize the GeneralizIT class
-    # GT = GeneralizIT(data=formatted_df, design_str='person x (r:t)', response='Response')
-    
-    # GT.calculate_anova()
-    # GT.g_coeffs()
-    
-    # GT.anova_summary()
-    # GT.g_coeff_summary()
-    
-    # GT.calculate_d_study(levels={'person': None, 't': [1, 2, 3], 'r': [12, 6, 4]})
-    # GT.d_study_summary()
-    
-    # GT.calculate_confidence_intervals(alpha=0.05)
-    # GT.confidence_intervals_summary()
         
         

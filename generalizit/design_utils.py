@@ -1,7 +1,10 @@
 import re
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Tuple, Union
+from itertools import combinations
+import pandas as pd
 
-def match_research_design(input_string: str) -> tuple[str, list] | tuple[int, list] | tuple[None, list]:
+
+def match_research_design(input_string: str) -> Union[Tuple[str, List], Tuple[int, List], Tuple[None, List]]:
     """
     Matches a string input of a research design to one of 8 predefined designs.
     
@@ -11,8 +14,8 @@ def match_research_design(input_string: str) -> tuple[str, list] | tuple[int, li
             Some designs require parentheses to indicate grouping.
     
     Returns:
-        int: The design number (1 to 8) that matches the input
-        None: If no match is found
+        int or str: The design number (1 to 8) that matches the input
+        List: List of facets extracted from the design string
     
     Raises:
         ValueError: If the input string is invalid or malformed
@@ -68,8 +71,7 @@ def match_research_design(input_string: str) -> tuple[str, list] | tuple[int, li
     if ":" in normalized_input and " x " in normalized_input:
         if "(" not in normalized_input or ")" not in normalized_input:
             raise ValueError("Invalid input: Parentheses are required for partially crossed designs. See examples.")
-    
-    # AFTER (fixed code):
+
     # Split on operators while preserving the operators
     def get_facets(input_str: str) -> list:
         """
@@ -133,7 +135,7 @@ def validate_research_design(design_number: Optional[int]) -> bool:
     """
     return isinstance(design_number, int) and 1 <= design_number <= 8 or design_number == 'crossed'
 
-def parse_facets(design_num: int, design_facets: list) -> Dict[str, str]:
+def create_corollary_dictionary(design_num: int, design_facets: list) -> Dict[str, str]:
     """
     Parse a research design string and return a dictionary mapping facet types
     (p, i, h) to their actual values based on the design pattern.
@@ -143,110 +145,177 @@ def parse_facets(design_num: int, design_facets: list) -> Dict[str, str]:
         design_facets (list): List of facets extracted from the design string
         
     Returns:
-        Dict[str, str]: Dictionary mapping facet types to their values
-        Keys are 'p' (persons), 'i' (items), 'h' (helpers/raters)
+        Dict[str, str]: Dictionary mapping facet names from the research design to base design facets.
+        Keys are 'p', 'i', and/or 'h'
         
     Raises:
         ValueError: If the design pattern is invalid or can't be parsed
     """
     
     # Initialize facets dictionary
-    facets_dict = {}
+    corollary_dict = {}
     
     try:
         if design_num == 'crossed':
             return {f"facet_{i+1}": facet for i, facet in enumerate(design_facets)}
         
         elif design_num == 2:  # i:p
-            facets_dict['i'] = design_facets[0]
-            facets_dict['p'] = design_facets[1]
+            corollary_dict['i'] = design_facets[0]
+            corollary_dict['p'] = design_facets[1]
             
         elif design_num == 8:  # i:h:p
-            facets_dict['i'] = design_facets[0]
-            facets_dict['h'] = design_facets[1]
-            facets_dict['p'] = design_facets[2]
+            corollary_dict['i'] = design_facets[0]
+            corollary_dict['h'] = design_facets[1]
+            corollary_dict['p'] = design_facets[2]
         
         elif design_num == 6:  # i:(p x h)
-            facets_dict['i'] = design_facets[0]
-            facets_dict['p'] = design_facets[1]
-            facets_dict['h'] = design_facets[2]
+            corollary_dict['i'] = design_facets[0]
+            corollary_dict['p'] = design_facets[1]
+            corollary_dict['h'] = design_facets[2]
             
         elif design_num == 5:  # (i:p) x h
-            facets_dict['i'] = design_facets[0]
-            facets_dict['p'] = design_facets[1]
-            facets_dict['h'] = design_facets[2]
+            corollary_dict['i'] = design_facets[0]
+            corollary_dict['p'] = design_facets[1]
+            corollary_dict['h'] = design_facets[2]
                 
         elif design_num == 4:  # p x (i:h)
-            facets_dict['p'] = design_facets[0]
-            facets_dict['i'] = design_facets[1]
-            facets_dict['h'] = design_facets[2]
+            corollary_dict['p'] = design_facets[0]
+            corollary_dict['i'] = design_facets[1]
+            corollary_dict['h'] = design_facets[2]
             
         elif design_num == 7:  # (i x h):p
-            facets_dict['i'] = design_facets[0]
-            facets_dict['h'] = design_facets[1]
-            facets_dict['p'] = design_facets[2]
+            corollary_dict['i'] = design_facets[0]
+            corollary_dict['h'] = design_facets[1]
+            corollary_dict['p'] = design_facets[2]
             
         # Verify all required facets are present
         required_facets = ['i', 'p']
         if design_num >= 3:  # Designs 3-8 require all three facets
             required_facets.append('h')
             
-        missing_facets = [f for f in required_facets if f not in facets_dict]
+        missing_facets = [f for f in required_facets if f not in corollary_dict]
         if missing_facets:
             raise ValueError(f"Missing required facets: {missing_facets}")
             
     except Exception as e:
         raise ValueError(f"Error parsing facets: {str(e)}")
         
-    return facets_dict
-            
-            
-# def print_design(design_num: int, facets_dict: Dict[str, str]):
-#     """Prints the design number and facets in a readable format"""
-#     design_names = {
-#         2: "i:p",
-#         4: "p x (i:h)",
-#         5: "(i:p) x h",
-#         6: "i:(p x h)",
-#         7: "(i x h):p",
-#         8: "i:h:p"
-#     }
-    
-#     # Print the design number, facets, and design
-#     print(f"Design {design_num}: {design_names[design_num]}")
-#     print("Facets:")
-#     for _, facet in facets_dict.items():
-#         print(f" {facet}")
-    
-#     # Reprint the design replacing 'i', 'p', 'h' with actual facet values
-#     start = 0
-#     design_str = design_names[design_num]
-#     for key, value in facets_dict.items():
-#         design_str = design_str[:start] + design_str[start:].replace(key, value)
-#         # Find the end of the replaced value
-#         start = design_str.index(value) + len(value)
-#     print(f"Design: {design_str}")
-    
+    return corollary_dict
 
 
-# Run tests
-# if __name__ == "__main__":
-#     test_parse_facets()
-    # Test cases including problematic facets
-    # test_cases = [
-    #     "xylaphones:helpers:persons",  # Should work now
-    #     "x y:helpers:persons",         # Should raise error (empty facets)
-    #     "facets x helpers:persons",     # Should work
-    #     "matrix x helpers:persons",    # Should work
-    #     "xbox:helpers:persons"         # Should work
-    # ]
+def create_variance_tuple_dictionary(
+        design_num: Union[int, str],
+        corollary_dict: Dict[str, str]
+) -> Dict[str, tuple]:
+    """
+        Create a variance tuple dictionary for a given study design structure.
 
-    # for test in test_cases:
-    #     try:
-    #         result = match_research_design(test)
-    #         print(f"✓ Success: {test} -> Design {result}")
-    #     except ValueError as e:
-    #         print(f"✗ Error: {test} -> {str(e)}")
-    
-    
-    # p x (r:t) design 7
+        This function constructs a dictionary representing variance components for a
+        given study design, for example Brennan Design 2 `(i:p)`,
+        where `p` and `i` represent facets of variation. The dictionary maps each
+        variance component to a tuple of relevant facets.
+
+        Parameters:
+            design_num (int): The design number (2,4-8) or 'crossed' for fully crossed designs.
+            corollary_dict (dict): A dictionary mapping corollary names to actual facet names.
+                For example, {'p': 'persons', 'i': 'items'}.
+
+            ```
+        Returns:
+            dict: A dictionary where keys are variance component names (strings), and
+                  values are tuples of the corresponding facets.
+
+        Example:
+            >>> create_variance_tuple_dictionary(2, {'p': 'persons', 'i': 'items'})
+            {
+                'p': ('p',),
+                'i:p': ('i', 'p'),
+                'mean': ()
+            }
+        """
+    variance_tuple_dictionary = {}
+
+    try:
+        if design_num == 'crossed':
+            # each facet should be a separate variance component and crossed
+            # get all possible combinations of facets
+            for j in range(1, len(corollary_dict) + 1):
+                for combo in combinations(corollary_dict.values(), j):
+                    variance_tuple_dictionary[' x '.join(combo)] = combo
+
+        elif design_num == 2:  # i:p
+            variance_tuple_dictionary[corollary_dict['p']] = (corollary_dict['p'],)
+            variance_tuple_dictionary[f'{corollary_dict["i"]}:{corollary_dict["p"]}'] = (corollary_dict['i'], corollary_dict['p'])
+
+        elif design_num == 8:  # i:h:p
+            variance_tuple_dictionary[corollary_dict['p']] = (corollary_dict['p'],)
+            variance_tuple_dictionary[f'{corollary_dict["h"]}:{corollary_dict["p"]}'] = (corollary_dict['h'], corollary_dict['p'])
+            variance_tuple_dictionary[f'{corollary_dict["i"]}:{corollary_dict["h"]}:{corollary_dict["p"]}'] = (corollary_dict['i'], corollary_dict['h'], corollary_dict['p'])
+
+        elif design_num == 6:  # i:(p x h)
+            variance_tuple_dictionary[corollary_dict['p']] = (corollary_dict['p'],)
+            variance_tuple_dictionary[corollary_dict['h']] = (corollary_dict['h'],)
+            variance_tuple_dictionary[f'{corollary_dict["p"]} x {corollary_dict["h"]}'] = (corollary_dict['p'], corollary_dict['h'])
+            variance_tuple_dictionary[f'{corollary_dict["i"]}:({corollary_dict["p"]} x {corollary_dict["h"]})'] = (corollary_dict['i'], corollary_dict['p'], corollary_dict['h'])
+
+        elif design_num == 5:  # (i:p) x h
+            variance_tuple_dictionary[corollary_dict['p']] = (corollary_dict['p'],)
+            variance_tuple_dictionary[corollary_dict['h']] = (corollary_dict['h'],)
+            variance_tuple_dictionary[f'{corollary_dict["i"]}:{corollary_dict["p"]}'] = (corollary_dict['i'], corollary_dict['p'])
+            variance_tuple_dictionary[f'{corollary_dict["p"]} x {corollary_dict["h"]}'] = (corollary_dict['p'], corollary_dict['h'])
+            variance_tuple_dictionary[f'({corollary_dict["i"]}:{corollary_dict["p"]}) x {corollary_dict["h"]}'] = (corollary_dict['i'], corollary_dict['p'], corollary_dict['h'])
+
+        elif design_num == 4:  # p x (i:h)
+            variance_tuple_dictionary[corollary_dict['p']] = (corollary_dict['p'],)
+            variance_tuple_dictionary[corollary_dict['h']] = (corollary_dict['h'],)
+            variance_tuple_dictionary[f'{corollary_dict["i"]}:{corollary_dict["h"]}'] = (corollary_dict['i'], corollary_dict['h'])
+            variance_tuple_dictionary[f'{corollary_dict["p"]} x {corollary_dict["h"]}'] = (corollary_dict['p'], corollary_dict['h'])
+            variance_tuple_dictionary[f'{corollary_dict["p"]} x ({corollary_dict["i"]}:{corollary_dict["h"]})'] = (corollary_dict['p'], corollary_dict['i'], corollary_dict['h'])
+
+        elif design_num == 7:  # (i x h):p
+            variance_tuple_dictionary[corollary_dict['p']] = (corollary_dict['p'],)
+            variance_tuple_dictionary[f'{corollary_dict["i"]}:{corollary_dict["p"]}'] = (corollary_dict['i'], corollary_dict['p'])
+            variance_tuple_dictionary[f'{corollary_dict["h"]}:{corollary_dict["p"]}'] = (corollary_dict['h'], corollary_dict['p'])
+            variance_tuple_dictionary[f'({corollary_dict["i"]} x {corollary_dict["h"]}):{corollary_dict["p"]}'] = (corollary_dict['i'], corollary_dict['h'], corollary_dict['p'])
+
+        # Add the mean variance component
+        variance_tuple_dictionary['mean'] = ()
+
+    except Exception as e:
+        raise ValueError(f"Error creating variance tuple dictionary: {str(e)}")
+
+    return variance_tuple_dictionary
+
+
+def parse_facets(design_num: Union[int, str], design_facets: list) -> Dict[str, tuple]:
+    """
+    Parses the facets of a research design and returns a dictionary of variance components.
+
+    This function combines the functionality of `create_corollary_dictionary` and
+    `create_variance_tuple_dictionary` to generate a comprehensive dictionary of
+    variance components for a given research design.
+
+    Parameters:
+        design_num (Union[int, str]): The design number or 'crossed' for fully crossed designs.
+        design_facets (list): List of facets extracted from the design string.
+
+    Returns:
+        Dict[str, tuple]: A dictionary where keys are variance component names (strings), and
+                          values are tuples of the corresponding facets.
+
+    Raises:
+        ValueError: If the design pattern is invalid or can't be parsed.
+
+    Example:
+        >>> parse_facets(2, ['items', 'persons'])
+        {
+            'p': ('persons',),
+            'i:p': ('items', 'persons'),
+            'mean': ()
+        }
+    """
+    corollary_dict = create_corollary_dictionary(design_num=design_num, design_facets=design_facets)
+    variance_tuple_dict = create_variance_tuple_dictionary(design_num=design_num, corollary_dict=corollary_dict)
+
+    return variance_tuple_dict
+
