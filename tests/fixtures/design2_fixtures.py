@@ -1,15 +1,26 @@
 import pytest
 import pandas as pd
-from tests.testdesign import TestDesign
-from generalizit.design2 import Design2
+from generalizit.design import Design
+from generalizit.design_utils import match_research_design, parse_facets, validate_research_design
+from tests.design_test_base import DesignTestBase
 
 @pytest.fixture
 def test_design2():
     # synthetic dataset for item:person
     # Brennan (2001) Synthetic Data # 2
 
-    # Create the corollary dictionary
-    corollary_df = {'p': 'person', 'i': 'item'}
+    # First we parse the input string to get the research design
+    design_str = "item:person"
+    design_num, facets = match_research_design(design_str)
+    
+    # Validate the research design
+    try:
+        validate_research_design(design_num)
+    except ValueError as e:
+        raise ValueError(e)
+
+    variance_tuple_dictionary = parse_facets(design_num=design_num, design_facets=facets)
+    
 
     # Create the data object
     data = {
@@ -40,30 +51,10 @@ def test_design2():
 
     synthetic_data = pd.DataFrame(formatted_data)
 
-    levels_dict = {
-        'person': 10,
-        'item': 8
-    }
-
-    deg_freedom_dict = {
-        'person': 9,
-        'item:person': 70
-    }
-
     t_values_dict = {
         'person': 2288.2500,
         'item:person': 2430.0000,
-        'u': 2226.0500
-    }
-
-    ss_values_dict = {
-        'person': 62.20,
-        'item:person': 141.75
-    }
-
-    ms_values_dict = {
-        'person': 6.9111,
-        'item:person': 2.0250
+        'mean': 2226.0500
     }
 
     variances_dict = {
@@ -78,14 +69,32 @@ def test_design2():
     phi_dict = {
         'person': 0.71,
     }
+    
+    # ---- Unused ----
+    levels_dict = {
+        'person': 10,
+        'item': 8
+    }
 
-    return TestDesign(
-        design=Design2(synthetic_data, corollary_df),
-        levels_dict=levels_dict,
-        deg_freedom_dict=deg_freedom_dict,
+    deg_freedom_dict = {
+        'person': 9,
+        'item:person': 70
+    }
+    
+    ss_values_dict = {
+        'person': 62.20,
+        'item:person': 141.75
+    }
+
+    ms_values_dict = {
+        'person': 6.9111,
+        'item:person': 2.0250
+    }
+
+    return DesignTestBase(
+        design=Design(data=synthetic_data, variance_tuple_dictionary=variance_tuple_dictionary, response_col='Response'),
+        levels_df=None,
         t_values_dict=t_values_dict,
-        ss_values_dict=ss_values_dict,
-        ms_values_dict=ms_values_dict,
         variances_dict=variances_dict,
         rho_dict=rho_dict,
         phi_dict=phi_dict
