@@ -700,40 +700,28 @@ class Design:
         return rho_squared
 
 
-    def _calculate_g_coeffs(self, levels_df: pd.DataFrame, variance_tup_dict: dict) -> pd.DataFrame:
+    def _calculate_g_coeffs(self, variance_df: pd.DataFrame, levels_df: pd.DataFrame, variance_tup_dict: dict) -> pd.DataFrame:
         """
         Calculate the G-coefficients for each facet of differentiation.
         """
-        # Step 1: Drop the 'mean' row and column and from the variance_tup_dict to exclude it from calculations
-        df = self.anova_table.drop('mean', axis=0, errors='ignore')
-        df = self.anova_table.drop('mean', axis=1, errors='ignore')
-
-        self.variance_tuple_dictionary.pop('mean', None)
-
-        # Step 1.5: Check if any variance components are less than 0
-        if (df['Variance'] < 0).any():
-            # Print a warning message and set negative values to 0
-            print(f"Warning: Negative variance components found for {df[df['Variance'] < 0].index}. Setting to 0.")
-            df.loc[df['Variance'] < 0, 'Variance'] = 0
-
-        # Step 2: Initialize the G coefficients DataFrame
-        columns = list(df.columns) + ['phi^2', 'rho^2']
-        g_coeffs_df = df.copy()
+        # Step 1: Initialize the G coefficients DataFrame
+        columns = list(variance_df.columns) + ['phi^2', 'rho^2']
+        g_coeffs_df = variance_df.copy()
         g_coeffs_df = g_coeffs_df.reindex(columns=columns)
 
         # Step 3: Calculate the G coefficients for each facet up until the largest facet
-        largest_facet = max(self.variance_tuple_dictionary, key=lambda x: len(self.variance_tuple_dictionary[x]))
-        for facet in df.index:
+        largest_facet = max(variance_tup_dict, key=lambda x: len(variance_tup_dict[x]))
+        for facet in variance_df.index:
             if facet == 'mean' or facet == largest_facet:
                 continue
 
             # Calculate the phi-squared coefficient
-            g_coeffs_df.at[facet, 'phi^2'] = self._calculate_phi_squared(df, facet_of_differentiation=facet,
+            g_coeffs_df.at[facet, 'phi^2'] = self._calculate_phi_squared(variance_df, facet_of_differentiation=facet,
                                                                    variance_tup_dict=variance_tup_dict,
                                                                    levels_df=levels_df)
 
             # Calculate the rho-squared coefficient
-            g_coeffs_df.at[facet, 'rho^2'] = self._calculate_rho_squared(df, facet_of_differentiation=facet,
+            g_coeffs_df.at[facet, 'rho^2'] = self._calculate_rho_squared(variance_df, facet_of_differentiation=facet,
                                                                    variance_tup_dict=variance_tup_dict,
                                                                    levels_df=levels_df)
 
@@ -773,37 +761,63 @@ class Design:
         - The method ensures that all variance components are non-negative by clipping any negative values to 0.
         - The resulting G-coefficients are stored in `self.g_coeff_table` using the `g_coeff_general` method.
         """
-        # add the variance components to a dictionary
+        # Set the variance tuple dictionary (in case the design has been updated)
+        if 'variance_tuple_dictionary' in kwargs:
+            variance_tup_dict = kwargs['variance_tuple_dictionary']
+            if not isinstance(variance_tup_dict, dict):
+                raise ValueError("Variance tuple dictionary must be a dictionary.")
+            for value in variance_tup_dict.values():
+                if not isinstance(value, tuple):
+                    raise ValueError(
+                        f"Variance tuple dictionary component '{key}' is not a tuple.")
+            print("Using user-provided variance tuple dictionary")
+        else:
+            # Use the default variance tuple dictionary
+            print("Using default variance tuple dictionary")
+            variance_tup_dict = self.variance_tuple_dictionary
+            
+        variance_tup_dict.pop('mean', None)
+        
+        # Process the variance dictionary
         if 'variance_dictionary' in kwargs:
             variance_dict = kwargs['variance_dictionary']
             if not isinstance(variance_dict, dict):
                 raise ValueError("Variance dictionary must be a dictionary.")
-            print("Using User Provided Variance Dictionary")
+            
+            print("Using user-provided variance dictionary")
+            
+            # Validate the variance dictionary
             for key, value in variance_dict.items():
                 if not isinstance(value, (int, float)):
                     raise ValueError(
-                        f"Variance component '{key}' is not a number. Please check the variance dictionary and try again.")
+                        f"Variance component '{key}' is not a number.")
                 if value < 0:
                     raise ValueError(
-                        f"Variance component '{key}' is negative. Please check the variance dictionary and try again.")
-                if key not in self.anova_table.index.to_list():
-                    raise ValueError(
-                        f"Variance component '{key}' not found in the source of variance. Please check the variance dictionary and try again.")
-                
-            # variance_dict = {re.sub(r"\s+", " ", key.strip().lower()): value for key, value in variance_dict.items()}
+                        f"Variance component '{key}' is negative.")
+            if set(variance_dict.keys()) != set(variance_tup_dict.keys()):
+                raise ValueError(
+                    f"Variance dictionary keys do not match the variance tuple dictionary keys. Mismatched keys: {variance_dict.keys()} and {variance_tup_dict.keys()}")
+            
+            # Convert to DataFrame to match anova_table structure
+            variance_df = pd.DataFrame({'Variance': variance_dict})
         else:
             # Check if the ANOVA table has been calculated
             if self.anova_table.empty:
                 raise ValueError("Please calculate the ANOVA table using the calculate_anova method before calculating the confidence intervals.")
-            print("Using ANOVA Table Variance Dictionary")
-            variance_dict = {idx: row['Variance'] for idx, row in self.anova_table.iterrows() if idx != 'mean'} # Exclude the mean row
-            # Check if any variance components are less than 0
-            negative_keys = [key for key, value in variance_dict.items() if value < 0]
-            if negative_keys:
-                # Print a warning message and set negative values to 0
-                print(f"Warning: Negative variance components found for {negative_keys}. Setting to 0.")
-                for key in negative_keys:
-                    variance_dict[key] = 0
+            print("Using ANOVA Table Variance Dictionary for Generalizability Coefficients")
+            variance_df = self.anova_table.copy()
+            
+        
+        # Process the variance dictionary
+        variance_df = variance_df.drop('mean', axis=0, errors='ignore')
+        variance_df = variance_df.drop('mean', axis=1, errors='ignore')
+        if (variance_df['Variance'] < 0).any():
+            # Print a warning message and set negative values to 0
+            print(f"Warning: Negative variance components found for {variance_df[variance_df['Variance'] < 0].index}. Setting to 0.")
+            variance_df.loc[variance_df['Variance'] < 0, 'Variance'] = 0
+        # Check that variance DataFrame indices match the variance tuple dictionary keys
+        if set(variance_df.index) != set(variance_tup_dict.keys()):
+            raise ValueError(f"ANOVA table indices do not match the variance tuple dictionary keys. Mismatched indices: {self.anova_table.index.tolist()} and {variance_tup_dict.keys()}")
                     
         # Check if the levels coefficients have been calculated
         if 'levels_df' in kwargs:
@@ -811,33 +825,28 @@ class Design:
             if not isinstance(levels_df, pd.DataFrame):
                 raise ValueError("Levels coefficients must be a DataFrame.")
             print("Using User Provided Levels Coefficients")
-            if levels_df.index.tolist() != list(variance_dict.keys()):
+            if set(levels_df.index) != set(variance_df.index):
                 raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {levels_df.index.tolist()} and {list(variance_dict.keys())}")
-            if levels_df.columns.tolist() != levels_df.index.tolist():
+            if set(levels_df.columns) != set(levels_df.index):
                 raise ValueError(f"Levels coefficients must have a square shape with a value for each facet. Mismatched columns: {levels_df.columns.tolist()} and {levels_df.index.tolist()}")
             if levels_df.values.min() <= 0:
                 raise ValueError(f"Levels coefficients must be greater than 0. Minimum value: {levels_df.values.min()}")
         elif not self.levels_coeffs.empty:
+            # check that the levels coefficient indices match the variance components
+            if set(self.levels_coeffs.index) != set(variance_df.index):
+                raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {self.levels_coeffs.index.tolist()} and {variance_df.index.tolist()}")
+            
             levels_df = self.levels_coeffs
         else:
             self._calculate_levels_coeffs() # Calculate the levels coefficients
+            
+            if set(self.levels_coeffs.index) != set(variance_df.index):
+                raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {self.levels_coeffs.index.tolist()} and {variance_df.index.tolist()}")
+            
             levels_df = self.levels_coeffs
 
-        # Set the variance tuple dictionary (in case the design has been updated)
-        variance_tup_dict = kwargs.get('variance_tuple_dictionary', self.variance_tuple_dictionary)
-
-        # Drop 'Total' from the dictionary if it exists
-        if 'Total' in self.variances.keys():
-            self.variances.pop('Total')
-
-        # Clip any variance components that are negative to 0
-        for key, value in self.variances.items():
-            if value < 0:
-                self.variances[key] = 0
-                print(f"Warning: Variance component for '{key}' was negative and has been clipped to 0.")
-
         # Store the G-coefficients in a table
-        self.g_coeffs_table = self._calculate_g_coeffs(levels_df=levels_df, variance_tup_dict=variance_tup_dict)
+        self.g_coeffs_table = self._calculate_g_coeffs(variance_df=variance_df, levels_df=levels_df, variance_tup_dict=variance_tup_dict)
         
     # ----------------- D STUDY -----------------
     def calculate_d_study(self, levels: dict):
@@ -1031,21 +1040,25 @@ class Design:
                     
         # Check if the levels coefficients have been calculated
         if 'levels_df' in kwargs:
+            print("Using User Provided Levels Coefficients")
             levels_df = kwargs['levels_df']
             if not isinstance(levels_df, pd.DataFrame):
                 raise ValueError("Levels coefficients must be a DataFrame.")
-            print("Using User Provided Levels Coefficients")
-            if levels_df.index.tolist() != list(variance_dict.keys()):
-                raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {levels_df.index.tolist()} and {list(variance_dict.keys())}")
-            if levels_df.columns.tolist() != levels_df.index.tolist():
+            if set(levels_df.columns) != set(levels_df.index):
                 raise ValueError(f"Levels coefficients must have a square shape with a value for each facet. Mismatched columns: {levels_df.columns.tolist()} and {levels_df.index.tolist()}")
             if levels_df.values.min() <= 0:
                 raise ValueError(f"Levels coefficients must be greater than 0. Minimum value: {levels_df.values.min()}")
         elif not self.levels_coeffs.empty:
+            print("Using previously calculated levels coefficients")
             levels_df = self.levels_coeffs
         else:
+            print("Calculating levels coefficients")
             self._calculate_levels_coeffs() # Calculate the levels coefficients
             levels_df = self.levels_coeffs
+            
+        # Check that the levels coefficients match the variance components
+        if set(levels_df.index) != set(variance_dict.keys()):
+                raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {levels_df.index.tolist()} and {list(variance_dict.keys())}")
            
         self.confidence_intervals = {key: pd.DataFrame() for key in variance_dict.keys()}  # Create a dictionary with empty DataFrames as values
 
