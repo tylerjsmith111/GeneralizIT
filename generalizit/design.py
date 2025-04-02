@@ -709,7 +709,7 @@ class Design:
         g_coeffs_df = variance_df.copy()
         g_coeffs_df = g_coeffs_df.reindex(columns=columns)
 
-        # Step 3: Calculate the G coefficients for each facet up until the largest facet
+        # Step 2: Calculate the G coefficients for each facet up until the largest facet
         largest_facet = max(variance_tup_dict, key=lambda x: len(variance_tup_dict[x]))
         for facet in variance_df.index:
             if facet == 'mean' or facet == largest_facet:
@@ -739,27 +739,36 @@ class Design:
     def g_coeffs(self, **kwargs):
         """
         Calculate G-coefficients for various scenarios of fixed and random facets.
-        This method creates a table of all rho^2 and phi^2 values for each potential object of measurement assuming facets are random.
-        For fully crossed designs, coefficients for potential fixed facets and iteraction effects are also calculated.
-        The G-coefficients are stored in `self.g_coeff_table`.
+        
+        This method computes rho^2 (relative) and phi^2 (absolute) coefficients for each 
+        potential object of measurement in the design. The coefficients quantify the 
+        reliability of measurements across different facets.
+        
         Parameters:
-        -----------
-        **kwargs : dict
-            Optional keyword arguments.
-            - variance_dictionary (dict): A dictionary containing variance components. If provided, this dictionary will be used instead of the ANOVA table.
+            **kwargs: Optional keyword arguments.
+                - variance_dictionary (dict): Custom variance components to use.
+                  If provided, values must be non-negative. If not provided, 
+                  components from the ANOVA table are used.
+                - levels_df (pd.DataFrame): Custom levels coefficients table.
+                  If not provided, self.levels_coeffs is used or calculated.
+                - variance_tuple_dictionary (dict): Custom variance tuple dictionary.
+                  If not provided, self.variance_tuple_dictionary is used.
+        
+        Returns:
+            None: Results are stored in self.g_coeffs_table
+            
         Raises:
-        -------
-        ValueError:
-            - If a variance component key from the provided dictionary is not found in the source of variance.
-            - If the ANOVA table is empty and no variance dictionary is provided.
-            - If the 'Total' key exists in the variance dictionary, it will be removed.
-            - If any variance component is negative, it will be clipped to 0 and a warning will be printed.
+            ValueError: If:
+                - ANOVA table hasn't been calculated and no variance_dictionary is provided
+                - Any variance component is negative
+                - Levels coefficients are invalid (non-square, negative values)
+                - Keys in variance_dictionary don't match variance_tuple_dictionary
+                - Levels coefficients don't match variance components
+        
         Notes:
-        ------
-        - If 'variance_dictionary' is provided in kwargs, it will be used as the source of variance components.
-        - If 'variance_dictionary' is not provided, the method will use the ANOVA table to create the variance dictionary.
-        - The method ensures that all variance components are non-negative by clipping any negative values to 0.
-        - The resulting G-coefficients are stored in `self.g_coeff_table` using the `g_coeff_general` method.
+            - Negative variance components are automatically set to zero with a warning
+            - The 'mean' component is removed from calculations
+            - The method produces a DataFrame with rho^2 and phi^2 values for each facet
         """
         # Set the variance tuple dictionary (in case the design has been updated)
         if 'variance_tuple_dictionary' in kwargs:
