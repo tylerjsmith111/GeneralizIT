@@ -1,6 +1,7 @@
 # -------------------------------- #
 # Description:
-# This script forms the generic design class for performing G and D study calculations.
+# This is the analytical engine for the Generalizability Theory (G-Theory) calculations.
+# It calculates variance components, G-coefficients, and other related statistics.
 # -------------------------------- #
 
 import pandas as pd
@@ -32,6 +33,9 @@ class Design:
         self.T: dict = {}
         self.variances: dict = {}
         self.confidence_intervals: dict = {}
+        
+        # Initialize alpha
+        self._alpha: float = 0.05
 
     def _calculate_levels_coeffs(self, **kwargs):
         """
@@ -116,116 +120,29 @@ class Design:
                     # Store the calculated level in the levels coefficients table
                     self.levels_coeffs.at[key, grouping_facet] = inverse_level
 
-    # def get_unique_levels(self):
-    #     """
-    #     Create a dictionary of levels for both independent and dependent facets in a dataset.
-    #
-    #     This function calculates the unique levels for independent facets and the harmonic mean
-    #     of levels for dependent facets based on groupings defined in a variance tuple dictionary.
-    #
-    #     Attributes:
-    #         data (pd.DataFrame): The input DataFrame containing the facets and response column.
-    #         variance_tuple_dictionary (dict): A dictionary mapping variance components to tuples of facets.
-    #         missing_data (bool): A boolean indicating whether missing data is present in the dataset.
-    #         response_col (str): The name of the response column to exclude from facet calculations.
-    #                            Default is 'Response'.
-    #         levels(dict): A dictionary where keys are facet names, and values are the number of unique levels
-    #                       (or harmonic means for dependent facets).
-    #
-    #     Example:
-    #         >>> df = pd.DataFrame({
-    #                 'p': [1, 1, 2, 2],
-    #                 'h': [1, 2, 1, 2],
-    #                 'i': [1, 2, 1, 2],
-    #                 'Response': [0.1, 0.2, 0.3, 0.4]
-    #             })
-    #         >>> variance_tup_dict = {
-    #                 'p': ('p',),
-    #                 'h': ('h',),
-    #                 'i:h': ('i', 'h'),
-    #                 'p x h': ('p', 'h')
-    #             }
-    #         >>> self.get_unique_levels(df, variance_tup_dict)
-    #         {'p': 2, 'h': 2, 'i': 2}
-    #     """
-    #     # Step 0: Optionally drop rows with NaN values
-    #     if self.missing_data:
-    #         df = self.data.dropna()
-    #     else:
-    #         df = self.data
-    #
-    #     # Step 1: Identify facets (excluding the response column)
-    #     facets = df.columns[df.columns != self.response_col]
-    #
-    #     # Step 2: Group facets into independent and dependent facets
-    #     independent_facets = [facet for facet in facets if facet in self.variance_tuple_dictionary.keys()]
-    #     dependent_facets = [facet for facet in facets if facet not in self.variance_tuple_dictionary.keys()]
-    #
-    #     # Step 3: Calculate unique levels for independent facets
-    #     for facet in independent_facets:
-    #         grouping = [f for f in independent_facets if f != facet]
-    #
-    #         unique_values = df.groupby(grouping)[facet].nunique().reset_index(name='nunique')
-    #
-    #         # Calculate the harmonic mean of unique counts
-    #         harmonic_mean = 1 / np.mean(1 / unique_values['nunique'])
-    #
-    #         self.levels[facet] = round(harmonic_mean, 4)
-    #
-    #     # Step 4: Calculate harmonic mean of levels for dependent facets
-    #     for facet in dependent_facets:
-    #         # Find the shortest tuple containing the dependent facet
-    #         shortest_tuple = min(
-    #             [tup for _, tup in self.variance_tuple_dictionary.items() if facet in tup],
-    #             key=len
-    #         )
-    #
-    #         # Define the grouping by removing the dependent facet
-    #         grouping = [f for f in shortest_tuple if f != facet]
-    #
-    #         # Group data and calculate unique counts for the dependent facet
-    #         unique_values = df.groupby(grouping)[facet].nunique().reset_index(name='nunique')
-    #
-    #         # Calculate harmonic mean of the unique counts
-    #         harmonic_mean = 1 / np.mean(1 / unique_values['nunique'])
-    #         self.levels[facet] = round(harmonic_mean, 4)
-    #
-    #     # Step 5: Convert levels to floats
-    #     self.levels = {key: float(value) for key, value in self.levels.items()}
-
     def _calculate_degrees_of_freedom(self):
         pass
 
     def _calculate_T_values(self):
         """
-        Calculate the uncorrected sum of squares (T value) for a given DataFrame,
-        either grouped by specified effect variables or for the entire dataset.
+        Calculate the uncorrected sum of squares (T values) for each variance component.
 
-        This function computes the uncorrected sum of squares (T values) by:
-        1. Grouping the data based on specified effect variables, calculating the mean
-           and count for each group, and summing the squared means multiplied by their group sizes.
-        2. If no grouping variables are provided, the calculation is done for the entire dataset
-           using its overall mean and count.
+        This method computes the T values for each entry in the variance tuple dictionary by:
+        1. For components with effect variables: Groups the data by those variables, 
+           calculates the mean and count for each group, and sums the squared means 
+           multiplied by their group sizes.
+        2. For the mean component (empty effect variables): Calculates the T value 
+           using the overall mean and count of the entire dataset.
 
-        Args:
-            df (pd.DataFrame): Input DataFrame containing the data.
-                               Must include a 'Response' column for the dependent variable.
-            effect_vars (list): List of column names to group by, representing the effects
-                                or factors in the analysis. If empty, the entire dataset is used.
+        The results are stored in the `self.T` dictionary, with keys matching those in 
+        `self.variance_tuple_dictionary`.
 
         Returns:
-            float: The uncorrected sum of squares (T value), representing the variability
-                   in the response variable explained by the grouping effects, or the entire dataset.
+            None: Updates `self.T` in place with the calculated T values.
 
         Example:
-            >>> data = {'Effect1': [1, 1, 2, 2],
-            ...         'Effect2': ['A', 'A', 'B', 'B'],
-            ...         'Response': [10, 12, 14, 16]}
-            >>> df = pd.DataFrame(data)
-            >>> self._calculate_T_values(df, effect_vars=['Effect1', 'Effect2'])
-            650.0
-            >>> self._calculate_T_values(df, effect_vars=[])
-            1300.0
+            If the variance tuple dictionary contains {'p': ('p',), 'i': ('i',), 'mean': ()},
+            `self.T` will be populated with T values for 'p', 'i', and 'mean'.
         """
         df = self.data
 
@@ -235,7 +152,7 @@ class Design:
 
                 if effect_vars:
                     # Group the DataFrame by the specified effect variables and calculate group mean and size
-                    t_calc_df = df.groupby(effect_vars).agg({'Response': ['mean', 'count']})
+                    t_calc_df = df.groupby(effect_vars).agg({self.response_col: ['mean', 'count']})
 
                     # Flatten the MultiIndex columns to single level for easier access
                     t_calc_df.columns = t_calc_df.columns.droplevel()
@@ -856,23 +773,50 @@ class Design:
         - The method ensures that all variance components are non-negative by clipping any negative values to 0.
         - The resulting G-coefficients are stored in `self.g_coeff_table` using the `g_coeff_general` method.
         """
+        # add the variance components to a dictionary
         if 'variance_dictionary' in kwargs:
             variance_dict = kwargs['variance_dictionary']
+            if not isinstance(variance_dict, dict):
+                raise ValueError("Variance dictionary must be a dictionary.")
             print("Using User Provided Variance Dictionary")
-            for key in variance_dict.keys():
-                if key not in self.variances.keys():
+            for key, value in variance_dict.items():
+                if not isinstance(value, (int, float)):
+                    raise ValueError(
+                        f"Variance component '{key}' is not a number. Please check the variance dictionary and try again.")
+                if value < 0:
+                    raise ValueError(
+                        f"Variance component '{key}' is negative. Please check the variance dictionary and try again.")
+                if key not in self.anova_table.index.to_list():
                     raise ValueError(
                         f"Variance component '{key}' not found in the source of variance. Please check the variance dictionary and try again.")
-            variance_dict = {re.sub(r"\s+", " ", key.strip().lower()): value for key, value in variance_dict.items()}
-            self.variances = variance_dict
+                
+            # variance_dict = {re.sub(r"\s+", " ", key.strip().lower()): value for key, value in variance_dict.items()}
         else:
-            if self.anova_table is None:
-                raise ValueError(
-                    "Please calculate the ANOVA table using the calculate_anova method before calculating the G-coefficients.")
-
-        # Set the levels df
+            # Check if the ANOVA table has been calculated
+            if self.anova_table.empty:
+                raise ValueError("Please calculate the ANOVA table using the calculate_anova method before calculating the confidence intervals.")
+            print("Using ANOVA Table Variance Dictionary")
+            variance_dict = {idx: row['Variance'] for idx, row in self.anova_table.iterrows() if idx != 'mean'} # Exclude the mean row
+            # Check if any variance components are less than 0
+            negative_keys = [key for key, value in variance_dict.items() if value < 0]
+            if negative_keys:
+                # Print a warning message and set negative values to 0
+                print(f"Warning: Negative variance components found for {negative_keys}. Setting to 0.")
+                for key in negative_keys:
+                    variance_dict[key] = 0
+                    
+        # Check if the levels coefficients have been calculated
         if 'levels_df' in kwargs:
             levels_df = kwargs['levels_df']
+            if not isinstance(levels_df, pd.DataFrame):
+                raise ValueError("Levels coefficients must be a DataFrame.")
+            print("Using User Provided Levels Coefficients")
+            if levels_df.index.tolist() != list(variance_dict.keys()):
+                raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {levels_df.index.tolist()} and {list(variance_dict.keys())}")
+            if levels_df.columns.tolist() != levels_df.index.tolist():
+                raise ValueError(f"Levels coefficients must have a square shape with a value for each facet. Mismatched columns: {levels_df.columns.tolist()} and {levels_df.index.tolist()}")
+            if levels_df.values.min() <= 0:
+                raise ValueError(f"Levels coefficients must be greater than 0. Minimum value: {levels_df.values.min()}")
         elif not self.levels_coeffs.empty:
             levels_df = self.levels_coeffs
         else:
@@ -1002,63 +946,147 @@ class Design:
         
     # ----------------- Confidence Intervals -----------------
     def calculate_confidence_intervals(self, alpha: float=0.05, **kwargs):
-        """Calculate the confidence intervals for the individual facets.
-        This method computes the 95% confidence intervals for the individual facets using the formula from Cardinet et al. (1976).
-        The formula for the confidence intervals is as follows:
-        XaBC = XaBC +/- z_alpha/2 * sqrt(sigma^2(aBC))
-        Args:
-            alpha (float, optional): Significance level for the confidence intervals. Default is 0.05.
+        """
+        Calculate confidence intervals for means of each facet level.
+        
+        This method computes confidence intervals for individual facets based on 
+        variance component analysis using the formula from Cardinet et al. (1976):
+        
+        X ± z_(α/2) × √(σ²)
+        
+        where σ² represents the sum of variance components adjusted by the 
+        appropriate levels coefficients.
+        
+        Parameters:
+            alpha (float, optional): Significance level for confidence intervals.
+                Default is 0.05 (producing 95% confidence intervals).
+            **kwargs: Optional keyword arguments.
+                - variance_dictionary (dict): Custom variance components to use.
+                If not provided, components from the ANOVA table are used.
+                - levels_df (pd.DataFrame): Custom levels coefficients table. 
+                If not provided, self.levels_coeffs is used or calculated.
+        
+        Returns:
+            None: Results are stored in self.confidence_intervals
             
         Attributes:
-            self.confidence_intervals (dict): A dictionary containing the % confidence intervals for each level of each facet.
+            self.confidence_intervals (dict): Dictionary where keys are facet names and
+                values are DataFrames containing confidence intervals for each level.
+                Each DataFrame contains columns:
+                - lower_bound: Lower CI boundary
+                - mean: Observed mean
+                - upper_bound: Upper CI boundary
+                
+        Notes:
+            - Confidence intervals are not calculated for the facet with the largest
+            dimensionality (typically the interaction term containing all facets).
+            - Negative variance components are automatically set to zero with a warning.
+            - The method requires the ANOVA table to be calculated first unless
+            a custom variance_dictionary is provided.
+        
+        Raises:
+            ValueError: If alpha is not between 0 and 1, ANOVA hasn't been calculated,
+                or if invalid parameters are provided.
         """
-        # Check if the ANOVA table has been calculated
-        if self.anova_table.empty:
-            raise ValueError("Please calculate the ANOVA table using the calculate_anova method before calculating the confidence intervals.")
+        # Check if the alpha value is between 0 and 1
+        if not (0 < alpha < 1):
+            raise ValueError("Alpha must be between 0 and 1.")
+        # Check if the alpha value is a number
+        if not isinstance(alpha, (int, float)):
+            raise ValueError("Alpha must be a number.")
         
+        self._alpha = alpha
         
-        self.confidence_intervals = {}
+        # add the variance components to a dictionary
+        if 'variance_dictionary' in kwargs:
+            variance_dict = kwargs['variance_dictionary']
+            if not isinstance(variance_dict, dict):
+                raise ValueError("Variance dictionary must be a dictionary.")
+            print("Using User Provided Variance Dictionary")
+            for key, value in variance_dict.items():
+                if not isinstance(value, (int, float)):
+                    raise ValueError(
+                        f"Variance component '{key}' is not a number. Please check the variance dictionary and try again.")
+                if value < 0:
+                    raise ValueError(
+                        f"Variance component '{key}' is negative. Please check the variance dictionary and try again.")
+                if key not in self.anova_table.index.to_list():
+                    raise ValueError(
+                        f"Variance component '{key}' not found in the source of variance. Please check the variance dictionary and try again.")
+                
+            # variance_dict = {re.sub(r"\s+", " ", key.strip().lower()): value for key, value in variance_dict.items()}
+        else:
+            # Check if the ANOVA table has been calculated
+            if self.anova_table.empty:
+                raise ValueError("Please calculate the ANOVA table using the calculate_anova method before calculating the confidence intervals.")
+            print("Using ANOVA Table Variance Dictionary")
+            variance_dict = {idx: row['Variance'] for idx, row in self.anova_table.iterrows() if idx != 'mean'} # Exclude the mean row
+            # Check if any variance components are less than 0
+            negative_keys = [key for key, value in variance_dict.items() if value < 0]
+            if negative_keys:
+                # Print a warning message and set negative values to 0
+                print(f"Warning: Negative variance components found for {negative_keys}. Setting to 0.")
+                for key in negative_keys:
+                    variance_dict[key] = 0
+                    
+        # Check if the levels coefficients have been calculated
+        if 'levels_df' in kwargs:
+            levels_df = kwargs['levels_df']
+            if not isinstance(levels_df, pd.DataFrame):
+                raise ValueError("Levels coefficients must be a DataFrame.")
+            print("Using User Provided Levels Coefficients")
+            if levels_df.index.tolist() != list(variance_dict.keys()):
+                raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {levels_df.index.tolist()} and {list(variance_dict.keys())}")
+            if levels_df.columns.tolist() != levels_df.index.tolist():
+                raise ValueError(f"Levels coefficients must have a square shape with a value for each facet. Mismatched columns: {levels_df.columns.tolist()} and {levels_df.index.tolist()}")
+            if levels_df.values.min() <= 0:
+                raise ValueError(f"Levels coefficients must be greater than 0. Minimum value: {levels_df.values.min()}")
+        elif not self.levels_coeffs.empty:
+            levels_df = self.levels_coeffs
+        else:
+            self._calculate_levels_coeffs() # Calculate the levels coefficients
+            levels_df = self.levels_coeffs
+           
+        self.confidence_intervals = {key: pd.DataFrame() for key in variance_dict.keys()}  # Create a dictionary with empty DataFrames as values
+
+        # Remove the largest facet from the confidence intervals i.e. p x (i:h) since
+        # there will be a single value for each unique combination of the other facets
+        max_facet = max(self.confidence_intervals, key=lambda x: len(self.variance_tuple_dictionary[x]))
+        self.confidence_intervals = {key: self.confidence_intervals[key] for key in self.confidence_intervals if key != max_facet}
         
-        var_table = self.anova_table.set_index('Source of Variation')['Variance Component'].to_dict()
-        
-        # Drop 'Total' from the dictionary
-        if 'Total' in var_table.keys():
-            var_table.pop('Total')
-        
-        # Clip any variance components that are negative to 0
-        for key, value in var_table.items():
-            if value < 0:
-                print(f"Warning: Variance component for '{key}' was negative and has been clipped to 0.")
-                var_table[key] = 0
-        
-        for key in var_table.keys():
-            if ':' in key or ' x ' in key:
-                continue  # Skip interaction effects
+        for key in self.confidence_intervals:
             
             # Sum the variances all other variances divided by the product of the levels of the other facets
             # Do not include the variance of the facet in question or the level of the facet in question
             # For example, sigma^2(aBC) = sigma^2(b)/n_b + sigma^2(c)/n_c + sigma^2(bc)/n_b*n_c + sigma^2(ab)/n_b + sigma^2(ac)/n_c + sigma^2(abc)/n_b*n_c
             sigma_squared = 0
             
-            for var in var_table.keys():
+            for var in variance_dict.keys():
                 if var == key:
                     continue
-                pi_star = 1
                 
-                for vars_n in self.levels.keys():
-                    if vars_n in var and vars_n != key:
-                        pi_star *= self.levels[vars_n]
-                
-                sigma_squared += var_table[var] / pi_star
+                sigma_squared += variance_dict[var] * levels_df.loc[key, var]  # levels_df returns 1 / level so variance * levels_df is equivalent to variance / levels
             
             # Use the alpha value to get the z_alpha/2 value
-            z_alpha = norm.ppf(1 - alpha/2)
+            z_alpha = norm.ppf(1 - self._alpha/2)
             interval = z_alpha * np.sqrt(sigma_squared)
 
-            # Get the means and unique values of the responses for the key
-            means = self.data.groupby(key).mean().values.flatten()
-            unique_values = self.data[key].unique()
-            self.confidence_intervals[key] = {val: (m - interval, m, m + interval) for val, m in zip(unique_values, means)}
+            # First, get just the mean in a clean way
+            ci_df = self.data.groupby(list(self.variance_tuple_dictionary[key])).agg({
+                self.response_col: 'mean'
+            })
+
+            # Rename the column to be clearer
+            ci_df = ci_df.rename(columns={self.response_col: 'mean'})
+
+            # Now add the confidence interval columns
+            ci_df['lower_bound'] = ci_df['mean'] - interval
+            ci_df['upper_bound'] = ci_df['mean'] + interval
+
+            # Reorder columns to match your desired output
+            ci_df = ci_df[['lower_bound', 'mean', 'upper_bound']]
+            
+            self.confidence_intervals[key] = ci_df
     
     # ----------------- Summary Functions -----------------    
     def _summary_helper(self, title:str, headers: list[str], table: pd.DataFrame):
@@ -1150,15 +1178,45 @@ class Design:
                 
     ## POTENTIAL TODO: Add a D-Study visualization function to visualize the G-Coefficients for different scenarios
 
-    def confidence_intervals_summary(self):
+    def confidence_interval_summary(self):
         """
-        Print a summary of the confidence intervals.
+        Print a summary of the confidence intervals for each facet.
         """
-        print(f"\n{'-'*20}")
-        print(f"{'Confidence Intervals':^20}")
-        print(f"{'-'*20}")
-        print(f"{'Source':<20} {'Identifier':<20} {'Confidence Interval':<40}")
-        for key, intervals in self.confidence_intervals.items():
-            for identifier, interval in intervals.items():
-                print(f"{key:<20} {identifier:<20} {interval}")
+        # Calculate the percentiles based on alpha
+        lower_percentile = f"{(self._alpha/2)*100:.1f}%"
+        upper_percentile = f"{(1-self._alpha/2)*100:.1f}%"
+        
+        for facet, ci_df in self.confidence_intervals.items():
+            # Create a copy with renamed columns
+            display_df = ci_df.copy()
+            
+            # Rename columns to show percentiles
+            if 'lower_bound' in display_df.columns and 'upper_bound' in display_df.columns:
+                display_df = display_df.rename(columns={
+                    'lower_bound': lower_percentile,
+                    'upper_bound': upper_percentile
+                })
+            
+            # Handle MultiIndex by converting to string representation
+            if isinstance(display_df.index, pd.MultiIndex):
+                # Create string representations for each MultiIndex entry
+                index_names = display_df.index.names
+                string_indices = []
+                
+                for idx_tuple in display_df.index:
+                    parts = [f"{name}={val}" for name, val in zip(index_names, idx_tuple)]
+                    string_indices.append(', '.join(parts))
+                
+                # Create new DataFrame with string index
+                display_df = pd.DataFrame(
+                    display_df.values, 
+                    index=string_indices, 
+                    columns=display_df.columns
+                )
+            
+            # Prepare headers (include 'Group' for the index column)
+            headers = ['Group'] + list(display_df.columns)
+            
+            # Call the helper function with appropriate title
+            self._summary_helper(f"{int((1-self._alpha)*100)}% CI for '{facet}'", headers, display_df)
         

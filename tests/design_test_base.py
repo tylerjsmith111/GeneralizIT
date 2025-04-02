@@ -196,7 +196,7 @@ class DesignTestBase:
             atol=self.atol
         )
     
-    def test_calculate_anova(self):
+    def test__calculate_anova(self):
         """
         Test the ANOVA table structure and existence.
         
@@ -262,12 +262,62 @@ class DesignTestBase:
 
         return self # Allow method chaining
     
+    # ---- Calculate Confidence Intervals for Means Test ----
+    def test__calculate_confidence_intervals(self):
+        """
+        Test the confidence interval calculation.
+        
+        This method verifies that the confidence intervals for G-coefficients
+        are correctly calculated by comparing against expected values.
+        
+        Returns:
+            self: For method chaining
+        """
+        if self.design.anova_table.empty:
+            # ANOVA must be calculated first
+            self.design.calculate_anova()
+        
+        # Test with default alpha value (0.05)
+        self.design.calculate_confidence_intervals()
+        confidence_intervals = self.design.confidence_intervals
+        assert isinstance(confidence_intervals, dict), "Confidence intervals should be a dictionary"
+    
+        # Verify each facet has confidence intervals
+        for facet, ci_df in confidence_intervals.items():
+            # Basic structure checks
+            assert not ci_df.empty, f"Confidence intervals for {facet} should not be empty"
+            assert 'lower_bound' in ci_df.columns, f"Column 'lower_bound' should be in {facet} DataFrame"
+            assert 'upper_bound' in ci_df.columns, f"Column 'upper_bound' should be in {facet} DataFrame"
+            assert 'mean' in ci_df.columns, f"Column 'mean' should be in {facet} DataFrame"
+            
+            # Verify logical integrity of intervals
+            assert (ci_df['lower_bound'] <= ci_df['mean']).all(), f"Lower bounds should be <= means for {facet}"
+            assert (ci_df['upper_bound'] >= ci_df['mean']).all(), f"Upper bounds should be >= means for {facet}"
+            
+            # Test interval width relationships
+            interval_width = ci_df['upper_bound'] - ci_df['lower_bound']
+            assert (interval_width > 0).all(), f"Interval widths should be positive for {facet}"
+            
+        # Test with different alpha value
+        self.design.calculate_confidence_intervals(alpha=0.01)
+        
+        # Verify narrower intervals with smaller alpha
+        new_intervals = self.design.confidence_intervals
+        for facet in confidence_intervals:
+            if facet in new_intervals:
+                old_width = confidence_intervals[facet]['upper_bound'] - confidence_intervals[facet]['lower_bound']
+                new_width = new_intervals[facet]['upper_bound'] - new_intervals[facet]['lower_bound']
+                # 99% intervals should be wider than 95% intervals
+                assert (new_width >= old_width).all(), f"99% intervals should be wider than 95% intervals for {facet}"
+
+        return self
+    
     # ---- Composite Test Methods ----
     def test_all_anova_components(self):
         """Run all ANOVA component tests in the correct sequence."""
         return (self.test__calculate_t_values()
             .test__calculate_variance()
-            .test_calculate_anova())
+            .test__calculate_anova())
         
     def test_full_analysis(self):
         """Run all tests including g-coefficients."""

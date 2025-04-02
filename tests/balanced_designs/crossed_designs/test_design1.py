@@ -30,3 +30,9 @@ def test_anova_calculations(test_design1):
 def test_g_coefficients(test_design1):
     """Tests the calculation of G coefficients."""
     test_design1.set_tolerance(0.01).test__calculate_g_coeffs()
+    
+@pytest.mark.crossed
+@pytest.mark.balanced
+def test_confidence_intervals(test_design1):
+    """Tests the calculation of confidence intervals."""
+    test_design1.set_tolerance(0.01).test__calculate_confidence_intervals()
