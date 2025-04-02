@@ -6,7 +6,7 @@ from generalizit.design_utils import match_research_design, parse_facets, valida
 
 
 @pytest.fixture
-def test_design1():
+def test_design1_missing():
     # synthetic dataset for person x item
     # Brennan (2001) Synthetic Data # 1
     
