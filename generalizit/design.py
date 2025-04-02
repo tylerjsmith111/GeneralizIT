@@ -11,6 +11,7 @@ from scipy.stats import norm
 import copy
 import re
 from typing import Union
+from generalizit.g_theory_utils import create_pseudo_df
 
 class Design:
     def __init__(
@@ -30,12 +31,14 @@ class Design:
         self.variance_coeffs_table: pd.DataFrame = pd.DataFrame()
         self.anova_table: pd.DataFrame = pd.DataFrame()
         self.g_coeffs_table: pd.DataFrame = pd.DataFrame()
-        self.d_study_table: pd.DataFrame  = pd.DataFrame()
+        
+        # Initialize the dictionaries
         self.T: dict = {}
         self.variances: dict = {}
+        self.d_study_dict: dict  = {}
         self.confidence_intervals: dict = {}
         
-        # Initialize alpha
+        # Initialize alpha for confidence intervals
         self._alpha: float = 0.05
 
     def _calculate_levels_coeffs(self, **kwargs) -> pd.DataFrame:
@@ -755,15 +758,18 @@ class Design:
         Parameters:
             **kwargs: Optional keyword arguments.
                 - variance_dictionary (dict): Custom variance components to use.
-                  If provided, values must be non-negative. If not provided, 
-                  components from the ANOVA table are used.
+                    If provided, values must be non-negative. If not provided, 
+                    components from the ANOVA table are used.
                 - levels_df (pd.DataFrame): Custom levels coefficients table.
-                  If not provided, self.levels_coeffs is used or calculated.
+                    If not provided, self.levels_coeffs is used or calculated.
                 - variance_tuple_dictionary (dict): Custom variance tuple dictionary.
-                  If not provided, self.variance_tuple_dictionary is used.
+                    If not provided, self.variance_tuple_dictionary is used.
+                - d_study (bool): If True, returns the G-coefficients DataFrame directly
+                    instead of storing it in self.g_coeffs_table. Default is False.
         
         Returns:
-            None: Results are stored in self.g_coeffs_table
+            pd.DataFrame or None: If d_study=True, returns the G-coefficients DataFrame directly.
+            Otherwise, results are stored in self.g_coeffs_table and None is returned.
             
         Raises:
             ValueError: If:
@@ -863,112 +869,123 @@ class Design:
             levels_df = self.levels_coeffs
 
         # Store the G-coefficients in a table
-        self.g_coeffs_table = self._calculate_g_coeffs(variance_df=variance_df, levels_df=levels_df, variance_tup_dict=variance_tup_dict)
+        d_study = kwargs.get('d_study', False)  # Default to False if not provided
+
+        if not isinstance(d_study, bool):
+            raise ValueError("d_study must be a boolean value.")
+
+        # Calculate G-coefficients
+        result = self._calculate_g_coeffs(variance_df=variance_df, levels_df=levels_df, variance_tup_dict=variance_tup_dict)
+
+        # Either return the result (in the case of a D-Study) or store it in the class attribute to maintain compatibility
+        if d_study:
+            return result
+        else:
+            self.g_coeffs_table = result
         
     # ----------------- D STUDY -----------------
     def calculate_d_study(self, d_study_design: Union[dict, None], **kwargs):
         """
-        Implement the D-Study to determine the optimal number for each facet.
+        Implement a D-Study to determine optimal facet levels based on G-Study variance components.
         
-        Only applicable for maintaing a fully crossed design. Can be adapted in the 
-        future to handle nested designs as well.
+        This method examines multiple possible study designs by generating all combinations
+        of the provided facet levels. It calculates G-coefficients for each design scenario
+        using the variance components from a previously conducted G-Study.
         
-        D Study Implemented as in Brennan 2001, Generalizability Theory.
-        Uses the G-Study learned variances and adjusts levels according to the users' input.
-
-        Args:
-            levels (dict): Dictionary of the number of levels for each facet in the D-Study.
-            
-            For example, if we have a 3 facet design, we can have the following levels:
-            levels = {
-                'person': [5, 10, 15],
-                'item': [1, 2, 3],
-                'rater': [2, 4, 6]
-            }
-            
-            If we want to keep the levels the same pass None for the facet:
-            levels = {
-                'person': None,
-                'item': [1, 2, 3],
-                'rater': [2, 4, 6]
-            }
+        Parameters:
+            d_study_design (dict): Dictionary where keys are facet names and values are 
+                lists of integers representing different numbers of levels to test.
+                For example:
+                {
+                    'person': [10],        # Only testing 10 persons
+                    'item': [2, 3],        # Testing either 2 or 3 items
+                    'rater': [2, 4, 6]     # Testing 2, 4, or 6 raters
+                }
+                This would generate 6 different study designs (1×2×3 combinations).
+                        
+            **kwargs: Optional additional parameters.
         
         Returns:
-            self.d_study_table (pd.DataFrame): A DataFrame containing the D-Study results. 
+            None: Results are stored in self.d_study_dict, where keys are string
+            representations of each design scenario and values are DataFrames
+            containing the corresponding G-coefficients.
+            
+        Raises:
+            ValueError: If d_study_design is not properly formatted or if required
+            precalculations haven't been performed.
+            
+        Notes:
+            - This method requires that variance components have been calculated via a G-Study
+            - For each design scenario, new levels coefficients are calculated
+            - All facet combinations in the original design must be maintained
         """
         
-        # First, normalize the keys in the levels dictionary
-        levels = {re.sub(r"\s+", " ", key.strip().lower()): value for key, value in levels.items()}
-        
-        
-        # Check that the levels dictionary contains only valid facets
-        for key in levels.keys():
-            if key not in self.levels.keys():
-                raise ValueError(f"Facet {key} not found in the design. Please Update the levels dictionary to include only valid facets.")
+        # Check if a d_study_design dictionary is provided
+        if d_study_design is not None:
+            if not isinstance(d_study_design, dict):
+                raise ValueError("D-Study design must be a dictionary.")
+            # Check that each key in d_study_design appears in at least one tuple in variance_tuple_dictionary
+            all_facets_in_variance_tuples = set()
+            for component, variance_tuple in self.variance_tuple_dictionary.items():
+                if component != 'mean':  # Skip the 'mean' component which typically has an empty tuple
+                    all_facets_in_variance_tuples.update(variance_tuple)
                 
-        # Check that the levels dictionary contains list of integer values greater than 0
-        for key, value in levels.items():
-            if not isinstance(value, list) and value is not None:
-                raise ValueError(f"Levels for facet {key} must be a list of integers or `None`. Please check the levels dictionary and try again.")
-            if value is not None:
+            unknown_facets = set(d_study_design.keys()) - all_facets_in_variance_tuples
+            if unknown_facets:
+                raise ValueError(f"Facets {unknown_facets} in d_study_design are not found in any variance component tuple. Valid facets are: {all_facets_in_variance_tuples}")
+            # Check that the values are lists of integers
+            for key, value in d_study_design.items():
+                if not isinstance(value, list):
+                    raise ValueError(f"Levels for facet {key} must be a list of integers.")
                 if any([not isinstance(val, int) for val in value]):
-                    raise ValueError(f"All levels for facet {key} must be integers. Please check the levels dictionary and try again.")
+                    raise ValueError(f"All levels for facet {key} must be integers.")
                 if any([val <= 0 for val in value]):
-                    raise ValueError(f"All levels for facet {key} must be greater than 0. Please check the levels dictionary and try again.")
-            if value is None:
-                levels[key] = [self.levels[key]]
-                print(f"Levels for {key} not provided. Keeping the levels the same as the original design.")
-        
-        # Check to make sure all facets are accounted for
-        if len(levels.keys()) != len(self.levels.keys()):
-            # Get the missing facets
-            missing_facets = [facet for facet in self.levels.keys() if facet not in levels.keys()]
-            
-            # Add the missing facets to the levels dictionary
-            for facet in missing_facets:
-                print(f"Facet {facet} not found in the levels dictionary. Keeping the levels the same as the original design.")
-                levels[facet] = [self.levels[facet]]
+                    raise ValueError(f"All levels for facet {key} must be greater than 0.")
                 
-        
-        og_levels = copy.deepcopy(self.levels) # Store the original levels
-        
-        # Create a list of tuples containing all possible combinations of levels
-        level_combinations = list(product(*levels.values()))
-        
-        self.d_study_table = pd.DataFrame()
-
-        print("Using ANOVA Table Variance Dictionary for D-Study")
-        variance_dict = self.anova_table.set_index('Source of Variation')['Variance Component'].to_dict()
-        
-        # Drop 'Total' from the dictionary if it exists
-        variance_dict.pop('Total', None)
-        
-        # Clip any variance components that are negative to 0
-        for key, value in variance_dict.items():
-            if value < 0:
-                variance_dict[key] = 0
-                print(f"Variance component for {key} is negative. Setting to 0.")
-        
-        for combo in level_combinations:
-            for i, key in enumerate(levels.keys()):
-                if self.levels[key] != combo[i]:
-                    print(f"Updating levels for {key} from {self.levels[key]} to {combo[i]}.")
-                    self.levels[key] = combo[i]
+            # iterate through potential study designs
+            study_designs = []
             
-            # calculate the generalizability coefficients
-            d_coeffs = self._calculate_g_coeffs()
+            # Get all possible combinations of levels using itertools.product
+            facets = list(d_study_design.keys())
+            level_lists = [d_study_design[facet] for facet in facets]
             
-            # Create a DataFrame with the level combination values repeated for each row in d_coeffs
-            combo_df = pd.DataFrame([combo] * len(d_coeffs), columns=levels.keys())
+            # Generate all combinations using itertools.product
+            for combo in product(*level_lists):
+                # Create a dictionary for this specific design scenario
+                design_scenario = {facet: level for facet, level in zip(facets, combo)}
+                study_designs.append(design_scenario)
             
-            # Concatenate the level combination DataFrame with the G Coefficients table
-            combined_df = pd.concat([combo_df, d_coeffs], axis=1)
+            for study_design in study_designs:
+                # Create the pseudo count df
+                # Use the variance tuple dictionary from the G study's design
+                pseudo_counts_df = create_pseudo_df(d_study=study_design, variance_tup_dict=self.variance_tuple_dictionary)
+                
+                # Create the pseudo levels df
+                pseudo_levels_df = self._calculate_levels_coeffs(
+                    df=pseudo_counts_df,
+                    variance_tuple_dictionary=self.variance_tuple_dictionary
+                )
+                
+                # Create the pseudo g coefficients table using the variance from the G study
+                pseudo_g_coeffs_table = self.g_coeffs(
+                    levels_df=pseudo_levels_df,
+                    variance_tuple_dictionary=self.variance_tuple_dictionary,
+                    d_study=True,
+                )
+                
+                # create a label by turning the study_design dictionary into a string
+                label = ', '.join([f"{key}: {value}" for key, value in study_design.items()])
+                
+                # add the label and pseudo g coefficients table to the d_study_table dictionary
+                self.d_study_dict[label] = pseudo_g_coeffs_table
+        else:
+            # Unbalanced or missing D Study Designs must input manual pseudo counts
+            # TODO: Implement Missing and Unbalanced D Study Designs by adding kwargs for 'pseudo_counts_dfs', 'variance_tuple_dictionary', and 'variance_dictionary'
+            # pseudo_counts_dfs: List of DataFrames containing pseudo counts for each D-Study design
+            # variance_tuple_dictionary: Dictionary containing the variance tuples for each facet, this allows for more complex designs
+            # variance_dictionary: Dictionary containing the variance components for each facet as crossed designs could become nested in D-Studies
+            pass
             
-            # Append to the main study table
-            self.d_study_table = pd.concat([self.d_study_table, combined_df], ignore_index=True)
-           
-         
-        self.levels = copy.deepcopy(og_levels)  # Reset the levels to the original design
         
     # ----------------- Confidence Intervals -----------------
     def calculate_confidence_intervals(self, alpha: float=0.05, **kwargs):
@@ -1173,38 +1190,16 @@ class Design:
         Print a summary of the D-Study results.
         """
         
-        # Identify unique combinations of levels (facet values) dynamically using self.facets
-        unique_combinations = self.d_study_table[list(self.levels.keys())].drop_duplicates()
+        for label, d_study_df in self.d_study_dict.items():
+            # Adjust the column headers for prettier printing
+            title = f"D-Study: {label}"
+            # Adjust the column headers for prettier printing
+            # Add a blank space for the index column
+            headers = [''] + [col for col in d_study_df.columns]
+            symbol_map = {"rho^2": "ρ²", "phi^2": "φ²"}
+            adjusted_headers = [symbol_map.get(header, header) for header in headers]
 
-        for _, combo in unique_combinations.iterrows():
-            # Extract the specific combination as a dictionary for easy access
-            combo_dict = combo.to_dict()
-            
-            # Build a dynamic title based on the facets and their values in the current combination
-            title_parts = [f"{facet}_n={value}" for facet, value in combo_dict.items()]
-            title = f"G Coefficients ({', '.join(title_parts)})"
-            print(f"\n{'-' * len(title)}")
-            print(f"{title:^}")
-            print(f"{'-' * len(title)}")
-            
-            # Filter rows matching this combination by dynamically constructing the filter
-            filter_condition = (self.d_study_table[list(combo_dict)] == pd.Series(combo_dict)).all(axis=1)
-            combo_rows = self.d_study_table[filter_condition]
-            
-            # Print column headers for the summary table
-            print(f"{'Source of Variation':<20} {'random':<10} {'fixed':<10} {'rho^2':<10} {'phi^2':<10}")
-            
-            # Print each row for this combination
-            for _, row in combo_rows.iterrows():
-                differentiation = row['Source of Variation']
-                differentiation = differentiation.replace(' × ', ' & ')
-                random = row['Generalized Over Random']
-                random = random.replace(' × ', ' & ')
-                fixed = row['Generalized Over Fixed']
-                fixed = fixed.replace(' × ', ' & ')
-                rho_squared = f"{row['rho^2']:.4f}" if row['rho^2'] is not None else ""
-                phi_squared = f"{row['phi^2']:.4f}" if row['phi^2'] is not None else ""
-                print(f"{differentiation:<20} {random:<10} {fixed:<10} {rho_squared:<10} {phi_squared:<10}")
+            self._summary_helper(title, adjusted_headers, d_study_df)
                 
     ## POTENTIAL TODO: Add a D-Study visualization function to visualize the G-Coefficients for different scenarios
 

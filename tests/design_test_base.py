@@ -37,7 +37,8 @@ class DesignTestBase:
             t_values_dict: Dict[str, float],
             variances_dict: Dict[str, float],
             rho_dict: Dict[str, float],
-            phi_dict: Dict[str, float]
+            phi_dict: Dict[str, float],
+            d_study_expected: Optional[Dict[str, pd.DataFrame]] = None,
     ):
         """
         Initialize the base test class with the specified design and expected values.
@@ -57,6 +58,7 @@ class DesignTestBase:
         self.variances_dict = variances_dict
         self.rho_dict = rho_dict
         self.phi_dict = phi_dict
+        self.d_study_expected = d_study_expected or {}
         
         # Default test parameters
         self.atol = 0.01
@@ -234,10 +236,6 @@ class DesignTestBase:
             # ANOVA must be calculated first
             self.design.calculate_anova()
 
-        # check to make sure that 'Total' is not in the source of variation
-        if 'Total' in self.design.variances.keys():
-            self.design.variances.pop('Total')
-
         # Call the method being tested
         self.design.g_coeffs()
 
@@ -261,6 +259,86 @@ class DesignTestBase:
             f"phi^2 for {key} should be {value}, but got {phi_value}."
 
         return self # Allow method chaining
+    
+    # ---- D Study Tests ----
+    def test__calculate_d_study(self, d_study_design: Dict[str, List[int]]):
+        """
+        Test the BALANCED D-study calculations with a specified design configuration.
+        
+        This method verifies that D-study calculations correctly generate G-coefficients
+        for each combination of facet levels according to the specified design.
+        
+        Args:
+            d_study_design: Dictionary where keys are facet names and values are 
+                lists of integers representing different numbers of levels to test.
+                Example: {'person': [10], 'item': [2, 3]}
+        
+        Returns:
+            self: For method chaining
+        """
+        # Ensure ANOVA has been calculated
+        if self.design.anova_table.empty:
+            self.design.calculate_anova()
+        
+        # Ensure G-coefficients are calculated (needed for accurate comparison)
+        if self.design.g_coeffs_table.empty:
+            self.design.g_coeffs()
+        
+        # Clear any existing D-study results
+        self.design.d_study_dict = {}
+        
+        # Run the D-study calculation
+        self.design.calculate_d_study(d_study_design=d_study_design)
+        
+        # Check that D-study dictionary is not empty
+        assert self.design.d_study_dict, "D-study dictionary should not be empty."
+        
+        # Calculate how many combinations we should have
+        expected_combinations = 1
+        for levels in d_study_design.values():
+            expected_combinations *= len(levels)
+        
+        # Verify the correct number of scenarios were calculated
+        assert len(self.design.d_study_dict) == expected_combinations, \
+            f"Expected {expected_combinations} D-study scenarios, got {len(self.design.d_study_dict)}"
+        
+        # If expected D-study results were provided, verify them
+        if self.d_study_expected:
+            for scenario, expected_df in self.d_study_expected.items():
+                assert scenario in self.design.d_study_dict, \
+                    f"Expected scenario '{scenario}' not found in D-study results."
+                
+                actual_df = self.design.d_study_dict[scenario]
+                
+                 # Check that indices in the expected df are in the actual df
+                for idx in expected_df.index:
+                    assert idx in actual_df.index, f"Index '{idx}' not found in actual DataFrame for scenario '{scenario}'."
+                
+                # Check all values with expected tolerance
+                for idx in expected_df.index:
+                    for col in ['rho^2', 'phi^2']:
+                        assert col in expected_df.columns, f"Column '{col}' not in expected DataFrame"
+                        assert col in actual_df.columns, f"Column '{col}' not in actual DataFrame"
+                        
+                        expected_val = expected_df.loc[idx, col]
+                        actual_val = actual_df.loc[idx, col]
+                        
+                        assert np.isclose(actual_val, expected_val, atol=self.atol), \
+                            f"{col} for {idx} in scenario '{scenario}' should be {expected_val}, got {actual_val}."
+        
+        # General structure verification for all scenarios
+        for scenario, result_df in self.design.d_study_dict.items():
+            # Verify DataFrame has expected columns
+            assert 'rho^2' in result_df.columns, f"Column 'rho^2' missing in scenario '{scenario}'"
+            assert 'phi^2' in result_df.columns, f"Column 'phi^2' missing in scenario '{scenario}'"
+            
+            # Verify values are within valid range
+            assert (result_df['rho^2'] >= 0).all() and (result_df['rho^2'] <= 1).all(), \
+                f"rho^2 values should be between 0 and 1 in scenario '{scenario}'"
+            assert (result_df['phi^2'] >= 0).all() and (result_df['phi^2'] <= 1).all(), \
+                f"phi^2 values should be between 0 and 1 in scenario '{scenario}'"
+        
+        return self
     
     # ---- Calculate Confidence Intervals for Means Test ----
     def test__calculate_confidence_intervals(self):

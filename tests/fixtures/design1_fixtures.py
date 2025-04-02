@@ -68,6 +68,25 @@ def test_design1():
         'person': 0.773
     }
     
+    d_study_expected = {
+        'person: 10, item: 5': pd.DataFrame({
+            'rho^2': [.693],
+            'phi^2': [0.586]
+        }, index=['person']),
+        'person: 10, item: 10': pd.DataFrame({
+            'rho^2': [.819],
+            'phi^2': [0.740]
+        }, index=['person']),
+        'person: 10, item: 15': pd.DataFrame({
+            'rho^2': [.871],
+            'phi^2': [0.810]
+        }, index=['person']),
+        'person: 10, item: 20': pd.DataFrame({
+            'rho^2': [.901],
+            'phi^2': [0.850]
+        }, index=['person']),
+    }
+    
     # ---- Unused ----
     ss_values_dict = {
         'person': 7.3417,
@@ -98,6 +117,7 @@ def test_design1():
         t_values_dict=t_values_dict,
         variances_dict=variances_dict,
         rho_dict=rho_dict,
-        phi_dict=phi_dict
+        phi_dict=phi_dict,
+        d_study_expected=d_study_expected
     )
 
