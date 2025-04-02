@@ -10,6 +10,7 @@ from itertools import product, combinations
 from scipy.stats import norm
 import copy
 import re
+from typing import Union
 
 class Design:
     def __init__(
@@ -37,61 +38,66 @@ class Design:
         # Initialize alpha
         self._alpha: float = 0.05
 
-    def _calculate_levels_coeffs(self, **kwargs):
+    def _calculate_levels_coeffs(self, **kwargs) -> pd.DataFrame:
         """
         Calculate the levels coefficients for variance components based on grouping combinations.
-
+    
         This method calculates the levels coefficients used to adjust variance components
         in Generalizability Theory. It processes the provided data to compute grouping
         combinations and their respective harmonic means, storing the results in a levels
-        coefficients table.
-
-        Args:
+        coefficients DataFrame.
+    
+        Parameters:
             **kwargs: Optional keyword arguments.
                 - df (pd.DataFrame): A custom DataFrame to use for calculations. If not provided,
                   the default `self.data` is used.
-
-        Workflow:
-            1. Optionally accepts a custom DataFrame (`df`).
-            2. Initializes the levels coefficients table, excluding the "mean" facet.
-            3. Handles missing data by dropping NaN values if `self.missing_data` is True.
-            4. Iterates over variance components to calculate levels for each grouping combination.
-            5. Uses harmonic mean calculations to determine the levels coefficients.
-
+                - variance_tuple_dictionary (dict): Custom variance tuple dictionary.
+                  If not provided, self.variance_tuple_dictionary is used.
+    
         Returns:
-            None. Updates `self.levels_coeffs` in place.
+            pd.DataFrame: A DataFrame containing the levels coefficients, where rows and columns
+                        correspond to facets. Values represent inverse level coefficients (1/n_i).
+    
+        Notes:
+            - The method automatically identifies the facet with the maximum grouping variables
+              and assigns a coefficient of 1 to all entries in its row.
+            - The "mean" facet is excluded from calculation.
+            - For unbalanced designs, harmonic means are used to calculate appropriate coefficients.
+            - Values in the returned DataFrame represent the inverse of the effective sample size (1/n_i).
         """
-        # Step 1: Use the provided DataFrame or default to self.data
+        # Step 1: Use the provided DataFrame or default to self.data 
         df = kwargs.get('df', self.data)
+        variance_tup_dict = kwargs.get('variance_tuple_dictionary', self.variance_tuple_dictionary)
+        
 
         # Step 2: Initialize levels coefficients table with variance components as index and columns
-        self.levels_coeffs = pd.DataFrame(index=self.variance_tuple_dictionary.keys(),
-                                          columns=self.variance_tuple_dictionary.keys())
+        levels_coeffs = pd.DataFrame(index=variance_tup_dict.keys(),
+                                          columns=variance_tup_dict.keys())
 
         # Drop the "mean" facet from rows and columns
-        self.levels_coeffs.drop('mean', axis=0, errors='ignore', inplace=True)
-        self.levels_coeffs.drop('mean', axis=1, errors='ignore', inplace=True)
+        levels_coeffs.drop('mean', axis=0, errors='ignore', inplace=True)
+        levels_coeffs.drop('mean', axis=1, errors='ignore', inplace=True)
 
         # Step 3: Handle missing data if applicable
         if self.missing_data:
             df = df.dropna()
 
         # Step 4: Identify the facet with the maximum grouping variables
-        max_facet = max(self.variance_tuple_dictionary, key=lambda x: len(self.variance_tuple_dictionary[x]))
+        max_facet = max(variance_tup_dict, key=lambda x: len(variance_tup_dict[x]))
 
         # Step 5: Iterate through each variance component to calculate levels coefficients
-        for key, differentiation_vars in self.variance_tuple_dictionary.items():
+        for key, differentiation_vars in variance_tup_dict.items():
             if key == 'mean':
                 continue
 
             if key == max_facet:
-                self.levels_coeffs.loc[key] = 1
+                levels_coeffs.loc[key] = 1
                 continue
 
             facet_of_differentiation_list = list(differentiation_vars)
 
             # Iterate through each grouping facet to calculate levels
-            for grouping_facet, grouping_vars in self.variance_tuple_dictionary.items():
+            for grouping_facet, grouping_vars in variance_tup_dict.items():
                 if grouping_facet == 'mean':
                     continue
 
@@ -118,7 +124,9 @@ class Design:
                     level = 1 / inverse_level
 
                     # Store the calculated level in the levels coefficients table
-                    self.levels_coeffs.at[key, grouping_facet] = inverse_level
+                    levels_coeffs.at[key, grouping_facet] = inverse_level
+
+        return levels_coeffs
 
     def _calculate_degrees_of_freedom(self):
         pass
@@ -847,7 +855,7 @@ class Design:
             
             levels_df = self.levels_coeffs
         else:
-            self._calculate_levels_coeffs() # Calculate the levels coefficients
+            self.levels_coeffs = self._calculate_levels_coeffs() # Calculate the levels coefficients
             
             if set(self.levels_coeffs.index) != set(variance_df.index):
                 raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {self.levels_coeffs.index.tolist()} and {variance_df.index.tolist()}")
@@ -858,7 +866,7 @@ class Design:
         self.g_coeffs_table = self._calculate_g_coeffs(variance_df=variance_df, levels_df=levels_df, variance_tup_dict=variance_tup_dict)
         
     # ----------------- D STUDY -----------------
-    def calculate_d_study(self, levels: dict):
+    def calculate_d_study(self, d_study_design: Union[dict, None], **kwargs):
         """
         Implement the D-Study to determine the optimal number for each facet.
         
@@ -1062,7 +1070,7 @@ class Design:
             levels_df = self.levels_coeffs
         else:
             print("Calculating levels coefficients")
-            self._calculate_levels_coeffs() # Calculate the levels coefficients
+            self.levels_coeffs = self._calculate_levels_coeffs() # Calculate the levels coefficients
             levels_df = self.levels_coeffs
             
         # Check that the levels coefficients match the variance components
