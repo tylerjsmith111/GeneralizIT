@@ -145,6 +145,10 @@ The `input_str` parameter specifies the research design. Supported formats inclu
 - **Confidence Intervals:** Calculates confidence intervals for means of each facet.
 - **Summaries:** Concise summaries of ANOVA, G coefficients, D studies, and Confidence Intervals.
 
+## Advanced Tutorials
+
+Advanced package usage and G-Theory methodology tutorials and are available in the [tutorials directory](https://github.com/tylerjsmith111/GeneralizIT/tree/main/tutorials) of our GitHub repository.
+
 ## Notes
 
 - Include only the necessary facets and the response variable.

@@ -3,13 +3,13 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["generalizit"]
+packages = {find = {include = ["generalizit"], exclude = ["tests*", "tutorials*"]}}
 
 [project]
 name = "generalizit"
-version = "0.0.3"
+version = "0.1.0"
 description = "Generalizability theory fully crossed and nested"
-keywords = ["generalizability theory", "crossed", "nested"]
+keywords = ["generalizability theory", "classical test theory", "unbalanced design"]
 readme = "README.md"
 authors = [
     {name = "Tyler Smith", email = "tyler.js.smith111@gmail.com"}
@@ -38,3 +38,4 @@ testpaths = ["tests"]
 [project.urls]
 Issues = "https://github.com/tylerjsmith111/GeneralizIT/issues"
 Homepage = "https://github.com/tylerjsmith111/GeneralizIT"
+Documentation = "https://github.com/tylerjsmith111/GeneralizIT#readme"
