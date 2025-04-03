@@ -131,6 +131,12 @@ class Design:
         return levels_coeffs
 
     def _calculate_degrees_of_freedom(self):
+        """
+        DEPRECATED since v0.1.0: This method is no longer supported.
+        
+        This method was originally intended to calculate degrees of freedom for variance components
+        but is no longer used in the current implementation of G-Theory calculations.
+        """
         pass
 
     def _calculate_T_values(self):
@@ -192,9 +198,21 @@ class Design:
         self.T = {key: round(value, 4) for key, value in self.T.items()}
 
     def _calculate_sums_of_squares(self):
+        """
+        DEPRECATED since v0.1.0: This method is no longer supported.
+        
+        This method was originally intended to calculate sums of squares for variance components
+        but is no longer used in the current implementation of G-Theory calculations.
+        """
         pass
 
     def _calculate_mean_squares(self):
+        """
+        DEPRECATED since v0.1.0: This method is no longer supported.
+        
+        This method was originally intended to calculate mean squares for variance components
+        but is no longer used in the current implementation of G-Theory calculations.
+        """
         pass
 
     def _calculate_variance_coefficients(
