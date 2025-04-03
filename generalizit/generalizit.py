@@ -238,7 +238,7 @@ class GeneralizIT:
 
     def d_study_summary(self):
         # First check that the D study has been calculated
-        if self.design.d_study_dict is {}:
+        if not self.design.d_study_dict:
             raise RuntimeError("D study must be calculated first. Please run the calculate_d_study() method.")
         
         # Print the D study
