@@ -9,8 +9,7 @@ import numpy as np
 from itertools import product, combinations
 from scipy.stats import norm
 import copy
-import re
-from typing import Union
+from typing import Union, Optional
 from generalizit.g_theory_utils import create_pseudo_df
 
 class Design:
@@ -884,6 +883,53 @@ class Design:
             self.g_coeffs_table = result
         
     # ----------------- D STUDY -----------------
+    def _process_d_study_helper(
+        self, 
+        pseudo_counts_df: pd.DataFrame, 
+        variance_tuple_dictionary: dict, 
+        variance_dictionary: Optional[dict] =None, 
+        scenario_label: Optional[str] =None,
+        ) -> None:
+        """
+        Helper method to process a single D-Study scenario and append it to the d_study_dict attribute.
+        
+        Parameters:
+            pseudo_counts_df (pd.DataFrame): The pseudo counts DataFrame for this scenario
+            variance_tuple_dictionary (dict): Dictionary mapping components to facet tuples
+            variance_dictionary (dict, optional): Custom variance components to use
+            scenario_label (str, optional): Label for this scenario. If None, generated from pseudo_counts_df
+            
+        Returns:
+            None: Results are appended to self.d_study_dict with the scenario label as key
+        """
+        # Create the pseudo levels df
+        pseudo_levels_df = self._calculate_levels_coeffs(
+            df=pseudo_counts_df,
+            variance_tuple_dictionary=variance_tuple_dictionary
+        )
+        
+        # Prepare kwargs for g_coeffs
+        g_coeffs_kwargs = {
+            'levels_df': pseudo_levels_df,
+            'variance_tuple_dictionary': variance_tuple_dictionary,
+            'd_study': True,
+        }
+        
+        # Add variance_dictionary if provided
+        if variance_dictionary is not None:
+            g_coeffs_kwargs['variance_dictionary'] = variance_dictionary
+            
+        # Get G-coefficients table
+        pseudo_g_coeffs_table = self.g_coeffs(**g_coeffs_kwargs)
+        
+        # Create a label if not provided
+        if scenario_label is None:
+            scenario_label = ', '.join([f"{key}: {value}" for key, value in pseudo_counts_df.items()])
+        
+        # Add to d_study_dict
+        self.d_study_dict[scenario_label] = pseudo_g_coeffs_table
+    
+    
     def calculate_d_study(self, d_study_design: Union[dict, None], **kwargs):
         """
         Implement a D-Study to determine optimal facet levels based on G-Study variance components.
@@ -922,6 +968,10 @@ class Design:
         
         # Check if a d_study_design dictionary is provided
         if d_study_design is not None:
+            print("Performing Balanced D-Study Design for the provided designs")
+            if kwargs.get('pseudo_counts_dfs', None) is not None:
+                raise ValueError("D-Study design must be provided as a dictionary OR pseudo_counts_dfs: list[pd.DataFrame] must be provided.")
+    
             if not isinstance(d_study_design, dict):
                 raise ValueError("D-Study design must be a dictionary.")
             # Check that each key in d_study_design appears in at least one tuple in variance_tuple_dictionary
@@ -956,36 +1006,90 @@ class Design:
                 study_designs.append(design_scenario)
             
             for study_design in study_designs:
-                # Create the pseudo count df
-                # Use the variance tuple dictionary from the G study's design
-                pseudo_counts_df = create_pseudo_df(d_study=study_design, variance_tup_dict=self.variance_tuple_dictionary)
-                
-                # Create the pseudo levels df
-                pseudo_levels_df = self._calculate_levels_coeffs(
-                    df=pseudo_counts_df,
-                    variance_tuple_dictionary=self.variance_tuple_dictionary
-                )
-                
-                # Create the pseudo g coefficients table using the variance from the G study
-                pseudo_g_coeffs_table = self.g_coeffs(
-                    levels_df=pseudo_levels_df,
-                    variance_tuple_dictionary=self.variance_tuple_dictionary,
-                    d_study=True,
-                )
-                
                 # create a label by turning the study_design dictionary into a string
                 label = ', '.join([f"{key}: {value}" for key, value in study_design.items()])
                 
-                # add the label and pseudo g coefficients table to the d_study_table dictionary
-                self.d_study_dict[label] = pseudo_g_coeffs_table
+                # Create the pseudo count df
+                # Use the variance tuple dictionary from the G study's design
+                pseudo_counts_df = create_pseudo_df(d_study=study_design, variance_tup_dict=self.variance_tuple_dictionary)
+                                
+                # Use the helper function to process the D-Study scenario
+                # and add to the d_study_dict
+                self._process_d_study_helper(
+                    pseudo_counts_df=pseudo_counts_df,
+                    variance_tuple_dictionary=self.variance_tuple_dictionary,
+                    scenario_label=label,
+                )
+            
         else:
             # Unbalanced or missing D Study Designs must input manual pseudo counts
-            # TODO: Implement Missing and Unbalanced D Study Designs by adding kwargs for 'pseudo_counts_dfs', 'variance_tuple_dictionary', and 'variance_dictionary'
-            # pseudo_counts_dfs: List of DataFrames containing pseudo counts for each D-Study design
-            # variance_tuple_dictionary: Dictionary containing the variance tuples for each facet, this allows for more complex designs
-            # variance_dictionary: Dictionary containing the variance components for each facet as crossed designs could become nested in D-Studies
-            pass
+            print("Performing Advanced D-Study Design for the provided designs")
+            pseudo_counts_dfs = kwargs.get('pseudo_counts_dfs', None)
+            if pseudo_counts_dfs is None:
+                raise ValueError("D-Study design must be provided as a dictionary or pseudo_counts_dfs: list[pd.DataFrame] must be provided.")
+            if not isinstance(pseudo_counts_dfs, list):
+                raise ValueError("pseudo_counts_dfs must be a list of DataFrames.")
+            if any([not isinstance(df, pd.DataFrame) for df in pseudo_counts_dfs]):
+                raise ValueError("All elements in pseudo_counts_dfs must be DataFrames.")
+            if any([df.empty for df in pseudo_counts_dfs]):
+                raise ValueError("All DataFrames in pseudo_counts_dfs must be non-empty.")
+                
             
+            if kwargs.get('variance_tuple_dictionary', None) is not None:
+                variance_tuple_dictionary = kwargs['variance_tuple_dictionary']
+                if not isinstance(variance_tuple_dictionary, dict):
+                    raise ValueError("variance_tuple_dictionary must be a dictionary.")
+                for value in variance_tuple_dictionary.values():
+                    if not isinstance(value, tuple):
+                        raise ValueError(
+                            f"Variance tuple dictionary component '{key}' is not a tuple.")
+                print("Using user-provided variance tuple dictionary")
+            else:
+                # Use the default variance tuple dictionary
+                print("Using default variance tuple dictionary")
+                variance_tuple_dictionary = self.variance_tuple_dictionary
+                
+            # validate that the columns (facets) of the pseudo_counts_dfs can be found in the variance_tuple_dictionary tuples
+            all_facets_in_variance_tuples = set()
+            for component, variance_tuple in variance_tuple_dictionary.items():
+                if component != 'mean':
+                    all_facets_in_variance_tuples.update(variance_tuple)
+            for df in pseudo_counts_dfs:
+                if not set(df.columns).issubset(all_facets_in_variance_tuples):
+                    raise ValueError(f"DataFrame columns {df.columns} are not found in any variance component tuple. Valid facets are: {all_facets_in_variance_tuples}")
+            
+            # check for the variance dictionary
+            if kwargs.get('variance_dictionary', None) is not None:
+                variance_dictionary = kwargs['variance_dictionary']
+                if not isinstance(variance_dictionary, dict):
+                    raise ValueError("variance_dictionary must be a dictionary.")
+                for key, value in variance_dictionary.items():
+                    if not isinstance(value, (int, float)):
+                        raise ValueError(
+                            f"Variance component '{key}' is not a number.")
+                    if value < 0:
+                        raise ValueError(
+                            f"Variance component '{key}' is negative.")
+            else:
+                variance_dictionary = {idx: row['Variance'] for idx, row in self.anova_table.iterrows() if idx != 'mean'} # Exclude the mean row
+            
+            if set(variance_dictionary.keys()) != set(variance_tuple_dictionary.keys()):
+                raise ValueError(
+                    f"Variance dictionary keys do not match the variance tuple dictionary keys. Mismatched keys: {variance_dictionary.keys()} and {variance_tuple_dictionary.keys()}")
+            
+            # Enter the D-Study Loop
+            for pseudo_counts_df in pseudo_counts_dfs:
+                # create a label by turning the study_design dictionary into a string
+                label = ', '.join([f"{key}: {value}" for key, value in pseudo_counts_df.items()])
+                
+                # Use the helper function to process the D-Study scenario
+                # and add to the d_study_dict
+                self._process_d_study_helper(
+                    pseudo_counts_df=pseudo_counts_df,
+                    variance_tuple_dictionary=variance_tuple_dictionary,
+                    variance_dictionary=variance_dictionary,
+                    scenario_label=label,
+                )
         
     # ----------------- Confidence Intervals -----------------
     def calculate_confidence_intervals(self, alpha: float=0.05, **kwargs):
