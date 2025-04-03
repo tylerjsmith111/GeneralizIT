@@ -4,23 +4,25 @@
 
 GeneralizIT is a Python-based library designed for conducting Generalizability Theory (GT) analyses. The library supports multiple research designs and provides tools to calculate ANOVA tables, generalizability coefficients (G coefficients), and decision (D) studies.
 
-It is particularly useful for researchers and practitioners who work with multi-faceted designs and want to quantify the reliability and generalizability of their measurements.
+Generalizability Theory extends classical test theory by estimating multiple sources of error variance, providing a more flexible and detailed approach to reliability assessment. This makes it particularly useful for researchers and practitioners who work with multi-faceted designs and want to quantify the reliability and generalizability of their measurements across different facets (e.g., raters, items, occasions).
 
 ## Features
 
-- **Support for Various Designs:** Handles different research designs (e.g., crossed, nested).
+- **Support for Various Designs:** Handles different research designs (fully crossed, partially nested) with user-friendly syntax
+- **Robust to Data Issues:** Supports unbalanced designs and can handle missing data
 - **Automated Data Cleaning:** Prepares your data by dropping unnecessary columns and normalizing names.
-- **ANOVA Calculation:** Produces ANOVA tables specific to your design.
+- **ANOVA Calculation:** Produces ANOVA tables specific to your design using Analogous ANOVA based on Henderson's Method I
 - **G Coefficients:** Computes generalizability coefficients to assess reliability.
-- **D Studies:** Performs decision studies with customizable levels for facets.
-- **Summaries:** Provides concise summaries for ANOVA, G coefficients, and D studies.
+- **D Studies:** Performs decision studies with customizable levels for facets to optimize measurement protocols
+- **Summaries:** Provides concise summaries for ANOVA, G coefficients, and D studies
 
 ## Installation
 ```python
 pip install generalizit
 ```
+It is recommended to create a Python environment with Python 3.8 or higher.
 
-To use this library, the following dependencies are installed alongside the package:
+The following dependencies are installed alongside the package:
 
 - `pandas`
 - `numpy`
@@ -42,43 +44,36 @@ GT = GeneralizIT(data=formatted_df, input_str='Person x i x o', response='Respon
 
 ### Example Workflow
 
-1. **Calculate ANOVA**
-   ```python
-   GT.calculate_anova()
-   ```
-2. **Compute G Coefficients**
-   ```python
-   GT.g_coeffs()
-   ```
-3. **Perform a D Study**
-   ```python
-   GT.calculate_d_study(levels={'Person': None, 'i': [4, 8], 'o': [1, 2]})
-   ```
-4. **Calculate Confidence Intervals**
-   ```python
-   GT.calculate_confidence_intervals(alpha=0.05)
-   ```
-5. **View Summaries**
-   - ANOVA Summary:
-     ```python
-     GT.anova_summary()
-     ```
-   - G Coefficients Summary:
-     ```python
-     GT.g_coeff_summary()
-     ```
-   - D Study Summary:
-     ```python
-     GT.d_study_summary()
-     ```
-   - Confidence Intervals Summary:
-     ```python
-       GT.confidence_intervals_summary()
-       ```
+```python
+# Import the package
+from generalizit import GeneralizIT
+import pandas as pd
+
+# Load data
+data = pd.read_csv("your_data.csv")
+
+# Initialize with your research design
+GT = GeneralizIT(data=data, input_str='Person x i x o', response='Response')
+
+# 1. Calculate ANOVA
+GT.calculate_anova()
+GT.anova_summary()
+
+# 2. Compute G Coefficients
+GT.calculate_g_coefficients()
+GT.g_coefficients_summary()
+
+# 3. Perform a D Study with different facet levels
+GT.calculate_d_study(levels={'Person': [8], 'i': [4, 8], 'o': [1, 2]})
+GT.d_study_summary()
+
+# 4. Calculate Confidence Intervals
+GT.calculate_confidence_intervals(alpha=0.05)
+GT.confidence_intervals_summary()
+```
 
 ### Input Data Format
-
-The input data must be a pandas DataFrame where each column represents a facet, and one column is the response variable.
+The data should be structureda as a pandas DataFrame in a long format, where each row corresponds to a unique combination of the facets and the response variable.
 
  ```markdown
   | Person | i | o | Response |
@@ -129,7 +124,9 @@ Conversely, if the design was nested such as `person x (rater:item)`, raters are
 
 #### Synthetic Data from Brennan (2001)
 
-The package includes examples of synthetic data used to demonstrate the functionality of the library. You can adapt these examples to your own datasets.
+The package includes examples of synthetic data used to demonstrate the functionality of the library.
+These are located in the 'tests' directory. 
+You can adapt these examples to your own datasets.
 
 ## Research Design Syntax
 
@@ -141,14 +138,31 @@ The `input_str` parameter specifies the research design. Supported formats inclu
 ## Output
 
 - **ANOVA Table:** Provides variance component estimates for each facet.
-- **G Coefficients:** Estimates the reliability of measurements across facets.
-- **D Studies:** Offers predictions of generalizability for specified facet levels.
+- **G Coefficients:**
+  - Phi (Φ): Absolute coefficient for dependability
+  - Rho² (ρ²): Relative coefficient for generalizability
+- **D Studies:** Offers predictions of generalizability for specified facet levels to optimize measurement protocols
+- **Confidence Intervals:** Calculates confidence intervals for means of each facet.
+- **Summaries:** Concise summaries of ANOVA, G coefficients, D studies, and Confidence Intervals.
 
 ## Notes
 
-- Ensure your data is preprocessed to be balanced without missing data.
 - Include only the necessary facets and the response variable.
-- Column names should match those specified in the research design.
+- Column names should match those specified in the research design.\
+- For unbalanced designs, GeneralizIT will automatically use appropriate computational methods
+
+## Citation
+If you use GeneralizIT in your research, please cite the following paper:
+```bibtex
+@software{GeneralizIT,
+  author = {Smith, T.J. and Kline, T.J.B. and Kline, A.},
+  title = {GeneralizIT: A Python Solution for Generalizability Theory Computations},
+  year = {2025},
+  publisher = {GitHub},
+  url = {https://github.com/tylerjsmith111/GeneralizIT},
+  version = {0.1.0}
+}
+```
 
 ## License
 
