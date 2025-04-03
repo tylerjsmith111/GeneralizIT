@@ -17,8 +17,8 @@ class Design:
             self,
             data: pd.DataFrame,
             variance_tuple_dictionary: dict,
+            response_col: str,
             missing_data: bool = False,
-            response_col: str = 'Response'
     ):
         self.data: pd.DataFrame = data
         self.variance_tuple_dictionary: dict = variance_tuple_dictionary
@@ -185,8 +185,8 @@ class Design:
                 # Mean calculations if no effect variables are provided
                 else:
                     # Calculate the overall mean and count for the entire DataFrame
-                    mean = df['Response'].mean()
-                    count = df['Response'].count()
+                    mean = df[self.response_col].mean()
+                    count = df[self.response_col].count()
 
                     # Return the T value for the overall mean: (mean^2) * count
                     self.T[key] = (mean ** 2) * count
@@ -528,27 +528,31 @@ class Design:
             df: pd.DataFrame,
             facet_of_differentiation: str,
             variance_tup_dict: dict,
-            levels_df: pd.DataFrame
+            levels_df: pd.DataFrame, 
+            error_variance: Optional[bool] = False
     ) -> float:
         """
-        Calculate the phi-squared (φ²) coefficient for a given facet of differentiation.
-
+        Calculate the Phi (Φ) coefficient for a given facet of differentiation.
+    
         The phi-squared coefficient quantifies the proportion of total variance attributable
         to the specified facet of differentiation. It is calculated using the variance components
         and levels from the provided dictionaries.
-
+    
         Parameters:
             df (pd.DataFrame): A DataFrame containing variance components with a 'Variance' column.
                                It should include rows and columns corresponding to facets of differentiation.
-            facet_of_differentiation (str): The facet for which φ² is being calculated.
+            facet_of_differentiation (str): The facet for which Φ is being calculated.
             variance_tup_dict (dict): A dictionary where keys are facet names and values are tuples
                                       representing the facets that contribute to the variance.
-            levels_df (pd.DataFrame): A DataFrame where keys are facet names and values are their respective
+            levels_df (pd.DataFrame): A DataFrame where indices are facet names and values are their respective
                                 levels coefficient (1 / levels).
-
+            error_variance (bool, optional): If True, prints detailed information about
+                                    the error variances for Tau (τ) and Delta (Δ) during
+                                    the calculation. Default is False.
+    
         Returns:
-            float: The calculated φ² coefficient for the specified facet of differentiation.
-
+            float: The calculated Φ coefficient for the specified facet of differentiation.
+    
         Example:
             >>> df = pd.DataFrame({'Variance': [1.0, 0.5, 0.2]}, index=['p', 'i', 'mean'])
             >>> variance_tup_dict = {'p': ('p',), 'i': ('i',), 'mean': ()}
@@ -556,8 +560,6 @@ class Design:
             >>> self._calculate_phi_squared(df, 'p', variance_tup_dict, levels_dict)
             0.8333
         """
-        print(f"Facet of Differentiation: {facet_of_differentiation}")
-
         # Step 1: Extract the tuple for the facet of differentiation
         facet_of_differentiation_tup = variance_tup_dict[facet_of_differentiation]
 
@@ -570,16 +572,11 @@ class Design:
 
         tau = self._calculate_tau(df, tau_facets)
 
-        print(f"Tau (τ) facets: {tau_facets}")
-        print(f"Tau (τ): {tau}")
-
         # Step 3: Initialize the Delta List (error variances) and calculate the Delta (Δ) value
         Delta_facets = self._get_big_delta_facets(
             tau_facets=tau_facets,
             variance_tup_dict=variance_tup_dict
         )
-
-        print(f"Delta (Δ) facets: {Delta_facets}")
 
         Delta = self._calculate_big_delta(
             df=df,
@@ -588,14 +585,17 @@ class Design:
             levels_df=levels_df
         )
 
-        print(f"Delta (Δ): {Delta}")
-
-        # Step 4: Calculate φ² using the tau and Delta values
+        # Step 4: Calculate Φ using the tau and Delta values
         phi_squared = tau / (tau + Delta)
 
-        # # Debugging logs (optional, can be removed in production)
-        # print(f"Tau (τ): {tau}")
-        # print(f"Delta (Δ): {Delta}")
+        # Step 5: Print Tau and Delta values for deeper insight
+        if error_variance:
+            print(f"Φ error variances for Tau (τ) and Delta (Δ):")
+            print(f"\tTau (τ) facets: {tau_facets}")
+            print(f"\tTau (τ): {tau}")
+            print(f"\tDelta (Δ) facets: {Delta_facets}")
+            print(f"\tDelta (Δ): {Delta}")
+
 
         return phi_squared
 
@@ -655,35 +655,37 @@ class Design:
             facet_of_differentiation: str,
             variance_tup_dict: dict,
             levels_df: pd.DataFrame,
+            error_variance: Optional[bool] = False
     ) -> float:
         """
-            Calculate the rho-squared (ρ²) coefficient for a given facet of differentiation.
-
-            The rho-squared coefficient measures the proportion of total variance attributable to
-            the specified facet of differentiation, considering only facets nested within the
-            differentiation tuple.
-
-            Parameters:
-                df (pd.DataFrame): A DataFrame containing variance components with a 'Variance' column.
-                                   It should include rows and columns corresponding to facets of differentiation.
-                facet_of_differentiation (str): The facet for which ρ² is being calculated.
-                variance_tup_dict (dict): A dictionary where keys are facet names and values are tuples
-                                          representing the facets that contribute to the variance.
-                levels_df (pd.DataFrame): A DataFrame where indices are facet names and values are their respective
-                                    levels coefficient (1 / levels).
-
-            Returns:
-                float: The calculated ρ² coefficient for the specified facet of differentiation.
-
-            Example:
-                >>> df = pd.DataFrame({'Variance': [1.0, 0.5, 0.2]}, index=['p', 'i', 'mean'])
-                >>> variance_tup_dict = {'p': ('p',), 'i': ('p', 'i'), 'mean': ()}
-                >>> levels_dict = pd.DataFrame({'p': [0.5, 0.2, 1.0], 'i': [0.2, 0.5, 1.0], 'mean': [1.0, 1.0, 1.0]})
-                >>> self._calculate_rho_squared(df, 'p', variance_tup_dict, levels_dict)
-                0.8333
-            """
-        print(f"ρ² Facet of Differentiation: {facet_of_differentiation}")
-
+        Calculate the rho-squared (ρ²) coefficient for a given facet of differentiation.
+    
+        The rho-squared coefficient measures the proportion of total variance attributable to
+        the specified facet of differentiation, considering only facets nested within the
+        differentiation tuple.
+    
+        Parameters:
+            df (pd.DataFrame): A DataFrame containing variance components with a 'Variance' column.
+                               It should include rows and columns corresponding to facets of differentiation.
+            facet_of_differentiation (str): The facet for which ρ² is being calculated.
+            variance_tup_dict (dict): A dictionary where keys are facet names and values are tuples
+                                      representing the facets that contribute to the variance.
+            levels_df (pd.DataFrame): A DataFrame where indices are facet names and values are their respective
+                                levels coefficient (1 / levels).
+            error_variance (bool, optional): If True, prints detailed information about
+                                    the error variances for Tau (τ) and delta (δ) during
+                                    the calculation. Default is False.
+    
+        Returns:
+            float: The calculated ρ² coefficient for the specified facet of differentiation.
+    
+        Example:
+            >>> df = pd.DataFrame({'Variance': [1.0, 0.5, 0.2]}, index=['p', 'i', 'mean'])
+            >>> variance_tup_dict = {'p': ('p',), 'i': ('p', 'i'), 'mean': ()}
+            >>> levels_dict = pd.DataFrame({'p': [0.5, 0.2, 1.0], 'i': [0.2, 0.5, 1.0], 'mean': [1.0, 1.0, 1.0]})
+            >>> self._calculate_rho_squared(df, 'p', variance_tup_dict, levels_dict)
+            0.8333
+        """
         # Step 1: Extract the tuple for the facet of differentiation
         facet_of_differentiation_tup = variance_tup_dict[facet_of_differentiation]
 
@@ -695,9 +697,6 @@ class Design:
         )
 
         tau = self._calculate_tau(df, tau_facets)
-
-        print(f"Tau Facets: {tau_facets}")
-        print(f"Tau (τ): {tau}")
 
         # Step 3: Get the facets for the delta calculation
         little_delta_facets = self._get_little_delta_facets(
@@ -715,20 +714,27 @@ class Design:
             levels_df=levels_df
         )
 
-        # print(f"Delta Facets: {delta_facets}")
-        print(f"Delta (δ): {delta}")
-
         # Step 4: Calculate ρ² using tau and delta values
         rho_squared = tau / (tau + delta)
 
-        # # Debugging logs (optional, can be removed in production)
-        # print(f"Tau (τ): {tau}")
-        # print(f"delta (δ): {delta}")
+        # Step 5: Print Tau (τ) and delta (δ) values for deeper insight
+        if error_variance:
+            print(f"ρ² error variances: Tau (τ) and Delta (δ)")
+            print(f"\tTau (τ) facets: {tau_facets}")
+            print(f"\tTau (τ): {tau}")
+            print(f"\tDelta (δ) facets: {little_delta_facets}")
+            print(f"\tDelta (δ): {delta}")
 
         return rho_squared
 
 
-    def _calculate_g_coeffs(self, variance_df: pd.DataFrame, levels_df: pd.DataFrame, variance_tup_dict: dict) -> pd.DataFrame:
+    def _calculate_g_coeffs(
+        self, 
+        variance_df: pd.DataFrame, 
+        levels_df: pd.DataFrame, 
+        variance_tup_dict: dict,
+        error_variance: Optional[bool] = False
+    ) -> pd.DataFrame:
         """
         Calculate the G-coefficients for each facet of differentiation.
         """
@@ -742,16 +748,27 @@ class Design:
         for facet in variance_df.index:
             if facet == 'mean' or facet == largest_facet:
                 continue
-
+            
+            if error_variance:
+                print(f"{'-' * 20} \nCalculating Φ and ρ² coefficients for facet of differentiation: {facet}\n{'-' * 20}")
+                
             # Calculate the phi-squared coefficient
-            g_coeffs_df.at[facet, 'phi^2'] = self._calculate_phi_squared(variance_df, facet_of_differentiation=facet,
-                                                                   variance_tup_dict=variance_tup_dict,
-                                                                   levels_df=levels_df)
+            g_coeffs_df.at[facet, 'phi^2'] = self._calculate_phi_squared(
+                variance_df, 
+                facet_of_differentiation=facet,
+                variance_tup_dict=variance_tup_dict,
+                levels_df=levels_df,
+                error_variance=error_variance
+            )
 
             # Calculate the rho-squared coefficient
-            g_coeffs_df.at[facet, 'rho^2'] = self._calculate_rho_squared(variance_df, facet_of_differentiation=facet,
-                                                                   variance_tup_dict=variance_tup_dict,
-                                                                   levels_df=levels_df)
+            g_coeffs_df.at[facet, 'rho^2'] = self._calculate_rho_squared(
+                variance_df, 
+                facet_of_differentiation=facet,
+                variance_tup_dict=variance_tup_dict,
+                levels_df=levels_df,
+                error_variance=error_variance
+            )
 
         # Drop any columns that are not 'phi^2' or 'rho^2'
         g_coeffs_df = g_coeffs_df[['phi^2', 'rho^2']]
@@ -783,6 +800,10 @@ class Design:
                     If not provided, self.variance_tuple_dictionary is used.
                 - d_study (bool): If True, returns the G-coefficients DataFrame directly
                     instead of storing it in self.g_coeffs_table. Default is False.
+                - error_variance (bool): If True, prints detailed information about
+                    the error variances for Tau (τ), Delta (Δ), and delta (δ) during
+                    the calculation of phi-squared and rho-squared coefficients.
+                    Default is False.
         
         Returns:
             pd.DataFrame or None: If d_study=True, returns the G-coefficients DataFrame directly.
@@ -801,6 +822,7 @@ class Design:
             - The 'mean' component is removed from calculations
             - The method produces a DataFrame with rho^2 and phi^2 values for each facet
         """
+        # ---- Variance Tuple Dictionary kwargs ----
         # Set the variance tuple dictionary (in case the design has been updated)
         if 'variance_tuple_dictionary' in kwargs:
             variance_tup_dict = kwargs['variance_tuple_dictionary']
@@ -818,6 +840,7 @@ class Design:
             
         variance_tup_dict.pop('mean', None)
         
+        # ---- Variance kwargs ----
         # Process the variance dictionary
         if 'variance_dictionary' in kwargs:
             variance_dict = kwargs['variance_dictionary']
@@ -847,8 +870,7 @@ class Design:
             print("Using ANOVA Table Variance Dictionary for Generalizability Coefficients")
             variance_df = self.anova_table.copy()
             
-        
-        # Process the variance dictionary
+        # Process the variance dictionary and check for matching keys in the variance tuple dictionary
         variance_df = variance_df.drop('mean', axis=0, errors='ignore')
         variance_df = variance_df.drop('mean', axis=1, errors='ignore')
         if (variance_df['Variance'] < 0).any():
@@ -858,7 +880,8 @@ class Design:
         # Check that variance DataFrame indices match the variance tuple dictionary keys
         if set(variance_df.index) != set(variance_tup_dict.keys()):
             raise ValueError(f"ANOVA table indices do not match the variance tuple dictionary keys. Mismatched indices: {self.anova_table.index.tolist()} and {variance_tup_dict.keys()}")
-                    
+        
+        # ---- Level Coefficients kwargs ----            
         # Check if the levels coefficients have been calculated
         if 'levels_df' in kwargs:
             levels_df = kwargs['levels_df']
@@ -885,16 +908,29 @@ class Design:
             
             levels_df = self.levels_coeffs
 
-        # Store the G-coefficients in a table
+        # ---- Boolean Kwargs ----
+        # Check if error_variance is provided and set to True
+        # error_variance flag is used to print the error variances for Tau (τ), Delta (Δ), and delta (δ)
+        error_variance = kwargs.get('error_variance', False)  # Default to False if not provided
+        if not isinstance(error_variance, bool):
+            raise ValueError("error_variance must be a boolean value.")
+        
+        # Return the G coefficients in a DataFrame if d_study is True
+        # Otherwise, store them in the class attribute
         d_study = kwargs.get('d_study', False)  # Default to False if not provided
-
         if not isinstance(d_study, bool):
             raise ValueError("d_study must be a boolean value.")
 
         # Calculate G-coefficients
-        result = self._calculate_g_coeffs(variance_df=variance_df, levels_df=levels_df, variance_tup_dict=variance_tup_dict)
+        result = self._calculate_g_coeffs(
+            variance_df=variance_df, 
+            levels_df=levels_df, 
+            variance_tup_dict=variance_tup_dict,
+            error_variance=error_variance
+        )
 
-        # Either return the result (in the case of a D-Study) or store it in the class attribute to maintain compatibility
+        # Either return the result (in the case of a D-Study)
+        # Or store it in the class attribute to maintain compatibility
         if d_study:
             return result
         else:
@@ -985,13 +1021,16 @@ class Design:
         """
         
         # Check if a d_study_design dictionary is provided
+        # If not, check if pseudo_counts_dfs is provided
+        # If neither is provided, raise an error
         if d_study_design is not None:
+            # ---- Balanced D Study Design ----
             print("Performing Balanced D-Study Design for the provided designs")
             if kwargs.get('pseudo_counts_dfs', None) is not None:
                 raise ValueError("D-Study design must be provided as a dictionary OR pseudo_counts_dfs: list[pd.DataFrame] must be provided.")
-    
             if not isinstance(d_study_design, dict):
                 raise ValueError("D-Study design must be a dictionary.")
+            
             # Check that each key in d_study_design appears in at least one tuple in variance_tuple_dictionary
             all_facets_in_variance_tuples = set()
             for component, variance_tuple in self.variance_tuple_dictionary.items():
@@ -1001,6 +1040,7 @@ class Design:
             unknown_facets = set(d_study_design.keys()) - all_facets_in_variance_tuples
             if unknown_facets:
                 raise ValueError(f"Facets {unknown_facets} in d_study_design are not found in any variance component tuple. Valid facets are: {all_facets_in_variance_tuples}")
+            
             # Check that the values are lists of integers
             for key, value in d_study_design.items():
                 if not isinstance(value, list):
@@ -1010,10 +1050,8 @@ class Design:
                 if any([val <= 0 for val in value]):
                     raise ValueError(f"All levels for facet {key} must be greater than 0.")
                 
-            # iterate through potential study designs
-            study_designs = []
-            
             # Get all possible combinations of levels using itertools.product
+            study_designs = []
             facets = list(d_study_design.keys())
             level_lists = [d_study_design[facet] for facet in facets]
             
@@ -1029,7 +1067,10 @@ class Design:
                 
                 # Create the pseudo count df
                 # Use the variance tuple dictionary from the G study's design
-                pseudo_counts_df = create_pseudo_df(d_study=study_design, variance_tup_dict=self.variance_tuple_dictionary)
+                pseudo_counts_df = create_pseudo_df(
+                    d_study=study_design, 
+                    variance_tup_dict=self.variance_tuple_dictionary
+                )
                                 
                 # Use the helper function to process the D-Study scenario
                 # and add to the d_study_dict
@@ -1038,9 +1079,10 @@ class Design:
                     variance_tuple_dictionary=self.variance_tuple_dictionary,
                     scenario_label=label,
                 )
-            
         else:
-            # Unbalanced or missing D Study Designs must input manual pseudo counts
+            # ---- Advanced D Study Design ----
+            # Unbalanced, missing, or change in study design type (i.e. crossed to nested)
+            # Must input manual pseudo counts df
             print("Performing Advanced D-Study Design for the provided designs")
             pseudo_counts_dfs = kwargs.get('pseudo_counts_dfs', None)
             if pseudo_counts_dfs is None:
@@ -1052,7 +1094,13 @@ class Design:
             if any([df.empty for df in pseudo_counts_dfs]):
                 raise ValueError("All DataFrames in pseudo_counts_dfs must be non-empty.")
                 
-            
+            # ---- Variance Tuple Dictionary kwargs ----
+            # If study design has been changed from crossed to nested,
+            # set the variance tuple dictionary according to the new design
+            # For example, if the design was Y = µ + p + i + pi
+            # and now it is Y = µ + p + i:p (crossed -> nested)
+            # A new variance tuple dictionary should be provided by the USER removing
+            # {'i': ('i',), 'pi': ('p', 'i')} and adding {'i:p': ('p', 'i')}
             if kwargs.get('variance_tuple_dictionary', None) is not None:
                 variance_tuple_dictionary = kwargs['variance_tuple_dictionary']
                 if not isinstance(variance_tuple_dictionary, dict):
@@ -1063,7 +1111,7 @@ class Design:
                             f"Variance tuple dictionary component '{key}' is not a tuple.")
                 print("Using user-provided variance tuple dictionary")
             else:
-                # Use the default variance tuple dictionary
+                # If design has not changed, use the default variance tuple dictionary
                 print("Using default variance tuple dictionary")
                 variance_tuple_dictionary = self.variance_tuple_dictionary
                 
@@ -1076,7 +1124,14 @@ class Design:
                 if not set(df.columns).issubset(all_facets_in_variance_tuples):
                     raise ValueError(f"DataFrame columns {df.columns} are not found in any variance component tuple. Valid facets are: {all_facets_in_variance_tuples}")
             
-            # check for the variance dictionary
+            # ---- Variance kwargs ----
+            # Check if the variance dictionary is provided
+            # Variance dictionary should be provided if the study design has changed
+            # As in the variance_tuple_dictionary example above
+            # {'i': var_i, 'pi': var_pi} should be removed and
+            # a combined variance term, {'i:p': var_i:p} should be added
+            # If the variance dictionary is not provided, use the default variance dictionary
+            # from the ANOVA table
             if kwargs.get('variance_dictionary', None) is not None:
                 variance_dictionary = kwargs['variance_dictionary']
                 if not isinstance(variance_dictionary, dict):
@@ -1088,9 +1143,15 @@ class Design:
                     if value < 0:
                         raise ValueError(
                             f"Variance component '{key}' is negative.")
+                print("Using user-provided variance dictionary")
             else:
+                if self.anova_table.empty:
+                    raise ValueError("Please calculate the ANOVA table using the calculate_anova method before calculating the confidence intervals.")
+                print("Using ANOVA Table Variance Dictionary for Generalizability Coefficients")
                 variance_dictionary = {idx: row['Variance'] for idx, row in self.anova_table.iterrows() if idx != 'mean'} # Exclude the mean row
             
+            # Check if the variance components are equal to the variance components
+            # Described by the variance tuple dictionary
             if set(variance_dictionary.keys()) != set(variance_tuple_dictionary.keys()):
                 raise ValueError(
                     f"Variance dictionary keys do not match the variance tuple dictionary keys. Mismatched keys: {variance_dictionary.keys()} and {variance_tuple_dictionary.keys()}")
@@ -1302,7 +1363,7 @@ class Design:
         """
         # Adjust the column headers for prettier printing
         headers = [''] + [col for col in self.g_coeffs_table.columns]
-        symbol_map = {"rho^2": "ρ²", "phi^2": "φ²"}
+        symbol_map = {"rho^2": "ρ²", "phi^2": "Φ"}
         adjusted_headers = [symbol_map.get(header, header) for header in headers]
 
         self._summary_helper("G Coefficients", adjusted_headers, self.g_coeffs_table)
@@ -1318,14 +1379,14 @@ class Design:
             # Adjust the column headers for prettier printing
             # Add a blank space for the index column
             headers = [''] + [col for col in d_study_df.columns]
-            symbol_map = {"rho^2": "ρ²", "phi^2": "φ²"}
+            symbol_map = {"rho^2": "ρ²", "phi^2": "Φ"}
             adjusted_headers = [symbol_map.get(header, header) for header in headers]
 
             self._summary_helper(title, adjusted_headers, d_study_df)
                 
     ## POTENTIAL TODO: Add a D-Study visualization function to visualize the G-Coefficients for different scenarios
 
-    def confidence_interval_summary(self):
+    def confidence_intervals_summary(self):
         """
         Print a summary of the confidence intervals for each facet.
         """
