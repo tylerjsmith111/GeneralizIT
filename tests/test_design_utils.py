@@ -1,20 +1,53 @@
 import pytest
 from generalizit.design_utils import match_research_design, parse_facets
 
-@pytest.mark.parametrize("input_str, expected, design_num", [
-    ("persons x raters", {'facet_1': 'persons', 'facet_2': 'raters'}, "crossed"),
-    ("items:persons", {'i': 'items', 'p': 'persons'}, 2),
-    ("raters x items x helpers", {'facet_1': 'raters', 'facet_2': 'items', 'facet_3': 'helpers'}, "crossed"),
-    ("raters x (persons:items)", {'p': 'raters', 'i': 'persons', 'h': 'items'}, 4),
-    ("(items:persons) x helpers", {'i': 'items', 'p': 'persons', 'h': 'helpers'}, 5),
-    ("items:(persons x helpers)", {'i': 'items', 'p': 'persons', 'h': 'helpers'}, 6),
-    ("(doctors x items): raters", {'i': 'doctors', 'h': 'items', 'p': 'raters'}, 7),
-    ("xylophones:helpers:persons", {'i': 'xylophones', 'h': 'helpers', 'p': 'persons'}, 8)
+@pytest.mark.utils
+@pytest.mark.parametrize("input_str, expected_num", [
+    ("persons x raters", "crossed"),
+    ("items:persons", 2),
+    ("raters x items x helpers", "crossed"),
+    ("raters x (persons:items)", 4),
+    ("(items:persons) x helpers", 5),
+    ("items:(persons x helpers)", 6),
+    ("(doctors x items): raters", 7),
+    ("xylophones:helpers:persons", 8)
 ])
+def test_match_research_design(input_str, expected_num):
+    """Test function to verify design pattern matching"""
+    num_result, _ = match_research_design(input_str)
+    assert num_result == expected_num, f"Failed for {input_str}. Got {num_result}, expected {expected_num}"
 
-def test_parse_facets(input_str, expected, design_num):
-    """Test function to verify facet parsing for all design patterns"""
+@pytest.mark.utils
+@pytest.mark.parametrize("input_str, expected_tuples", [
+    ("persons x raters", {
+        "persons": ("persons",),
+        "raters": ("raters",),
+        "persons x raters": ("persons", "raters"),
+        "mean": ()
+    }),
+    ("items:persons", {
+        "persons": ("persons",),
+        "items:persons": ("items", "persons"),
+        "mean": ()
+    }),
+    ("raters x (items:helpers)", {
+        "raters": ("raters",),
+        "helpers": ("helpers",),
+        "items:helpers": ("items", "helpers"),
+        "raters x helpers": ("raters", "helpers"),
+        "raters x (items:helpers)": ("raters", "items", "helpers"),
+        "mean": ()
+    })
+])
+def test_parse_facets(input_str, expected_tuples):
+    """Test function to verify variance tuple dictionary creation"""
     num_result, facets = match_research_design(input_str)
-    result = parse_facets(design_facets=facets, design_num=num_result)
-    assert num_result == design_num, f"Failed for {input_str}. Got {num_result}, expected {design_num}"
-    assert result == expected, f"Failed for {input_str}. Got {result}, expected {expected}"
+    result = parse_facets(design_num=num_result, design_facets=facets)
+    
+    # Check that all expected keys are present
+    for key in expected_tuples:
+        assert key in result, f"Missing key '{key}' in result"
+    
+    # Check that all expected tuples match
+    for key, value in expected_tuples.items():
+        assert result[key] == value, f"For key '{key}', expected {value}, got {result[key]}"

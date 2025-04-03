@@ -1,12 +1,36 @@
+# --------
+# This file uses synthetic dataset #3 from
+# @book{brennan_generalizability_2001,
+# 	address = {New York, NY},
+# 	author = {Brennan, Robert L.},
+# 	publisher = {Springer New York},
+# 	title = {Generalizability {Theory}},
+# 	year = {2001}}
+# --------
+
+
 import pytest
 import pandas as pd
-from generalizit.designcrossed import DesignCrossed
-from tests.testdesign import TestDesign
+from tests.design_test_base import DesignTestBase
+from generalizit.design import Design
+from generalizit.design_utils import match_research_design, parse_facets, validate_research_design
+
 
 @pytest.fixture
 def test_design3():
-    # synthetic dataset for person x o x i
+    # synthetic dataset for person x i x o
     # Brennan (2001) Synthetic Data # 3
+    
+    design_str = "person x i x o"
+    design_num, facets = match_research_design(design_str)
+    
+    # Validate the research design
+    try:
+        validate_research_design(design_num)
+    except ValueError as e:
+        raise ValueError(e)
+
+    variance_tuple_dictionary = parse_facets(design_num=design_num, design_facets=facets)
 
     data = {
         'Person': range(1, 11),
@@ -45,23 +69,6 @@ def test_design3():
     # Convert to DataFrame
     synthetic_data = pd.DataFrame(new_data)
 
-    levels_dict = {
-        'person': 10,
-        'i': 4,
-        'o': 2
-    }
-
-    deg_freedom_dict = {
-        'person': 9,
-        'i': 3,
-        'o': 1,
-        'person x i': 27,
-        'person x o': 9,
-        'i x o': 3,
-        'person x i x o': 27,
-        'Total': 79
-    }
-
     t_values_dict = {
         'person': 2288.25,
         'i': 2263.50,
@@ -70,26 +77,6 @@ def test_design3():
         'person x o': 2303.50,
         'i x o': 2274.20,
         'person x i x o': 2430.00
-    }
-
-    ss_values_dict = {
-        'person': 62.20,
-        'i': 37.45,
-        'o': 3.20,
-        'person x i': 56.30,
-        'person x o': 12.05,
-        'i x o': 7.50,
-        'person x i x o': 25.25
-    }
-
-    ms_values_dict = {
-        'person': 6.9111,
-        'i': 12.4833,
-        'o': 3.2000,
-        'person x i': 2.0852,
-        'person x o': 1.3383,
-        'i x o': 2.5000,
-        'person x i x o': 0.9352
     }
 
     variances_dict = {
@@ -109,14 +96,49 @@ def test_design3():
     phi_dict = {
         'person': 0.55
     }
+    
+    # ---- Unused ----
+    ss_values_dict = {
+        'person': 62.20,
+        'i': 37.45,
+        'o': 3.20,
+        'person x i': 56.30,
+        'person x o': 12.05,
+        'i x o': 7.50,
+        'person x i x o': 25.25
+    }
 
-    return TestDesign(
-        design=DesignCrossed(synthetic_data),
-        levels_dict=levels_dict,
-        deg_freedom_dict=deg_freedom_dict,
+    ms_values_dict = {
+        'person': 6.9111,
+        'i': 12.4833,
+        'o': 3.2000,
+        'person x i': 2.0852,
+        'person x o': 1.3383,
+        'i x o': 2.5000,
+        'person x i x o': 0.9352
+    }
+    
+    levels_dict = {
+        'person': 10,
+        'i': 4,
+        'o': 2
+    }
+
+    deg_freedom_dict = {
+        'person': 9,
+        'i': 3,
+        'o': 1,
+        'person x i': 27,
+        'person x o': 9,
+        'i x o': 3,
+        'person x i x o': 27,
+        'Total': 79
+    }
+
+    return DesignTestBase(
+        design=Design(data=synthetic_data, variance_tuple_dictionary=variance_tuple_dictionary, response_col='Response'),
+        levels_df=None,
         t_values_dict=t_values_dict,
-        ss_values_dict=ss_values_dict,
-        ms_values_dict=ms_values_dict,
         variances_dict=variances_dict,
         rho_dict=rho_dict,
         phi_dict=phi_dict
