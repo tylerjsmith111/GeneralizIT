@@ -76,8 +76,7 @@ class GeneralizIT:
                 data = data.rename(columns={col: re.sub(r"\s+", " ", col.strip().lower())})  # Normalize the column names
         
         # Combine factors and response variable into a single list
-        variables = list(facets) + response
-        
+        variables = list(facets) + [response]
         # Create a list of columns to drop
         drop_cols = [col for col in data.columns if col not in variables]
         
