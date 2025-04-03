@@ -1,3 +1,14 @@
+# --------
+# This file uses synthetic dataset #3 from
+# @book{brennan_generalizability_2001,
+# 	address = {New York, NY},
+# 	author = {Brennan, Robert L.},
+# 	publisher = {Springer New York},
+# 	title = {Generalizability {Theory}},
+# 	year = {2001}}
+# --------
+
+
 import pytest
 import pandas as pd
 from tests.design_test_base import DesignTestBase

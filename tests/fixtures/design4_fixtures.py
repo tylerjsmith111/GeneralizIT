@@ -1,3 +1,13 @@
+# --------
+# This file uses synthetic dataset #4 from
+# @book{brennan_generalizability_2001,
+# 	address = {New York, NY},
+# 	author = {Brennan, Robert L.},
+# 	publisher = {Springer New York},
+# 	title = {Generalizability {Theory}},
+# 	year = {2001}}
+# --------
+
 import pytest
 import pandas as pd
 from generalizit.design_utils import match_research_design, parse_facets, validate_research_design

@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 from itertools import product, combinations
 from scipy.stats import norm
-import copy
 from typing import Union, Optional
 from generalizit.g_theory_utils import create_pseudo_df
 
