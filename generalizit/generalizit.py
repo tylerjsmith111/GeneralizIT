@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 import numpy as np
 import pandas as pd
 from generalizit.design import Design
@@ -35,7 +35,7 @@ class GeneralizIT:
         >>> gt.calculate_g_coefficients()
         >>> gt.g_coefficients_summary()
     """
-    def __init__(self, data: pd.DataFrame, design_str: str, response: str):
+    def __init__(self, data: pd.DataFrame, design_str: str, response: str, variance_tuple_dictionary: Optional[Dict[str, Tuple[str, ...]]] = None):
         # Initialize the GeneralizIT class
         # First we parse the input string to get the research design
         design_num, facets = match_research_design(design_str)
@@ -46,7 +46,9 @@ class GeneralizIT:
         except ValueError as e:
             raise ValueError(e)
 
-        variance_tuple_dictionary = parse_facets(design_num=design_num, design_facets=facets)
+        # If a variance tuple dictionary is not provided, create one
+        if variance_tuple_dictionary is None:
+            variance_tuple_dictionary = parse_facets(design_num=design_num, design_facets=facets)
 
         data, missing_data = self._clean_data(data=data, facets=facets, response=response)
 
