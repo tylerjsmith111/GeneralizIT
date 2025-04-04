@@ -620,8 +620,9 @@ class Design:
                     len(tup) < len(facet_of_differentiation_tup) or
                     facet in tau_facets):
                 continue
-
-            print(f"delta (δ) Facet: {facet}, Tuple: {tup}")
+            
+            # Debugging output
+            # print(f"delta (δ) Facet: {facet}, Tuple: {tup}")
 
             # Check if any elements of the differentiation tuple are in the current tuple
             if any(f in tup for f in facet_of_differentiation_tup):
