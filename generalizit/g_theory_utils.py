@@ -14,13 +14,12 @@ def create_pseudo_df(d_study: dict, variance_tup_dict: dict) -> pd.DataFrame:
     Returns:
         pd.DataFrame: A pseudo DataFrame with all possible combinations of facet levels.
     """
-        
-    print(f"Variance Tuple Dictionary: {variance_tup_dict}")
-    
     # Identify independent variables (facets without ":" or " x ")
     independent_vars = [var for var in variance_tup_dict.keys() if ":" not in var and " x " not in var]
     
-    print(f"Independent Variables: {independent_vars}")
+    # Debugging: Print the unnested variables
+    # print(f"Variance Tuple Dictionary: {variance_tup_dict}")
+    # print(f"Unnested Variables: {independent_vars}")
     
     
     # Identify dependent variables and their dependencies
