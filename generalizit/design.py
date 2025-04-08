@@ -471,15 +471,22 @@ class Design:
 
         # Check for interactions if the facet tuple has more than one element
         if len(facet_of_differentiation_tup) > 1:
-            # Generate all potential lower-order subsets of the facet tuple
-            for i in range(len(facet_of_differentiation_tup) - 1, 0, -1):
-                # Generate all combinations of the tuple elements of length i
-                combos = {frozenset(combo) for combo in combinations(facet_of_differentiation_tup, i)}
+            # check if each facet in the tuple is a primary subscript (Cardinet et al. 1981, Extension of Generalizability Theory)
+            for facet in facet_of_differentiation_tup:
+                # if the facet is in a variance tuple of length 1, it is a primary subscript
+                if facet in variance_tup_dict and len(variance_tup_dict[facet]) == 1:
+                    tau_facets.append(facet)
+            
+            
+            # # Generate all potential lower-order subsets of the facet tuple
+            # for i in range(len(facet_of_differentiation_tup) - 1, 0, -1):
+            #     # Generate all combinations of the tuple elements of length i
+            #     combos = {frozenset(combo) for combo in combinations(facet_of_differentiation_tup, i)}
 
-                # Check if these combinations exist in the variance dictionary
-                for key, variance_tup in variance_tup_dict.items():
-                    if len(variance_tup) == i and frozenset(variance_tup) in combos:
-                        tau_facets.append(key)
+            #     # Check if these combinations exist in the variance dictionary
+            #     for key, variance_tup in variance_tup_dict.items():
+            #         if len(variance_tup) == i and frozenset(variance_tup) in combos:
+            #             tau_facets.append(key)
 
         return tau_facets
 
@@ -1319,7 +1326,7 @@ class Design:
             self.confidence_intervals[key] = ci_df
     
     # ----------------- Summary Functions -----------------    
-    def _summary_helper(self, title:str, headers: list[str], table: pd.DataFrame):
+    def _summary_helper(self, title: str, headers: list[str], table: pd.DataFrame):
         """
         Helper function to print a summary table.
         """
@@ -1327,15 +1334,32 @@ class Design:
         print(f"{title:^20}")
         print(f"{'-' * 20}")
 
-        # Print the column headers
-        print(" ".join(f"{header:<15}" for header in headers))
+        # Get column widths
+        std_width = 15
+        header_widths = []
 
-        # Print each row in the table with its string index
+        # Calculate widths: first one is for index, then for each column
+        max_idx = max(len(str(idx)) for idx in table.index)
+        idx_width = max(len(headers[0]), max_idx, std_width)
+        header_widths.append(idx_width)
+
+        for i, col in enumerate(table.columns):
+            max_col_val_len = max(len(f"{val:.4f}") for val in table[col])
+            header_widths.append(max(len(headers[i + 1]), max_col_val_len, std_width))
+
+        # Print the headers
+        formatted_header = " ".join(f"{header:<{width}}" for header, width in zip(headers, header_widths))
+        print(formatted_header)
+
+        # Print each row
         for idx, row in table.iterrows():
-            values = [f"{idx:<15}"] + [f"{row[col]:<15}" for col in table.columns]
-            print(" ".join(values))
+            row_str = f"{str(idx):<{header_widths[0]}}"
+            for i, col in enumerate(table.columns):
+                row_str += f" {row[col]:<{header_widths[i + 1]}.4f}"
+            print(row_str)
 
         print('\n')
+
 
     def anova_summary(self):
         """

@@ -33,6 +33,12 @@ def test_g_coefficients(test_design3):
     
 @pytest.mark.crossed
 @pytest.mark.balanced
+def test_d_coefficients(test_design3):
+    """Tests the calculation of G coefficients."""
+    test_design3.set_tolerance(0.01).test__calculate_d_study(d_study_design={'person': [10], 'i': [4], 'o': [2]}, utils=True)
+    
+@pytest.mark.crossed
+@pytest.mark.balanced
 def test_confidence_intervals(test_design3):
     """Tests the calculation of confidence intervals."""
     test_design3.set_tolerance(0.01).test__calculate_confidence_intervals()

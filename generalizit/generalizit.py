@@ -3,7 +3,7 @@ from typing import Tuple, Optional, Dict
 import numpy as np
 import pandas as pd
 from generalizit.design import Design
-from generalizit.design_utils import parse_facets, match_research_design, validate_research_design
+from generalizit.design_utils import parse_facets, match_research_design, validate_research_design, get_facets_from_variance_tuple_dictionary
 import warnings
 
 class GeneralizIT:
@@ -37,18 +37,26 @@ class GeneralizIT:
     """
     def __init__(self, data: pd.DataFrame, design_str: str, response: str, variance_tuple_dictionary: Optional[Dict[str, Tuple[str, ...]]] = None):
         # Initialize the GeneralizIT class
-        # First we parse the input string to get the research design
-        design_num, facets = match_research_design(design_str)
-        
-        # Validate the research design
-        try:
-            validate_research_design(design_num)
-        except ValueError as e:
-            raise ValueError(e)
 
         # If a variance tuple dictionary is not provided, create one
         if variance_tuple_dictionary is None:
+            # First we parse the input string to get the research design
+            design_num, facets = match_research_design(design_str)
+            
+            # Validate the research design
+            try:
+                validate_research_design(design_num)
+            except ValueError as e:
+                raise ValueError(e)
+            
             variance_tuple_dictionary = parse_facets(design_num=design_num, design_facets=facets)
+        else:
+            # Validate the provided variance tuple dictionary
+            if not isinstance(variance_tuple_dictionary, dict):
+                raise ValueError("variance_tuple_dictionary must be a dictionary.")
+            if not all(isinstance(k, str) and isinstance(v, tuple) for k, v in variance_tuple_dictionary.items()):
+                raise ValueError("variance_tuple_dictionary must contain string keys and tuple values.")
+            facets = get_facets_from_variance_tuple_dictionary(variance_tuple_dictionary)
 
         data, missing_data = self._clean_data(data=data, facets=facets, response=response)
 

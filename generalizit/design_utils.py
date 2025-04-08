@@ -319,3 +319,23 @@ def parse_facets(design_num: Union[int, str], design_facets: list) -> Dict[str, 
 
     return variance_tuple_dict
 
+def get_facets_from_variance_tuple_dictionary(
+        variance_tuple_dict: Dict[str, tuple]
+) -> List[str]:
+    """
+    Extracts the facets from a variance tuple dictionary.
+
+    Parameters:
+        variance_tuple_dict (Dict[str, tuple]): A dictionary where keys are variance component names (strings),
+                                                 and values are tuples of the corresponding facets.
+
+    Returns:
+        List[str]: A list of unique facets extracted from the variance tuple dictionary.
+    """
+    facets = set()
+    for key, value in variance_tuple_dict.items():
+        if key != 'mean':
+            facets.update(value)
+    
+    return list(facets)
+

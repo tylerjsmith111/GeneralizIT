@@ -1,78 +1,97 @@
 import pandas as pd
+from typing import Dict, Union, List, Tuple, Any
 import itertools
 
-def create_pseudo_df(d_study: dict, variance_tup_dict: dict) -> pd.DataFrame:
+def create_pseudo_df(d_study: Dict[str, int], variance_tup_dict: Dict[str, tuple]) -> pd.DataFrame:
     """
     Create a pseudo DataFrame with all possible combinations of facet levels.
 
     Parameters:
         d_study (dict): A dictionary representing the study design with facets as keys and 
-                        the number of levels for each facet as values.
+                        the number of levels for each facet as values. Values can be either
+                        integers or lists of integers.
         variance_tup_dict (dict): A dictionary mapping facet names to tuples containing the 
                                  component facets.
 
     Returns:
         pd.DataFrame: A pseudo DataFrame with all possible combinations of facet levels.
-    """
-    # Identify independent variables (facets without ":" or " x ")
-    independent_vars = [var for var in variance_tup_dict.keys() if ":" not in var and " x " not in var]
+    """    
+    # Identify nested structure from variance_tup_dict
+    nested_vars = {}
+    crossed_vars = set()
     
-    # Debugging: Print the unnested variables
-    # print(f"Variance Tuple Dictionary: {variance_tup_dict}")
-    # print(f"Unnested Variables: {independent_vars}")
-    
-    
-    # Identify dependent variables and their dependencies
-    dependent_vars = {}
     for comp_name, components in variance_tup_dict.items():
         if ":" in comp_name and " x " not in comp_name:
-            dependent_var = components[0]  # The first component is typically the dependent variable
-            dependencies = components[1:]  # The rest are the variables it depends on
-            dependent_vars[dependent_var] = dependencies
+            # This is a nested relationship
+            # For a string like "i:p", components would be ("i", "p")
+            # where i is nested within p
+            nested_relationship = list(components)
+            for i in range(len(nested_relationship) - 1):
+                child = nested_relationship[i]
+                parent = nested_relationship[i + 1]
+                if child not in nested_vars:
+                    nested_vars[child] = []
+                nested_vars[child].append(parent)
+        elif " x " in comp_name:
+            # This is a crossed relationship
+            for component in components:
+                crossed_vars.add(component)
     
-    # Generate all possible combinations of independent variable levels
-    independent_levels = {var: list(range(1, d_study[var] + 1)) for var in independent_vars}
-    independent_combinations = list(itertools.product(*[independent_levels[var] for var in independent_vars]))
+    # Find all facets
+    all_facets = set(d_study.keys())
     
-    # Initialize the data dictionary for the DataFrame
-    data = {facet: [] for facet in d_study.keys()}
+    # Order facets based on nesting
+    ordered_facets = []
     
-    # Generate rows for the DataFrame
-    for combo in independent_combinations:
-        # Map each value to its independent variable
-        ind_var_values = dict(zip(independent_vars, combo))
-        
-        # For dependent variables, generate all possible levels for each combo of independent variables
-        dep_var_combinations = []
-        for dep_var, deps in dependent_vars.items():
-            # Get all relevant independent variable values for this dependent variable
-            relevant_ind_vars = [ind_var_values[var] for var in deps if var in ind_var_values]
+    # First add facets that are not nested within anything (top level)
+    for facet in all_facets:
+        if facet not in nested_vars:
+            ordered_facets.append(facet)
             
-            # If the dependent variable depends on independent variables we have values for
-            if len(relevant_ind_vars) == len(deps):
-                # Generate all levels for this dependent variable
-                dep_levels = list(range(1, d_study[dep_var] + 1))
-                dep_var_combinations.append([(dep_var, level) for level in dep_levels])
-            else:
-                # Skip this dependent variable if dependencies not met
-                continue
-        
-        # Generate all combinations of dependent variable levels
-        if dep_var_combinations:
-            for dep_combo in itertools.product(*dep_var_combinations):
-                # Create a row with independent variable values
-                row_values = ind_var_values.copy()
-                
-                # Add dependent variable values
-                for dep_var, level in dep_combo:
-                    row_values[dep_var] = level
-                
-                # Add this row to the data dictionary
-                for facet, value in row_values.items():
-                    data[facet].append(value)
-        else:
-            # If no dependent variables, just add the independent variable values
-            for facet, value in ind_var_values.items():
-                data[facet].append(value)
+    # print(f"Top level facets: {ordered_facets}")
     
+    # Then add nested facets in order of nesting depth
+    remaining_facets = all_facets - set(ordered_facets)
+    while remaining_facets:
+        for facet in list(remaining_facets):
+            # If all parents of this facet are already in ordered_facets
+            if facet in nested_vars and all(parent in ordered_facets for parent in nested_vars[facet]):
+                ordered_facets.append(facet)
+                remaining_facets.remove(facet)
+        
+        # If we couldn't add any more facets, there might be a circular dependency
+        if not set(ordered_facets) & remaining_facets:
+            # Add remaining facets in arbitrary order
+            ordered_facets.extend(list(remaining_facets))
+            break
+
+    # print(f"Ordered facets after processing: {ordered_facets}")
+    # Reverse the order for proper nesting in for loops
+    # In a design like i:p, we want loops ordered as p then i
+    ordered_facets.reverse()
+    
+    # print(f"Ordered facets for nested structure: {ordered_facets}")
+    
+    # Generate all combinations
+    data = {facet: [] for facet in all_facets}
+    
+    # Use nested loops to generate combinations
+    def generate_combinations(facet_index=0, current_values={}):
+        if facet_index >= len(ordered_facets):
+            # We've assigned values to all facets, add to data
+            for facet, value in current_values.items():
+                data[facet].append(value)
+            return
+        
+        current_facet = ordered_facets[facet_index]
+        num_levels = d_study[current_facet]
+        
+        for level in range(1, num_levels + 1):
+            new_values = current_values.copy()
+            new_values[current_facet] = level
+            generate_combinations(facet_index + 1, new_values)
+    
+    generate_combinations()
+    
+    # Create DataFrame
     return pd.DataFrame(data)
