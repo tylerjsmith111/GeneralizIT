@@ -1,5 +1,9 @@
 # GeneralizIT: Generalizability Theory Analysis in Python
 
+[![PyPI version](https://img.shields.io/pypi/v/generalizit.svg)](https://pypi.org/project/generalizit/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://img.shields.io/badge/DOI-10.2139%2Fssrn.5209876-blue)](https://doi.org/10.2139/ssrn.5209876)
+
 ## Overview
 
 GeneralizIT is a Python-based library designed for conducting Generalizability Theory (GT) analyses. The library supports multiple research designs and provides tools to calculate ANOVA tables, generalizability coefficients (G coefficients), and decision (D) studies.
@@ -17,9 +21,11 @@ Generalizability Theory extends classical test theory by estimating multiple sou
 - **Summaries:** Provides concise summaries for ANOVA, G coefficients, and D studies
 
 ## Installation
+
 ```python
 pip install generalizit
 ```
+
 It is recommended to create a Python environment with Python 3.8 or higher.
 
 The following dependencies are installed alongside the package:
@@ -96,6 +102,7 @@ The data should be structureda as a pandas DataFrame in a long format, where eac
   |     10 | 3 | 2 |        8 |
   |     10 | 4 | 2 |        6 |
   ```
+
 Conversely, if the design was nested such as `person x (rater:item)`, raters are nested under item and should be identified uniquely either by delineation `item1_rater1` or unique numbering as below:
 
 ``` markdown
@@ -147,7 +154,10 @@ The `input_str` parameter specifies the research design. Supported formats inclu
 
 ## Advanced Tutorials
 
-Advanced package usage and G-Theory methodology tutorials and are available in the [tutorials directory](https://github.com/tylerjsmith111/GeneralizIT/tree/main/tutorials) of our GitHub repository.
+Advanced package usage and G-Theory methodology tutorials are available in our GitHub repository:
+
+- Generalizability Theory Tutorial [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tylerjsmith111/GeneralizIT/blob/main/tutorials/generaliz_tutorial.ipynb)
+- MNIST Variance Analysis Tutorial [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tylerjsmith111/GeneralizIT/blob/main/tutorials/mnist_variance_tutorial.ipynb)
 
 ## Notes
 
@@ -156,15 +166,17 @@ Advanced package usage and G-Theory methodology tutorials and are available in t
 - For unbalanced designs, GeneralizIT will automatically use appropriate computational methods
 
 ## Citation
+
 If you use GeneralizIT in your research, please cite the following paper:
+
 ```bibtex
-@software{GeneralizIT,
-  author = {Smith, T.J. and Kline, T.J.B. and Kline, A.},
-  title = {GeneralizIT: A Python Solution for Generalizability Theory Computations},
-  year = {2025},
-  publisher = {GitHub},
-  url = {https://github.com/tylerjsmith111/GeneralizIT},
-  version = {0.1.0}
+@misc{smith2025generalizit,
+  author       = {Smith, Tyler J. and Kline, Theresa J. B. and Kline, Adrienne Sarah},
+  title        = {{Generalizit: A Python Solution for Generalizability Theory Computations}},
+  year         = {2025},
+  note         = {Preprint submitted to \textit{SoftwareX}},
+  howpublished = {\url{https://ssrn.com/abstract=5209876}},
+  doi          = {10.2139/ssrn.5209876}
 }
 ```
 
