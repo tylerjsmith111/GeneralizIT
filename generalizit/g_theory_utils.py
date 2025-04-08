@@ -48,7 +48,7 @@ def create_pseudo_df(d_study: Dict[str, int], variance_tup_dict: Dict[str, tuple
         if facet not in nested_vars:
             ordered_facets.append(facet)
             
-    print(f"Top level facets: {ordered_facets}")
+    # print(f"Top level facets: {ordered_facets}")
     
     # Then add nested facets in order of nesting depth
     remaining_facets = all_facets - set(ordered_facets)
@@ -65,12 +65,12 @@ def create_pseudo_df(d_study: Dict[str, int], variance_tup_dict: Dict[str, tuple
             ordered_facets.extend(list(remaining_facets))
             break
 
-    print(f"Ordered facets after processing: {ordered_facets}")
+    # print(f"Ordered facets after processing: {ordered_facets}")
     # Reverse the order for proper nesting in for loops
     # In a design like i:p, we want loops ordered as p then i
     ordered_facets.reverse()
     
-    print(f"Ordered facets for nested structure: {ordered_facets}")
+    # print(f"Ordered facets for nested structure: {ordered_facets}")
     
     # Generate all combinations
     data = {facet: [] for facet in all_facets}
