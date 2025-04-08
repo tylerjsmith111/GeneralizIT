@@ -964,7 +964,6 @@ class Design:
             None: Results are appended to self.d_study_dict with the scenario label as key
         """
         # Create the pseudo levels df
-        print(pseudo_counts_df.head())
         pseudo_levels_df = self._calculate_levels_coeffs(
             df=pseudo_counts_df,
             variance_tuple_dictionary=variance_tuple_dictionary
