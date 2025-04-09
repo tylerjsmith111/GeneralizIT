@@ -207,6 +207,20 @@ pre code {
     h3 {
         font-size: 1.25rem;
     }
+
+    .tutorial-content {
+        flex-direction: column; /* Stack content vertically */
+        align-items: center; /* Center-align content */
+    }
+
+    .tutorial-image {
+        margin-right: 0; /* Remove right margin */
+        margin-bottom: 1rem; /* Add bottom margin for spacing */
+    }
+
+    .tutorial-text {
+        text-align: center; /* Center-align text */
+    }
 }
 
 /* Print styles */

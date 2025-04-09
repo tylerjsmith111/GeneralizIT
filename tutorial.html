@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>Tutorials - GeneralizIT</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .tutorial-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .tutorial-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 75%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .tutorial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tutorial-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .tutorial-header h3 {
+            margin: 0;
+            color: white;
+        }
+        
+        .tutorial-content {
+            display: flex;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .tutorial-image {
+            flex: 0 0 150px;
+            display: flex;
+            margin-right: 1.5rem;
+        }
+        
+        .tutorial-image img {
+            max-width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+        }
+        
+        .tutorial-text {
+            flex: 1;
+        }
+        
+        .tutorial-footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .colab-button {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            display: inline-block;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .title-section p {
+            width: 75%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <ul class="navbar">
+            <li><a href="index.html">About</a></li>
+            <li><a href="methods.html">Methods</a></li>
+            <li><a href="tutorial.html">Tutorials</a></li>
+        </ul>
+    </div>
+    <header>
+        <h1>GeneralizIT Tutorials</h1>
+    </header>
+
+    <main>
+        <section class="title-section">
+            <p>
+                These tutorials demonstrate how to use GeneralizIT for various Generalizability Theory analyses.
+                Each tutorial provides a step-by-step guide with example code and explanations.
+                Click the Colab badge to run the tutorials interactively in Google Colab.
+            </p>
+        </section>
+
+        <section class="tutorial-container">
+            <!-- GeneralizIT Tutorial Card -->
+            <div class="tutorial-card">
+                <div class="tutorial-header">
+                    <h3>GeneralizIT Tutorial</h3>
+                </div>
+                <div class="tutorial-content">
+                    <div class="tutorial-image">
+                        <img src="gtfig.svg" alt="GeneralizIT Framework Diagram">
+                    </div>
+                    <div class="tutorial-text">
+                        <p>
+                            This tutorial demonstrates how to use GeneralizIT for Generalizability Theory (G-theory) analyses 
+                            using a synthetic dataset. The tutorial gives a basic overview on how to use the python package 
+                            as well as a brief introduction to advanced usage for complex research designs.
+                        </p>
+                        <div class="tutorial-footer">
+                            <a href="https://colab.research.google.com/github/tylerjsmith111/GeneralizIT/blob/main/tutorials/generalizit_tutorial.ipynb" class="colab-button" target="_blank">
+                                <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MNIST Variance Tutorial Card -->
+            <div class="tutorial-card">
+                <div class="tutorial-header">
+                    <h3>GeneralizIT for Analyzing ML Datasets</h3>
+                </div>
+                <div class="tutorial-content">
+                    <div class="tutorial-image">
+                        <img src="mnist_digit.png" alt="MNIST Digit">
+                    </div>
+                    <div class="tutorial-text">
+                        <p>
+                            Machine learning practitioners often focus on model architecture and optimization techniques, 
+                            but understanding the variance structure of datasets is equally crucial for developing robust models. 
+                            This tutorial demonstrates how Generalizability Theory (G-theory) can provide valuable insights 
+                            into machine learning datasets using MNIST as a case study.
+                        </p>
+                        <div class="tutorial-footer">
+                            <a href="https://colab.research.google.com/github/tylerjsmith111/GeneralizIT/blob/main/tutorials/mnist_variance_tutorial.ipynb" class="colab-button" target="_blank">
+                                <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab">
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
