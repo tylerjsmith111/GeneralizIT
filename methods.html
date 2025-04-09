@@ -1,0 +1,5459 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Generalizability Methods Tutorial</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+</head>
+<body>
+      <div class="nav-container">
+        <ul class="navbar">
+            <li><a href="index.html">About</a></li>
+            <li><a href="methods.html">Methods</a></li>
+        </ul>
+    </div>
+<h1
+id="unbalanced-and-missing-data-generalizability-analyses-a-tutorial-based-on-henderson-1953-brennan-2001a">Unbalanced
+and Missing Data Generalizability Analyses: A tutorial based on
+Henderson (1953), Brennan (2001a)</h1>
+<h3>Tyler J. Smith and Theresa J.B. Kline<br />
+April 8, 2025</h3>
+<p>This tutorial assumes a fairly good working knowledge of
+generalizability theory and the terms used in its analysis. If the terms
+“facet”, “variance component”, “generalizability”, “dependability”,
+“G-Study” and “D-study” are unfamiliar, it is strongly advised that the
+reader review an introduction to generalizability procedures using
+balanced/non-missing data. There are many choices for this such as
+Briesch, Swaminathan, Welsh, and Chafouleas (2014).</p>
+<p>While data sets with balanced facets and with no missing data points
+are relatively straightforward to analyze for generalizability, the same
+is not true for data sets not meeting these criteria. In fact many data
+sets (including those used in machine learning) that researchers wish to
+subject to generalizability analyses are either: 1) unbalanced (have
+different numbers of cases in each combination/nesting of variables);
+and/or 2) are missing data. There have been few freely available options
+to analyze such data – exceptions include the urGENOVA (Brennan, 2001b)
+and G-String_V (Bloch &amp; Norman, 2012; 2023) programs. The urGENOVA
+program allows for both unbalanced data sets and missing data but has an
+esoteric user interface and does not calculate generalizability
+coefficients as part of the output. The G-String_V program has an
+intuitive user interface and produces generalizability and
+decision-study outputs but does not allow for missing data.</p>
+<p>Generalizability analyses are dependent on variance components for
+their calculation. In balanced designs with no missing data, these are
+readily calculated using the Sums of Squares/Mean Squares generated in
+typical ANOVA analyses. When these criteria are not met, another
+approach (“analogous ANOVA”) has been used (Brennan, 2001a) and is based
+on the “Method 1” approach introduced by Henderson (1953) to generate
+variance components in data sets that are unbalanced and/or have missing
+data. It is mathematically simple - using cell frequency counts and
+squared/summed values of the data point values to calculate the variance
+components. The generalizability/dependability calculations can follow
+from there.</p>
+<h2 id="henderson-1953">Henderson 1953</h2>
+<p>The first step in this document is to “walk” the reader through the
+“Method 1” approach to calculate variance components introduced by
+Henderson (1953) and the one utilized by Brennan (2001a) in creating the
+urGENOVA generalizability program. Note that calculating
+generalizability coefficients is NOT the end goal of Henderson - it is
+just to generate variance coefficients, which indicate how the variance
+in a set of data is distributed among its various components (or
+“facets” in the vernacular of generalizability theory). It will be
+simplest to show how these work with an actual data set.</p>
+<p>Table 1 below shows the data from Henderson’s (1953) Table 1. Its
+cells contain the butterfat levels at first lactations of 4 cow herds
+inseminated by 3 different sires over 4 years. The entries in each cell
+are somewhat unique – they represent number of cows in each herd (first
+number) and butterfat content (second number) in the first lactation of
+the year. The entry “3 – 1414” represents the total butterfat (1414)
+summed over 3 different cows. Thus, cows are nested within Herd/Sire
+combinations (C: HS).</p>
+<h3
+id="table-1.-hendersons-butterfat-data-set-yeara-x-herd-h-x-sire-s">Table
+1. Henderson’s butterfat data set “Year(A) X Herd (H) X Sire (S)”</h3>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr>
+<th>HERD</th>
+<th>SIRE</th>
+<th>YEAR</th>
+<th>YEAR</th>
+<th>YEAR</th>
+<th>YEAR</th>
+<th>TOTAL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HERD</td>
+<td>SIRE</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>TOTAL</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>3 - 1414</td>
+<td>2 – 981</td>
+<td></td>
+<td></td>
+<td>5 – 2395</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2</td>
+<td></td>
+<td>4 – 1766</td>
+<td>2 – 862</td>
+<td></td>
+<td>6 – 2628</td>
+</tr>
+<tr>
+<td>1</td>
+<td>3</td>
+<td></td>
+<td></td>
+<td></td>
+<td>5 - 1609</td>
+<td>5 – 1609</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>1 - 405</td>
+<td>3 – 1270</td>
+<td></td>
+<td></td>
+<td>4 – 1674</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2</td>
+<td></td>
+<td></td>
+<td>5 – 2109</td>
+<td></td>
+<td>5 – 2109</td>
+</tr>
+<tr>
+<td>2</td>
+<td>3</td>
+<td></td>
+<td></td>
+<td>4 – 1563</td>
+<td>2 - 740</td>
+<td>6 - 2303</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td></td>
+<td>3 – 1705</td>
+<td></td>
+<td></td>
+<td>3 – 1705</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2</td>
+<td></td>
+<td>4 – 2310</td>
+<td>2 – 1134</td>
+<td></td>
+<td>6 – 3444</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1</td>
+<td>3 - 1113</td>
+<td>5 - 1951</td>
+<td></td>
+<td></td>
+<td>8 – 3064</td>
+</tr>
+<tr>
+<td>4</td>
+<td>3</td>
+<td></td>
+<td></td>
+<td>3 - 1291</td>
+<td>6 - 2457</td>
+<td>9 – 3948</td>
+</tr>
+<tr>
+<td>TOTAL</td>
+<td></td>
+<td>7 - 2931</td>
+<td>21-9983</td>
+<td>16 - 6959</td>
+<td>13 - 4806</td>
+<td>57-24679</td>
+</tr>
+</tbody>
+</table>
+<p>It is worth noting:</p>
+<ul>
+<li>Most of the data are missing.</li>
+<li>The ‘cows’ variable is not of particular interest in the study. If
+it was, the actual butterfat values for each of the cows within the HS
+combinations would be listed. Thus, the focus of the rest of the
+analysis is on the crossed (but not fully crossed) Year(A) X Herd (H) X
+Sire (S). However, this issue DOES come up later in this tutorial. For
+now, we will set it aside.</li>
+<li>That for Herds 3 and 4, only 2 sires are crossed with them; sires 1
+and 2 for Herd 3 and sires 1 and 3 for Herd 4. This means that there are
+10 HS combinations. It is as though there are “missing data” for sire 3
+herd 3, and sire 2 herd 4.</li>
+<li>Henderson writes the equation that represents the linear model of
+the data is as follows: Note that there is a ‘k’ in the error term –
+this term includes random error PLUS also the cows:HS nested term (which
+is not assessed or accounted for in the model).</li>
+</ul>
+<p><span class="math display">\[Y_{hijk} = \mu + A_h(\text{Year}) +
+H_i(\text{Herd}) + S_j(\text{Sire}) + HS_{ij}(\text{Herd} \times
+\text{Sire}) + \text{Error}_{hijk}\]</span></p>
+<p>Assumptions:</p>
+<ul>
+<li>All variables are random</li>
+<li>All effects (except the grand mean) are uncorrelated with each
+other, have means of 0 and have variances.</li>
+</ul>
+<p>Step 1: Obtain the “T” values (uncorrected sums of squares) for each
+facet by summing over the squared values for each level of the facet and
+divide by each level’s relevant sample size (“^” indicates exponential).
+Henderson uses summation notation in his article – however actual values
+will make the computations more concrete.</p>
+<p><span class="math display">\[
+A \text{ (year)} =
+\sum \frac{(2931^2)}{7} + \frac{(9983^2)}{21} + \frac{(6959^2)}{16} +
+\frac{(4806^2)}{13}
+= 10,776,451
+\]</span></p>
+<p><span class="math display">\[
+H \text{ (herd)} =
+\sum \frac{(2395+2628+1609)^2}{(5+6+5)} +
+\frac{(1674+2109+2303)^2}{(4+5+6)} + \frac{(1705+3444)^2}{(3+6)} +
+\frac{(3064+3748)^2}{(8+9)}
+= 10,893,666
+\]</span></p>
+<p><span class="math display">\[S \text{ (sire)} = \sum
+\frac{(2395+1674+1705+3064)^2}{(5+4+3+8)} +
+\frac{(2628+2109+3444)^2}{(6+5+6)} + \frac{(1609+2303+3748)^2}{(5+6+9)}
+= 10,776,278\]</span></p>
+<p><span class="math display">\[HS \text{ (herd)} \times \text{(sire)} =
+\sum \frac{2395^2}{5} + \frac{2628^2}{6} + \frac{1609^2}{5} +
+\frac{1674^2}{4} + \frac{2109^2}{5} + \frac{2303^2}{6} +
+\frac{1705^2}{3} + \frac{3444^2}{6} + \frac{3064^2}{8} +
+\frac{3748^2}{9} = 10,970,369\]</span></p>
+<p><span class="math display">\[\text{Mean} \text{ (Henderson uses
+&quot;CF&quot; for this term)} = \sum \text{ over all values }
+\frac{24679^2}{57} = 10,685,141\]</span></p>
+<p><strong>Total = 11,124,007</strong></p>
+<hr />
+<p>This would normally be accomplished by squaring and summing each
+individual cell value (all 57 of them). In this data set this would mean
+we would have to have the individual butterfat values for EACH “cow”.
+Instead, Henderson provides the sum of the butterfat values across cows
+in the herd. For example, in the cell 3-1414, this means that 3 cows
+provided 1414 butterfat. We DO NOT know how the 1414 butterfat is
+distributed between the 3 cows. If we did, we would be able to calculate
+the nested effect of cows within herds (c:H), that we are not provided.
+Henderson later in the paper does provide a T-value for the total (Table
+6, p. 233) of <strong>11,124,007</strong>. I tried generating this value
+a couple of different ways:</p>
+<ol type="1">
+<li><p>Taking the overall total 24679 and dividing by 57 (433). Then
+squaring this value 57 times and summing. This gave me a T-value of
+10,686,873.</p></li>
+<li><p>Taking each herd value, dividing it by the number of cows in the
+herd, then “counting” that value for each cow for that herd. This was
+repeated 57 times. Then these values were squared then summed. This gave
+me a T-value of 10,973,517.</p></li>
+<li><p>Taking each herd value, dividing it by the number of cows in the
+herd. Then averaging across those values (440). Then squaring this value
+57 times and summing. This gave me a T-value of 11,035,200.</p></li>
+</ol>
+<p>Clearly the actual values for each cow would need to be provided to
+get the actual total T value for this analysis.</p>
+<p>Step 2: Obtain the estimated coefficients by which the variance
+components will be multiplied</p>
+<p>So far, things have been straightforward. The next step is more
+complicated and tedious. The coefficients of μ², σ²(year), σ²(herd),
+σ²(sire), σ²(herdXsire), σ²(error) are estimated using the SAMPLE SIZES
+on which they are based that contribute to the calculated T-values. This
+is tedious because the data set is unbalanced and there are lots of
+missing data! Fortunately, Henderson provides a slow and steady
+summation routine that allows for the estimations. Many of the cells can
+be filled using the simple overall sample size of the data set (N)
+(these are described below). The others (noted with a “?” in Table 2)
+have to be estimated individually. Again, Henderson provides the
+summation notation for calculating these terms for those interested in
+seeing them.</p>
+<ol type="1">
+<li>For the μ² term, ALL effects are based on the total number of data
+points involved in the study (denoted N).</li>
+<li>For the Total effect, all variances are also based on the total
+number of data points involved in the study (N).</li>
+<li>For each effect (except the Mean), the variance for that effect is
+also for the based on the total number of data points involved in the
+study (N). For example, the variance of σ²(year) for effect A (year) is
+N.</li>
+<li>For the σ²(error) term column, the facet sample sizes are equal to
+the number of levels of that effect (Year = 4, Herd = 4, Sire = 3, HS =
+10 (there are 10 different HS combinations), for the Mean it is always =
+1, and for the Total it is always = N.</li>
+<li>This leaves 16 “non-easy” ones that require calculation and are
+noted as such.</li>
+</ol>
+<h3
+id="table-2.-hendersons-t-values-uncorrected-sums-of-squares-for-each-facet-and-coefficient-sample-size-bases">Table
+2. Henderson’s T-values (uncorrected Sums of Squares) for each facet and
+coefficient sample size bases</h3>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 11%" />
+<col style="width: 5%" />
+<col style="width: 12%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 10%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>T-Value</th>
+<th>μ²</th>
+<th>σ²(Year)</th>
+<th>σ²(Herd)</th>
+<th>σ²(Sire)</th>
+<th>σ²(HS)</th>
+<th>σ²(error)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A (year)</td>
+<td>10,776,451</td>
+<td>N</td>
+<td>N</td>
+<td>? - 1</td>
+<td>? - 2</td>
+<td>? - 3</td>
+<td>Levels of A (4)</td>
+</tr>
+<tr>
+<td>H (herd)</td>
+<td>10,893,666</td>
+<td>N</td>
+<td>? - 4</td>
+<td>N</td>
+<td>? - 5</td>
+<td>? - 6</td>
+<td>Levels of H (4)</td>
+</tr>
+<tr>
+<td>S (sire)</td>
+<td>10,776,278</td>
+<td>N</td>
+<td>? - 7</td>
+<td>? - 8</td>
+<td>N</td>
+<td>? - 9</td>
+<td>Levels of S (3)</td>
+</tr>
+<tr>
+<td>HS (herdX sire)</td>
+<td>10,970,369</td>
+<td>N</td>
+<td>? - 10</td>
+<td>? - 11</td>
+<td>? - 12</td>
+<td>N</td>
+<td>#Combinations of HS (10)</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>10,685,141</td>
+<td>N</td>
+<td>? - 13</td>
+<td>? - 14</td>
+<td>? - 15</td>
+<td>? - 16</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>11,124,007*</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+</tbody>
+</table>
+<p>*See note above regarding where this value comes from</p>
+<p>Let’s begin to “fill in” the 16 different “?” terms with “brute
+force” calculations….</p>
+<ol type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Herd})\)</span> term
+on Year (data are collapsed across Sires). Sample size starts by
+calculating the squared sum of: cows that provided data in each herd
+within each year, divided by the total number of cows for that year.
+Then sum the quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Year 1: } \frac{(3^2) + (1^2) +
+(0^2) + (3^2)}{7} +\]</span></p>
+<p><span class="math display">\[\text{Year 2: } \frac{(2+4)^2 + (3^2) +
+((3+4)^2) + (5^2)}{21} +\]</span></p>
+<p><span class="math display">\[\text{Year 3: } \frac{(2^2) + ((5+4)^2)
++ (2^2) + (3^2)}{16} +\]</span></p>
+<p><span class="math display">\[\text{Year 4: } \frac{(5^2) + (2^2) +
+(0^2) + (6^2)}{13}\]</span></p>
+<p><span class="math display">\[= 19.51\]</span></p>
+<ol start="2" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Sire})\)</span> term
+on Year (data are collapsed across Herds). Sample size starts by
+calculating the squared sum of: cows that provided data for each sire
+within each year, divided by the total number of cows for that year.
+Then sum the quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Year 1: } \frac{((3+1+0+3)^2) +
+((0+0+0+0)^2) + ((0+0+0+0)^2))}{7} +\]</span></p>
+<p><span class="math display">\[\text{Year 2: } \frac{((2+3+3+5)^2) +
+((4+0+4+0)^2) + ((0+0+0+0)^2)}{21} +\]</span></p>
+<p><span class="math display">\[\text{Year 3: } \frac{((0+0+0+0)^2) +
+((2+5+2+0)^2) + ((0+4+0+3)^2))}{16} +\]</span></p>
+<p><span class="math display">\[\text{Year 4: } \frac{((0+0+0+0)^2) +
+((0+0+0+0)^2) + ((5+2+0+6)^2))}{13}\]</span></p>
+<p><span class="math display">\[= 39.22\]</span></p>
+<ol start="3" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{HS})\)</span> term on
+Year. Sample size starts by calculating the squared sum of: cows that
+provided data for each of the 10 herd/sire combinations within each
+year, divided by the total number of cows for that year. Then sum the
+quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Year 1: } \frac{((3^2) + (0^2) +
+(0^2) + (1^2) + (0^2) + (0^2) + (0^2) + (0^2) + (3^2)+ (0^2))}{7}
++\]</span></p>
+<p><span class="math display">\[\text{Year 2: } \frac{((2^2) + (4^2) +
+(0^2) + (3^2) +(0^2) + (0^2) + (3^2) + (4^2) + (5^2) +(0^2))}{21}
++\]</span></p>
+<p><span class="math display">\[\text{Year 3: } \frac{((0^2) + (2^2)
++(0^2) + (0^2) + (5^2) + (4^2) + (0^2) + (2^2)+  (0^2) + (3^2))}{16}
++\]</span></p>
+<p><span class="math display">\[\text{Year 4: } \frac{((0^2) + (0^2)
++(5^2) + (0^2) +  (0^2) + (2^2) + (0^2) + (0^2) + (0^2) +
+(6^2))}{13}\]</span></p>
+<p><span class="math display">\[= 15.10\]</span></p>
+<ol start="4" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Year})\)</span> term
+on Herd (data are collapsed across Sires). Sample size starts by
+calculating the squared sum of: cows that provided data in each year
+within each herd, divided by the total number of cows for that herd.
+Then sum the quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Herd 1: } \frac{((3^2) + ((2+4)^2)
++ (2^2) + (5^2))}{16} +\]</span></p>
+<p><span class="math display">\[\text{Herd 2: } \frac{((1^2) + (3^2) +
+((5+4)^2) + (2^2))}{15} +\]</span></p>
+<p><span class="math display">\[\text{Herd 3: } \frac{((0^2) + ((3+4)^2)
++ (2^2) + (0^2))}{9} +\]</span></p>
+<p><span class="math display">\[\text{Herd 4: } \frac{((3^2) + (5^2) +
+(3^2) + (6^2))}{17}\]</span></p>
+<p><span class="math display">\[= 21.49\]</span></p>
+<ol start="5" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Sire})\)</span> term
+on Herd (data are collapsed across Years). Sample size starts by
+calculating the squared sum of: cows that provided data in each herd,
+divided by the total number of cows for that herd. Then sum the
+quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Herd 1: } \frac{(((3+2)^2) +
+((4+2)^2) + (5^2))}{16} +\]</span></p>
+<p><span class="math display">\[\text{Herd 2: } \frac{((3+1)^2) + (5^2)
++ ((4+2)^2))}{15} +\]</span></p>
+<p><span class="math display">\[\text{Herd 3: } \frac{((3^2) + ((4+2)^2)
++ (0^2))}{9} +\]</span></p>
+<p><span class="math display">\[\text{Herd 4: } \frac{(((3+5)^2) + (0^2)
++ ((3+6)^2))}{17}\]</span></p>
+<p><span class="math display">\[= 24.04\]</span></p>
+<ol start="6" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{HS})\)</span> term on
+Herd. Sample size starts by calculating the squared sum of: cows that
+provided data in each herd, divided by the total number of cows for that
+herd. Then sum the quotients.</li>
+</ol>
+<ul>
+<li>Note that this is the SAME value as that for the <span
+class="math inline">\(\sigma^2(\text{Sire})\)</span> effect on Herd. The
+difference is in how the numbers were arrived at. For the <span
+class="math inline">\(\sigma^2(\text{Sire})\)</span> effect on Herd, we
+had to sum across the Years to get the number of cows. For the <span
+class="math inline">\(\sigma^2(\text{HS})\)</span> effect we just have
+used the sum of cows across years (like having rolled the Years into a
+single column).</li>
+</ul>
+<p><span class="math display">\[\text{Herd 1: } \frac{((5^2) + (6^2) +
+(5^2))}{16} +\]</span></p>
+<p><span class="math display">\[\text{Herd 2: } \frac{((4^2) + (5^2) +
+(6^2))}{15} +\]</span></p>
+<p><span class="math display">\[\text{Herd 3: } \frac{((3^2) + (6^2) +
+(0^2))}{9} +\]</span></p>
+<p><span class="math display">\[\text{Herd 4: } \frac{((8^2) + (0^2) +
+(9^2))}{17}\]</span></p>
+<p><span class="math display">\[= 24.04\]</span></p>
+<ol start="7" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Year})\)</span> term
+on Sire (data are collapsed across Herds). Sample size starts by
+calculating the squared sum of: cows that provided data in each year
+within each sire, divided by the total number of cows for that sire.
+Then sum the quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Sire 1: } \frac{((3+1+3)^2) +
+((2+3+3+5)^2) + (0^2)+(0))}{20} +\]</span></p>
+<p><span class="math display">\[\text{Sire 2: } \frac{((0^2) + ((4+4)^2)
++ ((2+5+2)^2) + ((0^2)))}{17} +\]</span></p>
+<p><span class="math display">\[\text{Sire 3: } \frac{((0^2) + (0^2) +
+((4+3)^2) + ((5+2+6)^2))}{20}\]</span></p>
+<p><span class="math display">\[= 30.33\]</span></p>
+<ol start="8" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Herd})\)</span> term
+on Sire (data are collapsed across Years). Sample size starts by
+calculating the squared sum of: cows that provided data in each herd
+within each sire, divided by the total number of cows for that sire.
+Then sum the quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Sire 1: } \frac{((3+2)^2) +
+((1+3)^2) + (3^2)+((3+5)^2))}{20} +\]</span></p>
+<p><span class="math display">\[\text{Sire 2: } \frac{((4+2)^2) + (5^2)
++ ((4+2)^2) + (0^2))}{17} +\]</span></p>
+<p><span class="math display">\[\text{Sire 3: } \frac{(5^2) + ((4+2)^2)
++ (0^2) + ((6+3)^2))}{20}\]</span></p>
+<p><span class="math display">\[= 18.51\]</span></p>
+<ol start="9" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{HS})\)</span> term on
+Sire. Sample size starts by calculating the squared sum of: cows that
+provided data in each sire, divided by the total number of cows for that
+sire. These quotients are then summed.</li>
+</ol>
+<p>Note that this is the SAME value as that for the <span
+class="math inline">\(\sigma^2(\text{Herd})\)</span> effect on Sire. The
+difference is in how the numbers were arrived at. For the <span
+class="math inline">\(\sigma^2(\text{Herd})\)</span> effect on Sire, we
+had to sum across the Years to get the number of cows. For the <span
+class="math inline">\(\sigma^2(\text{HS})\)</span> effect we just have
+used the sum of cows across years (like having rolled the Years into a
+single column).</p>
+<p><span class="math display">\[\text{Sire 1: } \frac{(5^2) + (4^2) +
+(3^2)+(8^2))}{20} +\]</span></p>
+<p><span class="math display">\[\text{Sire 2: } \frac{(6^2) + (5^2) +
+(6^2) + (0^2))}{17} +\]</span></p>
+<p><span class="math display">\[\text{Sire 3: } \frac{(5^2) + (6^2) +
+(0^2) + (9^2))}{20}\]</span></p>
+<p><span class="math display">\[= 18.51\]</span></p>
+<ol start="10" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Year})\)</span> term
+on HS. Sample size starts by calculating the squared sum of: cows that
+provided data across years for each Herd/Sire combination, divided by
+the total number of cows for that Herd/Sire combination. Then sum the
+quotients.</li>
+</ol>
+<p><span class="math display">\[\text{Herd/Sire 1: } \frac{((3^2) +
+(2^2) + (0^2)+(0^2))}{5} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 2: } \frac{((0^2) +
+(4^2) + (2^2)+(0^2))}{6} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 3: } \frac{((0^2) +
+(0^2) + (0^2)+(5^2))}{5} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 4: } \frac{((1^2) +
+(3^2) + (0^2)+(0^2))}{4} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 5: } \frac{((0^2) +
+(0^2) + (5^2)+(0^2))}{5} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 6: } \frac{((0^2) +
+(0^2) + (4^2)+(2^2))}{6} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 7: } \frac{((0^2) +
+(3^2) + (0^2)+(0^2))}{3} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 8: } \frac{((0^2) +
+(4^2) + (2^2)+(0^2))}{6} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 9: } \frac{((5^2) +
+(3^2) + (0^2)+(0^2))}{8} +\]</span></p>
+<p><span class="math display">\[\text{Herd/Sire 10: } \frac{((0^2) +
+(0^2) + (3^2)+(6^2))}{9}\]</span></p>
+<p><span class="math display">\[= 37.35\]</span></p>
+<ol start="11" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Herd})\)</span> term
+on HS. Sample size is calculated by the squared sum of: cows that
+provided data across Herds for each Herd/Sire combination, divided by
+the total number of cows. This results in the N size.</li>
+</ol>
+<p><span class="math display">\[= \frac{(57^2)}{57} = 57\]</span></p>
+<ol start="12" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Sire})\)</span> term
+on HS. Sample size is calculated by the squared sum of: cows that
+provided data across Sires for each Herd/Sire combination, divided by
+the total number of cows. This results in the N size.</li>
+</ol>
+<p><span class="math display">\[= \frac{(57^2)}{57} = 57\]</span></p>
+<ol start="13" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Year})\)</span> term
+on Mean. Sample size is calculated by the squared sum of: cows in each
+year divided by the total number of cows.</li>
+</ol>
+<p><span class="math display">\[= \frac{((7^2) + (21^2) + (16^2) +
+(13^2))}{57} = 16.05\]</span></p>
+<ol start="14" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Herd})\)</span> term
+on Mean. Sample size is calculated by the squared sum of: cows in each
+herd divided by the total number of cows.</li>
+</ol>
+<p><span class="math display">\[= \frac{((16^2) + (15^2) + (9^2) +
+(17^2))}{57} = 14.93\]</span></p>
+<ol start="15" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{Sire})\)</span> term
+on Mean. Sample size is calculated by the squared sum of: cows in each
+sire divided by the total number of cows.</li>
+</ol>
+<p><span class="math display">\[= \frac{((20^2) + (17^2) + (20^2))}{57}
+= 19.11\]</span></p>
+<ol start="16" type="1">
+<li>The <span class="math inline">\(\sigma^2(\text{HS})\)</span> term on
+Mean. Sample size is calculated by the squared sum of: cows in each
+Herd/Sire combination divided by the total number of cows.</li>
+</ol>
+<p><span class="math display">\[= \frac{((5^2) + (6^2) + (5^2) +(4^2) +
+(5^2) + (6^2) + (3^2) + (6^2) + (8^2) +(9^2))}{57} = 6.19\]</span></p>
+<p>All these calculated values can now be put into Table 2 and are
+presented in Table 3.</p>
+<h3
+id="table-3.-completed-hendersons-t-values-uncorrected-sums-of-squares-and-coefficient-sample-size-bases-contains-the-same-data-found-in-table-6-p.-233-in-henderson-1953">Table
+3. Completed Hendersons T-values (uncorrected Sums of Squares) and
+coefficient sample size bases (contains the same data found in Table 6
+p. 233 in Henderson 1953)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 11%" />
+<col style="width: 6%" />
+<col style="width: 14%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 11%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>T-Values</th>
+<th>μ²</th>
+<th>^2(year)</th>
+<th>σ²(herd)</th>
+<th>σ²(sire)</th>
+<th>σ²(HS)</th>
+<th>σ²(error)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A (year)</td>
+<td>10,776,451</td>
+<td>57</td>
+<td>57</td>
+<td>19.51</td>
+<td>39.22</td>
+<td>15.1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>H (herd)</td>
+<td>10,893,666</td>
+<td>57</td>
+<td>21.49</td>
+<td>57</td>
+<td>24.04</td>
+<td>24.04</td>
+<td>4</td>
+</tr>
+<tr>
+<td>S (sire)</td>
+<td>10,776,278</td>
+<td>57</td>
+<td>30.33</td>
+<td>18.51</td>
+<td>57</td>
+<td>18.51</td>
+<td>3</td>
+</tr>
+<tr>
+<td>HS (herdX sire)</td>
+<td>10,970,369</td>
+<td>57</td>
+<td>37.35</td>
+<td>57</td>
+<td>57</td>
+<td>57</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>10,685,141</td>
+<td>57</td>
+<td>16.05</td>
+<td>14.93</td>
+<td>19.11</td>
+<td>6.19</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Total</td>
+<td>11,124,007</td>
+<td>57</td>
+<td>57</td>
+<td>57</td>
+<td>57</td>
+<td>57</td>
+<td>57</td>
+</tr>
+</tbody>
+</table>
+<p>Although at this point Henderson creates a “Table 7” from which
+equations he says can be solved, this step is not necessary. What is
+necessary is to “solve” for the equations that are set up in Table 3.
+Specifically, what values need to be multiplied with each estimated
+coefficient down the entire column for all 6 equations that will solve
+the following equations? These will be the variance components: A, B, C,
+D, E, and F.</p>
+<p><span class="math display">\[
+10,776,451 = A(57) + B(57) + C(19.51) + D(39.22) + E(15.10) +F(4)
+\]</span></p>
+<p><span class="math display">\[
+10,893,666 = A(57) + B(21.49) + C(57) + D(24.04) + E(24.04) +F(4)
+\]</span></p>
+<p><span class="math display">\[
+10,776,278 = A(57) + B(30.33) + C(18.51) + D(57) + E(18.51) +F(3)
+\]</span></p>
+<p><span class="math display">\[
+10,970,369 = A(57) + B(37.35) + C(57) + D(57) + E(57) +F(10)
+\]</span></p>
+<p><span class="math display">\[
+10,685,141 = A(57) + B(16.05) + C(14.93) + D(19.11) + E(6.19) +F(1)
+\]</span></p>
+<p><span class="math display">\[
+11,124,007 = A(57) + B(57) + C(57) + D(57) + E(57) +F(57)
+\]</span></p>
+<p>Using the data in Table 3, solve these equations simultaneously via
+matrix procedures to solve a system of equations (solving by linear
+least squares method). Alternatively, they can be solved by regressing
+the 6 T-values on the 6 variance estimates in a direct regression (all
+predictors entered simultaneously), and requesting to include an
+intercept in the model). This produces the following output (from SPSS –
+although other programs will provide the same results). Note that there
+is no “Mean” variance component calculated, as μ² is a constant and has
+no variance so is eliminated from the analysis. Since there are 6
+predictors and 6 outcomes the data will “fit perfectly” (in fact, Excel
+WILL NOT run the regression because there are equal numbers of
+predictors and cell entries in the outcome). However, this is not
+relevant, as we are interested solely in the unstandardized B-values
+associated with each effect, which are the variance components. We now
+have the variance components (see Table 4) for Henderson’s data.</p>
+<h3 id="table-4a.-spss-output-of-hendersons-data">Table 4a. SPSS output
+of Henderson’s data</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 30%" />
+<col style="width: 29%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Unstandardized Coefficients</th>
+<th></th>
+<th>Standardized Coefficients</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>B</td>
+<td>Std. Error</td>
+<td>Beta</td>
+</tr>
+<tr>
+<td>(Constant)</td>
+<td>10572974.498</td>
+<td>.000</td>
+<td></td>
+</tr>
+<tr>
+<td>Year</td>
+<td>763.154</td>
+<td>.000</td>
+<td>.084</td>
+</tr>
+<tr>
+<td>Herd</td>
+<td>4531.304</td>
+<td>.000</td>
+<td>.615</td>
+</tr>
+<tr>
+<td>Sire</td>
+<td>1587.278</td>
+<td>.000</td>
+<td>.174</td>
+</tr>
+<tr>
+<td>HS</td>
+<td>-164.329</td>
+<td>.000</td>
+<td>-.023</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>2949.830</td>
+<td>.000</td>
+<td>.402</td>
+</tr>
+</tbody>
+</table>
+<h3 id="table-4b.-variance-components-from-henderson-1953-data">Table
+4b. Variance Components from Henderson 1953 data</h3>
+<table>
+<thead>
+<tr>
+<th>Facet</th>
+<th>Variance Component</th>
+<th>Proportion of Variance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A (year)</td>
+<td>763</td>
+<td>.08</td>
+</tr>
+<tr>
+<td>H (herd)</td>
+<td>4531</td>
+<td>.46</td>
+</tr>
+<tr>
+<td>S (sire)</td>
+<td>1587</td>
+<td>.16</td>
+</tr>
+<tr>
+<td>HS</td>
+<td>-164</td>
+<td>.30</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>2950</td>
+<td></td>
+</tr>
+<tr>
+<td>Total</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>We can see from the results that most of the variance (46%) in the
+butterfat amount, is due to the “Herd” variable and next by the Herd X
+Sire interaction (30%). Not a lot of the variance is due to the Sire
+(16%) and almost none is due to Year (8%). As noted earlier, Henderson
+stops at this point.</p>
+<p>Before leaving Henderson, there are a couple notes about his
+protocol.</p>
+<ol type="1">
+<li>It is obvious now why this approach allows for missing data and
+unbalanced designs in the estimate of variance components. While
+tedious, the calculation of the T-values and sample sizes for effects,
+do not require balanced, non-missing data sets that meet all assumptions
+of normality. This flexibility is a marvelous feature insofar as
+naturally occurring data sets often fall short of these restrictive
+assumptions.</li>
+<li>ALL effects are assumed to be random. If an effect (such as “year”)
+IS actually fixed, then the other estimates are biased. This assumption
+continues into Brennan’s (2001a) work, and thus the into the urGENOVA
+and G-String_V programs.</li>
+<li>The variance components are not used to create generalizability
+coefficients in Henderson’s article. They can be, but the
+generalizability literature had not begun to be published until after
+this article. Brennan (2001a) took up the calculations to extend
+generalizability’s reach into data sets that can be nested, unbalanced
+and/or have missing data.</li>
+</ol>
+<p>Brennan’s (2001a) approach (he calls it analogous-ANOVA) is based on
+Henderson’s calculations of T-values. With unbalanced or missing data,
+“The primary theoretical problem presented by most unbalanced designs is
+that there are many possible estimators of random effects variance
+components and no unambiguously clear basis for determining which
+estimators are best. Among the practical problems with unbalanced
+designs are that some estimation methods require distributional form
+assumptions, which are often difficult to justify in generalizability
+analyses.” (Manual for urGENOVA Brennan, 2001b p. 1). Thus, he advises
+using the variance components generated from urGENOVA for
+generalizability estimates that are strictly “descriptive” of the
+specific data set and not inferential. The urGENOVA program does not
+allow for any computations for D-studies, nor are standard errors and
+confidence intervals of the variance components appropriate except for
+balanced designs under the assumptions of normality. A shortcoming of
+the urGENOVA program is that IT DOES NOT produce generalizability or
+dependability coefficients. These have to be calculated by hand by the
+end user.</p>
+<p>The G-String_V program is more restrictive in input than urGENOVA. It
+does NOT allow for missing data. This simplifies the calculations (as we
+will see in a moment). The authors of this program do not adhere to
+Brennan’s (2001b) admonition of D-study, standard errors and confidence
+intervals of the variance components. In fact, it is relatively
+straightforward in the case of unbalanced, but no missing data, to
+estimate D-study generalizability coefficients using harmonic mean
+estimates of the unbalanced effects. However, these should be taken as
+estimates only, given the issues raised by Brennan. The G-String_V
+program DOES calculate generalizability and dependability coefficients
+for the facet of differentiation specified by the user.</p>
+<h2 id="narayanan-et-al.-2010-and-brennan-2001a">Narayanan et al. (2010)
+and Brennan (2001a)</h2>
+<p>With this as a backdrop, the next step in this tutorial is to use a
+data set from Narayanan et al. (2010) (Table 5) to calculate the
+variance components using Henderson’s Method 1. It will be noted at this
+point that Narayanan uses a completely different approach to calculating
+generalizability in the paper. It is based on the variance, not the
+variance components, which is the hallmark of traditional approaches to
+calculating Generalizability. These data are unbalanced, but no data
+points are missing. There are 3 different doctors (d); rated by 16
+patients (p) - note that patients are nested in doctors, and this facet
+is unbalanced; 8 patients rate Doctor A, 5 rate Doctor B and 3 rate
+Doctor C); all use 5 items (i) to rate the doctor. The model then is: i
+X (p:d). The dependent variable is “rating on a scale of 1-5” for each
+item.</p>
+<h3 id="table-5.-narayanan-et-al.-2010-data-set-i-x-pd">Table 5.
+Narayanan et al. (2010) data set (i X p:d)</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 16%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>item1</th>
+<th>item2</th>
+<th>item3</th>
+<th>item4</th>
+<th>item5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>7</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>8</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>9</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>B</td>
+<td>12</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>13</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>14</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="step-1-calculating-the-t-values-uncorrected-sums-of-squares-for-each-facet">Step
+1: Calculating the T-values (uncorrected sums of squares) for each
+facet</h3>
+<p>We are going to need a number of sums and their squares for the next
+analyses (Table 6):</p>
+<h4
+id="table-6.-narayanan-et-al.-2010-data-set-with-added-rows-and-columns">Table
+6. Narayanan et al. (2010) data set with added rows and columns</h4>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 18%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 3%" />
+<col style="width: 4%" />
+<col style="width: 12%" />
+<col style="width: 16%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>item1</th>
+<th>item2</th>
+<th>item3</th>
+<th>item4</th>
+<th>item5</th>
+<th>Sum across Patient Ratings</th>
+<th>Squared sum across Patient Ratings</th>
+<th>Squared sum across patient ratings/#ratings each completed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>20</td>
+<td>400</td>
+<td>80</td>
+</tr>
+<tr>
+<td>A</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>18</td>
+<td>324</td>
+<td>64.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+<td>18</td>
+<td>324</td>
+<td>64.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>15</td>
+<td>225</td>
+<td>45</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>7</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>15</td>
+<td>225</td>
+<td>45</td>
+</tr>
+<tr>
+<td>A</td>
+<td>8</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>B</td>
+<td>9</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>19</td>
+<td>361</td>
+<td>72.2</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>20</td>
+<td>400</td>
+<td>80</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>20</td>
+<td>400</td>
+<td>80</td>
+</tr>
+<tr>
+<td>B</td>
+<td>12</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>16</td>
+<td>256</td>
+<td>51.2</td>
+</tr>
+<tr>
+<td>B</td>
+<td>13</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>C</td>
+<td>14</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>15</td>
+<td>225</td>
+<td>45</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>19</td>
+<td>361</td>
+<td>72.2</td>
+</tr>
+<tr>
+<td></td>
+<td>Item Rating Sums</td>
+<td>59</td>
+<td>59</td>
+<td>55</td>
+<td>54</td>
+<td>53</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Item Rating sums squared</td>
+<td>3481</td>
+<td>3481</td>
+<td>3025</td>
+<td>2916</td>
+<td>2809</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Item sums squared/#ratings For each item</td>
+<td>217.562</td>
+<td>217.562</td>
+<td>189.062</td>
+<td>182.25</td>
+<td>175.562</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Doctor (d)</li>
+</ol>
+<p>Sum all ratings across each item for each Patient; Sum the individual
+patient ratings for each doctor; square these sums; divide by the number
+of rating counts within each doctor; add the quotients.</p>
+<p><span class="math display">\[\text{Doctor A} =
+(20+18+18+15+17+17+15+17) = 137; \frac{137^2}{40} = \frac{18769}{40} =
+469.225\]</span></p>
+<p><span class="math display">\[\text{Doctor B} = (19+20+20+16+17) = 92;
+\frac{92^2}{25} = \frac{8464}{25} = 338.560\]</span></p>
+<p><span class="math display">\[\text{Doctor C} = (17+15+19) = 51;
+\frac{51^2}{15} = \frac{2601}{15} = 173.400\]</span></p>
+<p>Sum across all 3 quotients = <span class="math inline">\(469.225 +
+338.560 + 173.400 = 981.185\)</span></p>
+<ol start="2" type="1">
+<li>Patient:Doctor (p:d)</li>
+</ol>
+<p>Sum all ratings across each item for each Patient; Square these sums;
+divide by the number of rating counts within each patient; sum across
+these quotients.</p>
+<p><span class="math display">\[\text{p:d 1: } \frac{20^2}{5} =
+\frac{400}{5} = 80\]</span></p>
+<p><span class="math display">\[\text{p:d 2: } \frac{18^2}{5} =
+\frac{324}{5} = 64.8\]</span></p>
+<p>[continuing for all patients]</p>
+<p><span class="math display">\[\text{p:d 15: } \frac{15^2}{5} =
+\frac{225}{5} = 45\]</span></p>
+<p><span class="math display">\[\text{p:d 16: } \frac{19^2}{5} =
+\frac{361}{5} = 72.2\]</span></p>
+<p>Sum across all 16 quotients = 989.200</p>
+<ol start="3" type="1">
+<li>Item (i)</li>
+</ol>
+<p>Sum all ratings down each item; Square these sums; divide by the
+number of rating counts within each item; sum across these
+quotients.</p>
+<p><span class="math display">\[\text{Item 1: } \frac{59^2}{16} =
+\frac{3481}{16} = 217.5625\]</span></p>
+<p><span class="math display">\[\text{Item 2: } \frac{59^2}{16} =
+\frac{3481}{16} = 217.5625\]</span></p>
+<p><span class="math display">\[\text{Item 3: } \frac{55^2}{16} =
+\frac{3025}{16} = 189.0625\]</span></p>
+<p><span class="math display">\[\text{Item 4: } \frac{54^2}{16} =
+\frac{2916}{16} = 182.250\]</span></p>
+<p><span class="math display">\[\text{Item 5: } \frac{53^2}{16} =
+\frac{2809}{16} = 175.5625\]</span></p>
+<p>Sum across all 5 quotients = <span
+class="math inline">\((217.5625+217.5625+189.0625+182.250+175.5625) =
+982.000\)</span></p>
+<ol start="4" type="1">
+<li>Doctor X Item (di)</li>
+</ol>
+<p>Sum down each set of items for each doctor (there will be 15
+combinations); square these sums; divide each sum by the number of
+ratings that go into each of the 15 combinations; sum the quotients.</p>
+<p><span class="math display">\[\text{di1: }
+\frac{(4+4+3+3+3+4+3+4)^2}{8} = \frac{28^2}{8} = \frac{784}{8} =
+98.000\]</span></p>
+<p><span class="math display">\[\text{di2: }
+\frac{(4+4+4+3+3+4+3+4)^2}{8} = \frac{29^2}{8} = \frac{841}{8} =
+105.125\]</span></p>
+<p>[continuing for all doctor-item combinations]</p>
+<p><span class="math display">\[\text{di14: } \frac{(3+3+4)^2}{3} =
+\frac{10^2}{3} = \frac{100}{3} = 33.333\]</span></p>
+<p><span class="math display">\[\text{di15: } \frac{(3+3+3)^2}{3} =
+\frac{9^2}{3} = \frac{81}{3} = 27.000\]</span></p>
+<p>Sum across all quotients = 983.808</p>
+<ol start="5" type="1">
+<li>PatientXItem:Doctor (pi:d) = TOTAL</li>
+</ol>
+<p>Note that this is the total uncorrected sums of squares. Each
+individual rating is first squared. Then these are summed across all
+ratings.</p>
+<p><span class="math display">\[4^2 + 4^2 + 4^2 + 4^2 + 4^2 + 4^2 + 4^2
++ 3^2 + 3^2 + 4^2 + ... + 3^2 + 3^2 + 3^2 + 3^2 + 3^2 + 4^2 + 4^2 + 4^2
++ 4^2 + 3^2\]</span></p>
+<p>Summing across all values = 1000.000</p>
+<ol start="6" type="1">
+<li>Mean</li>
+</ol>
+<p>Sum FIRST across all values; square this sum; divide by the total
+number of ratings that went into the sum.</p>
+<p><span class="math display">\[\frac{(4 + 4 + 4 + 4 + 4 + ... + 3 + 3 +
+3 + 3 + 3 + 4 + 4 + 4 + 4 + 3)^2}{80} = \frac{280^2}{80} =
+\frac{78400}{80} = 980.000\]</span></p>
+<p>We can now put our Facet T-values into Table 7. below.</p>
+<h4
+id="table-7.-facets-and-t-values-for-the-narayanan-et-al.-2010-data-set">Table
+7. Facets and T-values for the Narayanan et al. (2010) data set</h4>
+<table>
+<colgroup>
+<col style="width: 87%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>T-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D (doctor)</td>
+<td>981.185</td>
+</tr>
+<tr>
+<td>P:D (patient nested in doctor)</td>
+<td>989.2</td>
+</tr>
+<tr>
+<td>I (item)</td>
+<td>982</td>
+</tr>
+<tr>
+<td>DI (doctor X item)</td>
+<td>983.808</td>
+</tr>
+<tr>
+<td>PI:D (patient X item nested in doctor) (Equivalent to Henderson’s
+“total”)</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>980</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-2-calculating-variance-coefficients-for-each-facet">Step 2:
+Calculating variance coefficients for each facet</h3>
+<p>As we know from the Henderson example, the next part is tedious. We
+have to get the sample sizes for the variance coefficients. Like
+Henderson, we will first put in the “easy” ones.</p>
+<ol type="1">
+<li>For the μ² term, ALL coefficients are based on the total number of
+cases involved in the study (denoted N; 80 for this data set).</li>
+<li>For the PI:D (Total which includes the highest level term plus
+error) facet, all coefficients are also based on the total number of
+cases involved in the study (denoted N).</li>
+<li>For each facet (except the Mean), the coefficient for that variance
+is also the total number of cases involved in the study (denoted N). For
+example, the coefficient for σ²(d) for effect D is N.</li>
+<li>For the σ²(pi:d) term column, the sample sizes are equal to the
+number of levels of that facet (D = 3, P:D = 16, I = 5, DI = 15 (there
+are 15 different DI combinations), for the Mean is always = 1, and for
+the highest order effect (PI:D – also known as the total by Henderson)
+is always = N.</li>
+</ol>
+<p>Brennan (2001a, equations 7.2-7.6 p. 219) discusses how each of the
+cell entries are generated. These equations are difficult to “unpack” so
+I will be using Henderson’s “brute force” approach that allows for every
+count to be taken into consideration when calculating the terms.</p>
+<p>When the data set is not missing any datapoints, Brennan uses a
+notation system for the coefficients in the other cells that need to be
+calculated. These are mostly simple, such as n(p) is the number of
+levels of the facet. In this design the n(d) = 3; n(p) = 16; n(i) = 5.
+However, n(r) is a unique notation. It is based on the number of
+“counts(individual ratings)” within each DI combination (recall there
+are 15 of them); square these values; sum them; divide by the number of
+counts in the entire data set.</p>
+<p><span class="math display">\[
+\frac{(8^2) + (8^2) + (8^2) + (8^2) + (8^2) + (5^2) + (5^2) + (5^2) +
+(5^2) + (5^2) + (3^2) + (3^2) + (3^2) + (3^2) + (3^2)}{80} = 6.125
+\]</span></p>
+<p>The results from Brennan’s notation are shown in Table 8 for this
+design. However, as noted, the entries ONLY work in a balanced design.
+When there are missing data, we need to go back to the Henderson
+approach.</p>
+<h4
+id="table-8.-facets-and-variance-coefficients-for-narayanan-et-al.-2010-data-set-with-brennan-2001a-notation">Table
+8. Facets and Variance Coefficients for Narayanan et al. (2010) data set
+with Brennan (2001a) Notation</h4>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 13%" />
+<col style="width: 7%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>σ²(d)</th>
+<th>σ²(p:d)</th>
+<th>σ²(i)</th>
+<th>σ²(di)</th>
+<th>σ²(pi:d)</th>
+<th>μ²</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>N</td>
+<td>n(i)*n(d)</td>
+<td>n(p)</td>
+<td>n(p)</td>
+<td>n(d)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>N</td>
+<td>N</td>
+<td>n(p)</td>
+<td>n(p)</td>
+<td>n(p)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>I</td>
+<td>n(r)*n(i)</td>
+<td>n(i)</td>
+<td>N</td>
+<td>n(r)*n(i)</td>
+<td>n(i)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>N</td>
+<td>n(i)*n(d)</td>
+<td>N</td>
+<td>N</td>
+<td>n(i)*n(d)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>PI:D (total for Henderson)</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>n(r)*n(i)</td>
+<td>n(i)</td>
+<td>n(p)</td>
+<td>n(r)</td>
+<td>1</td>
+<td>N</td>
+</tr>
+</tbody>
+</table>
+<p>Henderson’s approach to completing the “non-simple” cells in the
+coefficient matrix follows. It allows for missing data in the
+calculations. There are 16 unique values (highlighted) to calculate.</p>
+<h4
+id="table-9.-facets-and-variance-coefficients-for-narayanan-et-al.-2010-data-set-with-needed-values-1-16-noted">Table
+9. Facets and Variance Coefficients for Narayanan et al. (2010) data set
+with needed values 1-16 noted</h4>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 13%" />
+<col style="width: 7%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>σ²(d)</th>
+<th>σ²(p:d)</th>
+<th>σ²(i)</th>
+<th>σ²(di)</th>
+<th>σ²(pi:d)</th>
+<th>μ²</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>N</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>n(d)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>4</td>
+<td>N</td>
+<td>5</td>
+<td>6</td>
+<td>n(p)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>I</td>
+<td>7</td>
+<td>8</td>
+<td>N</td>
+<td>9</td>
+<td>n(i)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+<td>N</td>
+<td>n(i)*n(d)</td>
+<td>N</td>
+</tr>
+<tr>
+<td>PI:D (total for Henderson)</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+<td>N</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+<td>1</td>
+<td>N</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li><p>The σ²(p:d) term on D (data are collapsed across Items). Sample
+size starts by calculating the squared sum of:</p>
+<p>counts of each p:d term within each D, divided by the total number of
+counts for that D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{D1: } \frac{(5^2) + (5^2) + (5^2)
++ (5^2) + (5^2) + (5^2) + (5^2) + (5^2)}{40} = \frac{200}{40} = 5
++\]</span></p>
+<p><span class="math display">\[\text{D2: } \frac{(5^2) + (5^2) + (5^2)
++ (5^2) + (5^2)}{25} = \frac{125}{25} = 5 +\]</span></p>
+<p><span class="math display">\[\text{D3: } \frac{(5^2) + (5^2) +
+(5^2)}{15} = \frac{75}{15} = 5\]</span></p>
+<p><span class="math display">\[= 15\]</span> 2. The σ²(i) term on D
+(data are collapsed across P:D). Sample size starts by calculating the
+squared sum of:</p>
+<pre><code>counts of each i term within each D, divided by the total number of counts for that D. Then sum the quotients.</code></pre>
+<p><span class="math display">\[\text{D1: } \frac{(8^2) + (8^2) + (8^2)
++ (8^2) + (8^2)}{40} = \frac{320}{40} = 8 +\]</span></p>
+<p><span class="math display">\[\text{D2: } \frac{(5^2) + (5^2) + (5^2)
++ (5^2) + (5^2)}{25} = \frac{125}{25} = 5 +\]</span></p>
+<p><span class="math display">\[\text{D3: } \frac{(3^2) + (3^2) + (3^2)
++ (3^2) + (3^2)}{15} = \frac{45}{15} = 3\]</span></p>
+<p><span class="math display">\[= 16\]</span></p>
+<ol start="3" type="1">
+<li><p>The σ²(di) term on D (data are collapsed across P:D). Sample size
+starts by calculating the squared sum of:</p>
+<p>counts of each di term within each D, divided by the total number of
+counts for that D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{D1: } \frac{(8^2) + (8^2) + (8^2)
++ (8^2) + (8^2)}{40} = \frac{320}{40} = 8 +\]</span></p>
+<p><span class="math display">\[\text{D2: } \frac{(5^2) + (5^2) + (5^2)
++ (5^2) + (5^2)}{25} = \frac{125}{25} = 5 +\]</span></p>
+<p><span class="math display">\[\text{D3: } \frac{(3^2) + (3^2) + (3^2)
++ (3^2) + (3^2)}{15} = \frac{45}{15} = 3\]</span></p>
+<p><span class="math display">\[= 16\]</span></p>
+<ol start="4" type="1">
+<li><p>The σ²(d) term on P:D (data are collapsed across Items). Sample
+size starts by calculating the squared sum of:</p>
+<p>counts of each d term within each P:D, divided by the total number of
+counts for that P:D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{PD 1: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 2: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 3: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 4: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 5: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 6: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 7: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 8: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 9: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 10: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 11: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 12: } \frac{(5^2)}{5} =
+5+\]</span></p>
+<p><span class="math display">\[\text{PD 13: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 14: } \frac{(5^2)}{5} =
+5+\]</span></p>
+<p><span class="math display">\[\text{PD 15: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{PD 16: } \frac{(5^2)}{5} =
+5\]</span></p>
+<p><span class="math display">\[=80\]</span></p>
+<ol start="5" type="1">
+<li><p>The σ²(i) term on P:D. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each i term within each P:D, divided by the total number of
+counts for that P:D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{PD 1: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 2: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 3: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 4: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 5: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 6: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 7: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 8: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 9: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 10: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 11: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 12: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 13: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 14: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 15: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 16: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1\]</span></p>
+<p><span class="math display">\[=16\]</span></p>
+<ol start="6" type="1">
+<li><p>The σ²(di) term on P:D. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each di term within each P:D, divided by the total number
+of counts for that P:D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{PD 1: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 2: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 3: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 4: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 5: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 6: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 7: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 8: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 9: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 10: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 11: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 12: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 13: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 14: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 15: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{PD 16: } \frac{((1^2) + (1^2) +
+(1^2) + 1^2) + (1^2))}{5} = 1\]</span></p>
+<p><span class="math display">\[=16\]</span></p>
+<ol start="7" type="1">
+<li><p>The σ²(d) term on I. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each d term within each I, divided by the total number of
+counts for that I. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{I 1: } \frac{((8^2) + (5^2) +
+(3^2))}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 2: } \frac{((8^2) + (5^2) +
+(3^2))}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 3: } \frac{((8^2) + (5^2) +
+(3^2))}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 4: } \frac{((8^2) + (5^2) +
+(3^2))}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 5: } \frac{((8^2) + (5^2) +
+(3^2))}{16} = \frac{98}{16} = 6.125\]</span></p>
+<p><span class="math display">\[=30.625\]</span></p>
+<ol start="8" type="1">
+<li><p>The σ²(p:d) term on I. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each p:d term within each I, divided by the total number of
+counts for that I. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{I 1: } \frac{((1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2)+(1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2))}{16} = \frac{16}{16}
+=1+\]</span></p>
+<p><span class="math display">\[\text{I 2: } \frac{((1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2)+(1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2))}{16} = \frac{16}{16}
+=1+\]</span></p>
+<p><span class="math display">\[\text{I 3: } \frac{((1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2)+(1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2))}{16} = \frac{16}{16}
+=1+\]</span></p>
+<p><span class="math display">\[\text{I 4: } \frac{((1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2)+(1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2))}{16} = \frac{16}{16}
+=1+\]</span></p>
+<p><span class="math display">\[\text{I 5: } \frac{((1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2)+(1^2)+(1^2)+(1^2)+
+(1^2)+(1^2)+(1^2)+ (1^2)+(1^2)+(1^2))}{16} = \frac{16}{16}
+=1\]</span></p>
+<p><span class="math display">\[=5\]</span></p>
+<ol start="9" type="1">
+<li><p>The σ²(di) term on I. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each di term within each I, divided by the total number of
+counts for that I. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{I 1: } \frac{(8^2) + (5^2) +
+(3^2)}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 2: } \frac{(8^2) + (5^2) +
+(3^2)}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 3: } \frac{(8^2) + (5^2) +
+(3^2)}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 4: } \frac{(8^2) + (5^2) +
+(3^2)}{16} = \frac{98}{16} = 6.125 +\]</span></p>
+<p><span class="math display">\[\text{I 5: } \frac{(8^2) + (5^2) +
+(3^2)}{16} = \frac{98}{16} = 6.125\]</span></p>
+<p><span class="math display">\[=30.625\]</span></p>
+<ol start="10" type="1">
+<li><p>The σ²(d) term on DI. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each d term within each DI, divided by the total number of
+counts for that DI. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{DI 1: } \frac{8^2}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 2: } \frac{8^2}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 3: } \frac{8^2}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 4: } \frac{8^2}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 5: } \frac{8^2}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 6: } \frac{5^2}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 7: } \frac{5^2}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 8: } \frac{5^2}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 9: } \frac{5^2}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 10: } \frac{5^2}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 11: } \frac{3^2}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 12: } \frac{3^2}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 13: } \frac{3^2}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 14: } \frac{3^2}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 15: } \frac{3^2}{3} =
+3\]</span></p>
+<p><span class="math display">\[=80\]</span></p>
+<ol start="11" type="1">
+<li><p>The σ²(p:d) term on DI. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each p:d term within each DI, divided by the total number
+of counts for that DI. Then sum the quotients.</p>
+<p><span class="math display">\[\text{DI 1: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{8} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 2: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{8} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 3: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{8} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 4: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{8} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 5: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{8} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 6: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2)}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 7: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2)}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 8: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2)}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 9: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2)}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 10: } \frac{(1^2) + (1^2) +
+(1^2) + (1^2) + (1^2)}{5} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 11: } \frac{(1^2) + (1^2) +
+(1^2)}{3} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 12: } \frac{(1^2) + (1^2) +
+(1^2)}{3} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 13: } \frac{(1^2) + (1^2) +
+(1^2)}{3} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 14: } \frac{(1^2) + (1^2) +
+(1^2)}{3} = 1 +\]</span></p>
+<p><span class="math display">\[\text{DI 15: } \frac{(1^2) + (1^2) +
+(1^2)}{3} = 1\]</span></p>
+<p><span class="math display">\[=15\]</span></p></li>
+<li><p>The σ²(i) term on DI. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each i term within each DI, divided by the total number of
+counts for that DI. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[\text{DI 1: } \frac{(8^2)}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 2: } \frac{(8^2)}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 3: } \frac{(8^2)}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 4: } \frac{(8^2)}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 5: } \frac{(8^2)}{8} = 8
++\]</span></p>
+<p><span class="math display">\[\text{DI 6: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 7: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 8: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 9: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 10: } \frac{(5^2)}{5} = 5
++\]</span></p>
+<p><span class="math display">\[\text{DI 11: } \frac{(3^2)}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 12: } \frac{(3^2)}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 13: } \frac{(3^2)}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 14: } \frac{(3^2)}{3} = 3
++\]</span></p>
+<p><span class="math display">\[\text{DI 15: } \frac{(3^2)}{3} =
+3\]</span></p>
+<p><span class="math display">\[=80\]</span></p>
+<ol start="13" type="1">
+<li><p>The σ²(d) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each d term within each mean, divided by the total number
+of counts for the mean.</p></li>
+</ol>
+<p><span class="math display">\[\text{Mean: } \frac{(40^2) + (25^2) +
+(15^2)}{80} = \frac{1600 + 625 + 225}{80} = \frac{2450}{80} =
+30.625\]</span></p>
+<ol start="14" type="1">
+<li><p>The σ²(p:d) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each p:d term within each mean, divided by the total number
+of counts for the mean.</p></li>
+</ol>
+<p><span class="math display">\[ \text{Mean: }
+\frac{(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)+(5^2)}{80}\]</span>
+<span class="math display">\[
+=\frac{25 \times 16}{80} = \frac{400}{80} = 5
+\]</span></p>
+<ol start="15" type="1">
+<li><p>The σ²(i) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each i term within each mean, divided by the total number
+of counts for the mean</p></li>
+</ol>
+<p><span class="math display">\[\text{Mean: } \frac{(16^2) + (16^2) +
+(16^2) + (16^2) + (16^2)}{80} = \frac{256 \times 5}{80} =
+\frac{1280}{80} = 16\]</span></p>
+<ol start="16" type="1">
+<li><p>The σ²(di) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each di term within each mean, divided by the total number
+of counts for the mean.</p></li>
+</ol>
+<p><span class="math display">\[\text{Mean: } \frac{(8^2) +
+(5^2)+(3^2)+(8^2)+(5^2)+(3^2)+(8^2)+(5^2)+(3^2)+(8^2)+(5^2)+(3^2)+(
+8^2)+(5^2)+(3^2)}{80}\]</span></p>
+<p><span class="math display">\[= \frac{64 \times 5 + 25 \times 5 + 9
+\times 5}{80}\]</span></p>
+<p><span class="math display">\[= \frac{320 + 125 + 45}{80}\]</span></p>
+<p><span class="math display">\[= \frac{490}{80} = 6.125\]</span></p>
+<p>We insert the calculated values into their respective cells (Table
+10) and bring the T-values down to complete the table.</p>
+<h4
+id="table-10.-facet-and-variance-coefficients-for-narayanan-et-al.-2010-data-set">Table
+10. Facet and Variance Coefficients for Narayanan et al. (2010) data
+set</h4>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 11%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>σ²(d)</th>
+<th>σ²(p:d)</th>
+<th>σ²(i)</th>
+<th>σ²(di)</th>
+<th>σ²(pi:d)</th>
+<th>μ²</th>
+<th>T-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>80</td>
+<td>15</td>
+<td>16</td>
+<td>16</td>
+<td>3</td>
+<td>80</td>
+<td>981.185</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>80</td>
+<td>80</td>
+<td>16</td>
+<td>16</td>
+<td>16</td>
+<td>80</td>
+<td>989.2</td>
+</tr>
+<tr>
+<td>I</td>
+<td>30.625</td>
+<td>5</td>
+<td>80</td>
+<td>30.625</td>
+<td>5</td>
+<td>80</td>
+<td>982</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>80</td>
+<td>15</td>
+<td>80</td>
+<td>80</td>
+<td>15</td>
+<td>80</td>
+<td>983.808</td>
+</tr>
+<tr>
+<td>PI:D (total for Henderson)</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>30.625</td>
+<td>5</td>
+<td>16</td>
+<td>6.125</td>
+<td>1</td>
+<td>80</td>
+<td>980</td>
+</tr>
+</tbody>
+</table>
+<p>Using the data in Table 10, (via matrix procedures or regressing the
+T-values on the coefficients) the variance components for the facets are
+calculated. Below is the output from SPSS. Because μ² is a constant and
+has no variance, it is eliminated from the regression analysis. However,
+the Constant (978.972) when divided by the sample size (80) is 12.237,
+which is the mean variance component if matrix procedures had been
+used.</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 27%" />
+<col style="width: 27%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Model</th>
+<th>Model</th>
+<th>Unstandardized Coefficients</th>
+<th>Unstandardized Coefficients</th>
+<th>Standardized Coefficients</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Model</td>
+<td>Model</td>
+<td>B</td>
+<td>Std. Error</td>
+<td>Beta</td>
+</tr>
+<tr>
+<td>1</td>
+<td>(Constant)</td>
+<td>978.972</td>
+<td>.000</td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>D</td>
+<td>.002</td>
+<td>.000</td>
+<td>.008</td>
+</tr>
+<tr>
+<td>1</td>
+<td>P_D</td>
+<td>.092</td>
+<td>.000</td>
+<td>.442</td>
+</tr>
+<tr>
+<td>1</td>
+<td>I</td>
+<td>.028</td>
+<td>.000</td>
+<td>.128</td>
+</tr>
+<tr>
+<td>1</td>
+<td>DI</td>
+<td>-.016</td>
+<td>.000</td>
+<td>-.071</td>
+</tr>
+<tr>
+<td>1</td>
+<td>PI_D_E</td>
+<td>.157</td>
+<td>.000</td>
+<td>.625</td>
+</tr>
+</tbody>
+</table>
+<p>Examination of the variance components of the facets and their
+relative contribution to variance away from the mean (Table 11), we can
+see that most of the variance (56%) in this data set is due to the PI:D
+facet. This is problematic from an interpretive standpoint, indicating
+it is not possible to really understand the variance in the data set.
+33% of the variance is due to the P:D facet – within patient ratings of
+the doctors. In examining the raw data, we see that the doctors are all
+rated similarly by all patients (very little variance in the data set
+with which to work).</p>
+<h4
+id="table-11.-variance-components-from-narayanan-et-al.-2010-data">Table
+11. Variance Components from Narayanan et al. (2010) data</h4>
+<table>
+<thead>
+<tr>
+<th>Facet</th>
+<th>Variance Component</th>
+<th>Proportion of Variance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>.002</td>
+<td>0.007</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>.092</td>
+<td>0.33</td>
+</tr>
+<tr>
+<td>I</td>
+<td>.028</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>-.016**</td>
+<td>0</td>
+</tr>
+<tr>
+<td>PI:D</td>
+<td>.157</td>
+<td>0.563</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="calculating-generalizability-and-dependability-g-and-d-coefficients">Calculating
+Generalizability and Dependability (G and D) Coefficients</h2>
+<p>Using the Variance Component (VC) values, Generalizability (G) and
+Dependability (D) coefficients can be calculated. It is most likely that
+we would want to know “Are the patients reliable in making their ratings
+of the doctors?” That is, “patient” would be the face of
+differentiation. We might also want to know how reliable the items are
+so we can also use item as a facet of differentiation. We can also
+specify doctor as a facet of differentiation, but looking at the data,
+there is so little variance on this facet that the results will not
+likely be reliable.</p>
+<p>To calculate G and D, we need the variance components for each facet
+<strong>as well as the denominators</strong> for each of the facets that
+will serve in the error term (the facet(s) of generalization) when
+calculating the G and D for each facet of differentiation. Note that
+these denominators will differ depending on which facet is the facet of
+differentiation, and which facet/facets are being generalized
+across.</p>
+<p>The calculations for the denominators are extensions on Brennan’s
+(2001a, p. 232) equation 7.28. The calculation modifies equation 7.28
+for each unique value within the facet of differentiation and returns
+the harmonic mean (see Appendix A for a description of the use of
+harmonic mean) of those values to give the appropriate level
+coefficient. The general formula for determining levels used for G
+Theory Calculations can be determined as follows:</p>
+<p>Let:</p>
+<ul>
+<li>G = the set of grouping combinations for the facet of
+differentiation. For example, if the facet of differentiation is
+“doctors”, the set of grouping combinations would simply be unique
+values of doctors (A, B, C), whereas if the facet of differentiation is
+“patients:doctors” the set of grouping combinations would be each unique
+combinations of patients and doctors [(1, A), (2, A), …, (16, C)].</li>
+<li>V = the set of grouping combinations for the variance over which
+generalization is occurring. For example, if we are generalizing the
+facet of p:d across items, we will want to determine the levels for
+variance(items), given the facet of differentiation p:d.</li>
+<li>C(g) = count of occurrences of the dependent variable for the
+grouping combination, g ∈ G</li>
+</ul>
+<p>For each g, the level is determined by the sum of counts squared over
+the sum of square counts for v ∈ V: <span class="math display">\[
+Lg =  \frac{\left(\sum_{v=1}^{V}C\left(g,
+v\right)\right)^{2}}{\sum_{v=1}^{V}C\left(g, v\right)^{2}}
+\]</span></p>
+<p>When the data set is balanced and complete (i.e. no missing terms)
+this expression simplifies to , which is equal to the counts of unique
+combinations of facets in the variance in question for a given facet of
+differentiation.</p>
+<p>It should be straightforward to the reader to see why this is the
+case. Let’s imagine briefly that for this design [items x
+(patients:doctors)] we had a balanced nesting of 5 items, 3 doctors, and
+5 patients per doctor (instead of 8, 5, and 3 patients respectively). If
+the facet of differentiation was ‘doctors’ and we were trying to
+determine the appropriate level for ‘patients:doctors’ the calculation
+would be as follows: <span class="math display">\[
+Lg =  \frac{\left(\sum_{v=1}^{5}5\right)^{2}}{\sum_{v=1}^{5}5^{2}}
+=  \frac{\left(5*5\right)^{2}}{5*5^{2}}  = 5
+\]</span></p>
+<p>Here each C(g,v) = 5 because there are 5 items for each combination
+of patient:doctor, and since there are 5 patients in the balanced
+example v ∈ [1, 5]. Thus, in the balanced case where there are 5
+patients per doctor, it makes sense that we must correct the
+variance(patient:doctor) by a factor of 5 when we are considering
+doctors as the facet of differentiation!</p>
+<p>Notice that thus far we’ve actually only calculated the level, L, for
+a unique facet of differentiation, g. When the data set is balanced, or
+we are dealing with an unnested variable (i.e. “items” is unnested in
+our current [items x (patients:doctors)] design) in an unbalanced
+design, each unique g will have the same level, L. For example, consider
+the unbalanced dataset in question. If we are considering ‘items’ as the
+facet of differentiation, and calculating the levels for ‘p:d’, it
+should be clear that each of the five items, g, has 16 unique
+combinations. However, this is not the case for facets involved with
+unbalanced or missing data. We must extend our definition of L to
+account for all g ∈ G by taking the harmonic mean of each Lg: <span
+class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{\sum_{v=1}^{V}C\left(g,
+v\right)^{2}}{\left(\sum_{v=1}^{V}C\left(g, v\right)\right)^{2}}}
+\]</span> The harmonic mean is necessary as we are accounting for the
+ratio between the counts of the variance in question and the chosen
+facet of differentiation. When data are balanced and complete this
+expression is unnecessary as gi = gk for all g ∈ G and thus L = Lg.
+However, this is not the case for unbalanced and missing data, so we
+must correct the variance by the harmonic mean of all Lg, L.</p>
+<p>Table 12 shows the denominators to be used in our unbalanced data set
+with the complete worked examples following.</p>
+<h3
+id="table-12.-denominators-for-each-effect-when-the-facet-of-differentiation-changes-when-calculating-g-and-d">Table
+12. Denominators for each effect when the facet of differentiation
+changes when calculating G and D</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 30%" />
+<col style="width: 29%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Variance Term</th>
+<th>P:D Facet of Differentiation Denominator for G and D</th>
+<th>I Facet of Differentiation Denominator for G and D</th>
+<th>D Facet of Differentiation Denominator for G and D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>σ²(d)</td>
+<td>1</td>
+<td>2.612</td>
+<td>1</td>
+</tr>
+<tr>
+<td>σ²(p:d)</td>
+<td>1</td>
+<td>16</td>
+<td>4.557</td>
+</tr>
+<tr>
+<td>σ²(i)</td>
+<td>5</td>
+<td>1</td>
+<td>5</td>
+</tr>
+<tr>
+<td>σ²(i x d)</td>
+<td>5</td>
+<td>2.612</td>
+<td>5</td>
+</tr>
+<tr>
+<td>σ²(i x (p:d))</td>
+<td>5</td>
+<td>16</td>
+<td>22.785</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li><p>Level of the σ²(d) term on facet of differentiation P:D. Since d
+is included in P:D, there is a single unique D for each P:D. L =
+1</p></li>
+<li><p>Level of the σ²(p:d) term on facet of differentiation P:D. Again,
+p:d is included in P:D, so there is a single unique P:D for each P:D. L
+= 1</p></li>
+<li><p>Level of the σ²(i) term on facet of differentiation P:D. The sum
+of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(p:d, i) = 1, v = 5 : 1 count of item for each unique combination of
+p:d and i with i ∈ [1, 5] for each p:d.</p></li>
+</ol>
+<p><span class="math display">\[
+L = Lg
+=  \frac{\left(\sum_{v=1}^{5}1\right)^{2}}{\sum_{v=1}^{5}1^{2}}  = 5
+\]</span></p>
+<ol start="4" type="1">
+<li><p>Level of the σ²(i x d) term on facet of differentiation P:D. The
+sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(p:d, i x d) = 1, v = 5: Again there is 1 count of item x doctor for
+each unique combination of p:d and i x d (notice that d occurs in both)
+with i x d ∈ [1, 5] for each p:d.</p></li>
+</ol>
+<p><span class="math display">\[
+L = Lg
+=  \frac{\left(\sum_{v=1}^{5}1\right)^{2}}{\sum_{v=1}^{5}1^{2}}  = 5
+\]</span></p>
+<ol start="5" type="1">
+<li><p>Level of the σ²(i x (p:d)) term on facet of differentiation P:D.
+The sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(p:d, i x (p:d)) = 1, v = 5: Again there is 1 count of i x (p:d))
+for each unique combination of p:d and i x (p:d)) (notice both d and p
+occurs in both) with i x (p:d)) ∈ [1, 5] for each p:d.</p></li>
+</ol>
+<p><span class="math display">\[
+L = Lg
+=  \frac{\left(\sum_{v=1}^{5}1\right)^{2}}{\sum_{v=1}^{5}1^{2}}  = 5
+\]</span></p>
+<ol start="6" type="1">
+<li><p>Level of the σ²(d) term on facet of differentiation I. The sum of
+counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, d) = <span class="math inline">\(\left|p_{v}\right|\)</span> ,
+for p = [8, 5, 3] with v ∈ [1, 3]; g ∈ [1, 5]. Since i is not involved
+with the unbalanced nesting, all levels of i, i ∈ [1, 5], will be the
+same.</p></li>
+</ol>
+<p><span class="math display">\[
+L = L1-5
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+5+3\right)^{2}}{(8^{2}+5^{2}+3^{2})}  =  \frac{256}{98}  =
+2.612
+\]</span></p>
+<ol start="7" type="1">
+<li><p>Level of the σ²(p:d) term on facet of differentiation I. The sum
+of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, p:d) = 1, v ∈ [1, 16]. For each unique i, there will be 16
+unique counts of p:d.</p></li>
+</ol>
+<p><span class="math display">\[
+L = L1-5
+=  \frac{\left(\sum_{v=1}^{16}1\right)^{2}}{\sum_{v=1}^{163}1^{2}}   =
+16
+\]</span></p>
+<ol start="8" type="1">
+<li><p>Level of the σ²(i) term on facet of differentiation I. Since i is
+included in I, there is a single unique i for each I. L = 1</p></li>
+<li><p>Level of the σ²(i x d) term on facet of differentiation I. The
+sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, i x d) = <span class="math inline">\(\left|p_{v}\right|\)</span>
+, for p = [8, 5, 3] with v ∈ [1, 3]; g ∈ [1, 5]. Since i is not involved
+with the unbalanced nesting, all levels of i, i ∈ [1, 5], will be the
+same.</p></li>
+</ol>
+<p><span class="math display">\[
+L = L1-5
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+5+3\right)^{2}}{(8^{2}+5^{2}+3^{2})}  =  \frac{256}{98}  =
+2.612
+\]</span></p>
+<ol start="10" type="1">
+<li><p>Level of the σ²(i x (p:d)) term on facet of differentiation I.
+The sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, I x (p:d)) = 1, v ∈ [1, 16]. For each unique i, there will be 16
+unique counts of i x(p:d).</p></li>
+</ol>
+<p><span class="math display">\[
+L = L1-5
+=  \frac{\left(\sum_{v=1}^{16}1\right)^{2}}{\sum_{v=1}^{163}1^{2}} = 16
+\]</span></p>
+<ol start="11" type="1">
+<li>Level of the σ²(d) term on facet of differentiation D. Since d is
+included in D, there is a single unique D for each D.</li>
+</ol>
+<p><span class="math display">\[
+L = 1
+\]</span></p>
+<ol start="12" type="1">
+<li><p>Level of the σ²(p:d) term on facet of differentiation D. The sum
+of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, p:d) = 5, for [g =A, v ∈ [1, 8]; g=B, v ∈ [1, 5]; g=C, v ∈ [1,
+3]]. Thus we have different levels of patients:doctors for each unique
+doctor.</p></li>
+</ol>
+<p><span class="math display">\[
+L_A =  \frac{\left(\sum_{v=1}^{8}5\right)^{2}}{\sum_{v=1}^{8}5^{2}}  = 8
+\]</span></p>
+<p><span class="math display">\[
+L_B =  \frac{\left(\sum_{v=1}^{5}5\right)^{2}}{\sum_{v=1}^{5}5^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+L_C =  \frac{\left(\sum_{v=1}^{3}5\right)^{2}}{\sum_{v=1}^{3}5^{2}}  = 3
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{3}{\frac{1}{8}+\frac{1}{5}+\frac{1}{3}}  =
+4.557
+\]</span></p>
+<ol start="13" type="1">
+<li><p>Level of the σ²(i) term on facet of differentiation D. The sum of
+counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, i) = <span class="math inline">\(\left|g\right|\)</span> , for
+g=[8, 5, 3] and v = 5. There are g counts of each item [1, 5]. For
+example, there are 8 counts of items [1, 5] for doctor, d, A because
+there are 8 instances of 8 (by marginalizing over patients).</p></li>
+</ol>
+<p><span class="math display">\[
+L_A =  \frac{\left(\sum_{v=1}^{5}8\right)^{2}}{\sum_{v=1}^{5}8^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+L_B =  \frac{\left(\sum_{v=1}^{5}5\right)^{2}}{\sum_{v=1}^{5}5^{2}} = 5
+\]</span></p>
+<p><span class="math display">\[
+L_C =  \frac{\left(\sum_{v=1}^{5}3\right)^{2}}{\sum_{v=1}^{5}3^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+L = Lc = L_B = L_A = 5
+\]</span></p>
+<ol start="14" type="1">
+<li><p>Level of the σ²(i x d) term on facet of differentiation D. The
+sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, i x d) = <span class="math inline">\(\left|p\right|\)</span> ,
+for p=[8, 5, 3] and v = 5. There are p counts of each item, v, [1, 5].
+This is identical to the uncrossed items.</p></li>
+</ol>
+<p><span class="math display">\[
+L_A =  \frac{\left(\sum_{v=1}^{5}8\right)^{2}}{\sum_{v=1}^{5}8^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+L_B =  \frac{\left(\sum_{v=1}^{5}5\right)^{2}}{\sum_{v=1}^{5}5^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+L_C =  \frac{\left(\sum_{v=1}^{5}3\right)^{2}}{\sum_{v=1}^{5}3^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+L = Lc = L_B = L_A = 5
+\]</span></p>
+<ol start="15" type="1">
+<li><p>Level of the σ²(i x (p:d)) term on facet of differentiation D.
+The sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, i x (p:d)) = 1, for v=[pg*5] with p=[8, 5, 3]. For each doctor,
+there is a single unique count of items crossed with the nested
+patient:doctor. Thus, to obtain the level for each unique facet of
+differentiation, g, we must sum over v, which is patients * items or p*5
+(since patients is unbalanced under doctors and items is constant
+5).</p></li>
+</ol>
+<p><span class="math display">\[
+L_A
+=  \frac{\left(\sum_{v=1}^{8*5}1\right)^{2}}{\sum_{v=1}^{8*5}1^{2}}  =  \frac{1600}{40}  =
+40
+\]</span></p>
+<p><span class="math display">\[
+L_A
+=  \frac{\left(\sum_{v=1}^{5*5}1\right)^{2}}{\sum_{v=1}^{5*5}1^{2}}  =  \frac{625}{25}  =
+25
+\]</span></p>
+<p><span class="math display">\[
+L_A
+=  \frac{\left(\sum_{v=1}^{3*5}1\right)^{2}}{\sum_{v=1}^{3*5}1^{2}}  =  \frac{225}{15}  =
+15
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{3}{\frac{1}{40}+\frac{1}{25}+\frac{1}{15}}  =
+22.785
+\]</span></p>
+<p>In Table 13 each of the generalizability coefficients (G and D; also
+referred to as <span class="math inline">\(E\rho^2\)</span> and <span
+class="math inline">\(\Phi\)</span>), are calculated as a ratio of: true
+variance/(true variance + error variance). “True variance” is signified
+by the term “tau” (<span class="math inline">\(\tau\)</span>) (and in
+general is equal to the variance of the facet of differentiation, more
+below) and the denominator represents “<span
+class="math inline">\(\tau\)</span>” + error variance. Error variances
+for generalizability and dependability coefficients are referred to as
+<span class="math inline">\(\delta\)</span> and <span
+class="math inline">\(\Delta\)</span> respectively. Notice that for the
+D-coefficients, more terms are added into the denominator that will
+result in lower values for D versus G coefficients. Error variances are
+comprised as indicated in the notes after Table 13.</p>
+<p>For nested facets of differentiation, such as patients nested in
+doctors, it is imperative that the researcher understands the true
+variance that they seek to measure. According to Brennan’s (2001a)
+discussion on group means (5.3, page 157) the generalizability
+coefficient (G) of the facet of differentiation (p:d) can assess the
+generalizability of the patient ratings for “a randomly selected doctor”
+and would result in the formula <span class="math inline">\(G(p:d) =
+σ²_{p:d}/[σ²{p:d} + σ²{pi:d}/levels_{pi:d}]\)</span>. Where <span
+class="math inline">\(\tau\)</span> represents the variance component of
+p:d (0.092) and the error variance is 0.157/5. If, however, we wanted
+the generalizability coefficient that represents patient ratings over
+“all doctors” then the <span class="math inline">\(\tau\)</span> needs
+to include both the p:d and d variance components [<span
+class="math inline">\(\tau = σ²(p:d) + σ² (d)\)</span>, 0.092 and .002,
+respectively)]. We will assume, in this example exercise, that we want
+the latter interpretation of generalizability for patient ratings.</p>
+<h3
+id="table-13.-calculating-g-and-d-coefficients-for-narayanan-et-al.-2010-data">Table
+13. Calculating G and D Coefficients for Narayanan et al. (2010)
+data</h3>
+<h4 id="generalizability-coefficient-g">Generalizability Coefficient
+(G)</h4>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 32%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet of Differentiation = P:D</th>
+<th>Facet of Differentiation = I</th>
+<th>Facet of Differentiation = D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau +
+\delta)\)</span></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau +
+\delta)\)</span></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau +
+\delta)\)</span></td>
+</tr>
+<tr>
+<td><span class="math inline">\(\tau = \text{VC(P:D)} +
+\text{VC(D)}\)</span> <br><span class="math inline">\(\tau = 0.092 +
+0.002 = 0.094\)</span></td>
+<td><span class="math inline">\(\tau = \text{VC(I)} =
+0.028\)</span></td>
+<td><span class="math inline">\(\tau = \text{VC(D)} =
+0.002\)</span></td>
+</tr>
+<tr>
+<td><span class="math inline">\(\delta =
+\text{VC(PI:D)}/\text{Level}_{P:D}(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0.157/5 = 0.031\)</span></td>
+<td><span class="math inline">\(\delta =
+\text{VC(IxD)}/\text{Level}_I(\text{IxD}) +
+\text{VC(PI:D)}/\text{Level}_I(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0/2.61 + 0.157/16 = 0.010\)</span></td>
+<td><span class="math inline">\(\delta =
+\text{VC(P:D)}/\text{Level}_D(\text{P:D}) +
+\text{VC(IxD)}/\text{Level}_D(\text{IxD}) +
+\text{VC(PI:D)}/\text{Level}_D(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0.092/4.557 + 0/5 + 0.157/22.785 =
+0.027\)</span></td>
+</tr>
+<tr>
+<td><span class="math inline">\(E\rho^2 = 0.094/(0.094+0.031) =
+\mathbf{0.752}\)</span></td>
+<td><span class="math inline">\(E\rho^2 = 0.028/(0.028+0.010) =
+\mathbf{0.737}\)</span></td>
+<td><span class="math inline">\(E\rho^2 = 0.002/(0.002+0.027) =
+\mathbf{0.069}\)</span></td>
+</tr>
+</tbody>
+</table>
+<h4 id="dependability-coefficient-d">Dependability Coefficient (D)</h4>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 32%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet of Differentiation = P:D</th>
+<th>Facet of Differentiation = I</th>
+<th>Facet of Differentiation = D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="math inline">\(\Phi = \tau/(\tau +
+\Delta)\)</span></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau +
+\Delta)\)</span></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau +
+\Delta)\)</span></td>
+</tr>
+<tr>
+<td><span class="math inline">\(\Delta = (0.028/5) + (0/5) + (0.157/5) =
+0.037\)</span></td>
+<td><span class="math inline">\(\Delta = (0.002/2.61) + (0.092/16) +
+(0/2.61) + (0.157/16) = 0.016\)</span></td>
+<td><span class="math inline">\(\Delta = (0.028/5) + (0.092/4.557) +
+(0/5) + (0.157/22.785) = 0.033\)</span></td>
+</tr>
+<tr>
+<td><span class="math inline">\(\Phi = 0.094/(0.094 + 0.037) =
+\mathbf{0.718}\)</span></td>
+<td><span class="math inline">\(\Phi = 0.028/(0.028 + 0.016) =
+\mathbf{0.636}\)</span></td>
+<td><span class="math inline">\(\Phi = 0.002/(0.002 + 0.033) =
+\mathbf{0.057}\)</span></td>
+</tr>
+</tbody>
+</table>
+<h4 id="notes">Notes:</h4>
+<p>* <span class="math inline">\(\delta\)</span> = Respective Error
+Variance for G = sum of all VCs (except the VC of differentiation) that
+contain the facet of differentiation and at least one facet of
+generalization, each divided by the size of the product of the
+respective facets of generalization</p>
+<p>** VC = Respective Variance Component for facet of
+differentiation</p>
+<p>*** <span class="math inline">\(\Delta\)</span> = Respective Error
+Variance for D = sum of all VCs (except the VC of differentiation), each
+divided by the size of the product of the respective facets of
+generalization</p>
+<p>**** Because the DI variance component term is negative (-.016), we
+will substitute “0” for it when calculating the error variances for G
+and D, as suggested by Brennan (2001a).</p>
+<p>It is worth pointing out at this stage when we finally obtain our
+Generalizability coefficient (G) for the P:D effect (0.752), that is it
+substantially different from that reported in the Narayanan et
+al. (2010) paper (0.91 for “unaggregated G” and 0.80 for “aggregated G”,
+p. 371). This is due to the completely different approach used. We will
+continue to observe the more traditional approach introduced by
+Henderson and made popular by Brennan (2001a).</p>
+<h2 id="decision-study-d-study-coefficients">Decision Study (D-Study)
+Coefficients</h2>
+<p>Decision Studies utilize the variance components calculated from
+Generalizability Studies and manipulate the levels of facets to show how
+generalizability coefficients may be improved. For example, in this
+study we saw that the generalizability coefficient for p:d was below
+0.80, and a researcher may wonder how the coefficient would change if
+there were more items for the same variance. With balanced and complete
+studies this is straightforward as the user can just input a dictionary
+of potential study combinations. For the items x (patients:doctors) this
+may look like:</p>
+<pre><code>D_Study_Dict: {items: [6, 7, 8], patients: [5], doctors: [3]}</code></pre>
+<p>Such a D-Study would calculate G Coefficients for the balanced
+scenarios where there are 3 unique doctors with 5 unique patients per
+doctor, each answering 6, 7, or 8 items per study respectively. Working
+out the 6-item scenario, we would have the following table of pseudo
+counts:</p>
+<h3
+id="table-14-pseudo-counts-table-for-unbalanced-d-study-6-items-3-doctors-5-patients">Table
+14: Pseudo Counts Table for Unbalanced D Study (6 items, 3 Doctors, 5
+patients)</h3>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>5</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>… (table con’t)</p>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>2</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>… (table con’t)</p>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>2</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>4</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>5</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>… (table con’t)</p>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>1</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>2</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>4</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>5</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>6</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>We then would have new levels coefficients to evaluate p:d (Table
+15):</p>
+<h4
+id="table-15.-modified-levels-for-the-d-study-items-6-patients-5-doctors-3">Table
+15. Modified Levels for the D-Study {items: 6, patients: 5, doctors:
+3}</h4>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr>
+<th>Variance Term</th>
+<th>P:D Facet of Differentiation Denominator for G and D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>σ²(d)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>σ²(p:d)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>σ²(i)</td>
+<td>6</td>
+</tr>
+<tr>
+<td>σ²(i x d)</td>
+<td>6</td>
+</tr>
+<tr>
+<td>σ²(i x (p:d))</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>With the adjusted generalizability coefficients (Table 16):</p>
+<h4
+id="table-16.-g-coefficients-for-the-d-study-items-6-patients-5-doctors-3">Table
+16. G Coefficients for the D-Study {items: 6, patients: 5, doctors:
+3}</h4>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th>Generalizability Coefficient</th>
+<th>Facet of Differentiation = P:D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Generalizability (G)</strong></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau + \delta)\)</span>
+<br><br><span class="math inline">\(\tau = \text{VC(P:D)} +
+\text{VC(D)}\)</span> <br><span class="math inline">\(\tau = 0.092 +
+0.002 = 0.094\)</span> <br><br><span class="math inline">\(\delta =
+\text{VC(PI:D)}/\text{Level}_{P:D}(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0.157/6 = 0.026\)</span> <br><br><span
+class="math inline">\(E\rho^2 = 0.094/(0.094 + 0.026)\)</span> <br><span
+class="math inline">\(E\rho^2 = \mathbf{0.78}\)</span></td>
+</tr>
+<tr>
+<td><strong>Dependability (D)</strong></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau + \Delta)\)</span>
+<br><br><span class="math inline">\(\Delta = (0.028/6) + (0/6) +
+(0.157/6) = 0.031\)</span> <br><br><span class="math inline">\(\Phi =
+0.094/(0.094 + 0.031)\)</span> <br><span class="math inline">\(\Phi =
+\mathbf{0.752}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>We see in this example that the G and D coefficients for P:D improve
+with the addition of another item (and assuming that there are 5
+patients rating 3 doctors), indicating that for the same conditions this
+study would have been more generalizable had a greater number of items
+been included.</p>
+<p>We see in this example that the G and D coefficients for P:D improve
+with the addition of another item (and assuming that there are 5
+patients rating 3 doctors), indicating that for the same conditions this
+study would have been more generalizable had a greater number of items
+been included.</p>
+<p>However, D-Studies need not be balanced. Let’s turn our attention to
+the generalizability coefficients associated with the “items” facet
+(which indicates the effect of questionnaire items in delineating doctor
+quality from patients) if some other aspect of the study was modified.
+In the G-Study, recall we had 5 items and the following unbalanced
+nesting of patients under doctors: {A: 8, B:5, C:3}. A researcher may
+have 16 patients but wonder: “If the number of patients nested under
+doctors A, B, and C were 6, 5, 5 respectively, how would this affect the
+generalizability of “items”? For demonstration let’s perform a D Study
+with the following characteristics and associated pseudo counts table
+(Table 17):</p>
+<h3 id="d-study-items-5-a-6-b-5-c-5">D-Study: {items: 5, {A: 6, B: 5, C,
+5}}</h3>
+<h4 id="table-17.-pseudo-counts-for-d-study-items-5-a-6-b-5-c-5">Table
+17. Pseudo Counts for D-Study: {items: 5, {A: 6, B: 5, C, 5}}</h4>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p>… (table con’t)</p>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>1</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>2</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p>… (table con’t)</p>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>2</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>4</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p>… (table con’t)</p>
+<table>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>Item</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>1</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>2</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>3</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>4</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p>Using the method to calculate levels presented in Table 12, these new
+pseudo counts would result in the following levels (Table 18) for facet
+of differentiation, item.</p>
+<h4
+id="table-18.-modified-levels-for-the-d-study-items-5-a-6-b-5-c-5">Table
+18. Modified Levels for the D-Study: {items: 5, {A: 6, B: 5, C, 5}}</h4>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr>
+<th>Variance Term</th>
+<th>I Facet of Differentiation Denominator for G and D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>σ²(d)</td>
+<td>2.98</td>
+</tr>
+<tr>
+<td>σ²(p:d)</td>
+<td>16</td>
+</tr>
+<tr>
+<td>σ²(i)</td>
+<td>1</td>
+</tr>
+<tr>
+<td>σ²(i x d)</td>
+<td>2.98</td>
+</tr>
+<tr>
+<td>σ²(i x (p:d))</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<p>σ²(d)and σ²(i x (p:d)) remain the same because there are still 16
+unique combinations of p and d despite being distributed differently.
+However, σ²(d) and σ²(i x d) change because of this distribution.
+Example calculation for σ²(d) shown below (which is identical to σ²(i x
+d)):</p>
+<p>C(i, d) = |<span class="math inline">\(p_v\)</span>|, for p = [6, 5,
+5] with v ∈ [1, 3]; g ∈ [1, 5]. Since i is not involved with the
+unbalanced nesting, all levels of i, i ∈ [1, 5], will be the same.</p>
+<p><span class="math display">\[
+L = L1-5
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(6+5+5\right)^{2}}{(6^{2}+5^{2}+5^{2})}  =  \frac{256}{86}
+= 2.98
+\]</span></p>
+<p>As a small aside, the reader should notice that as we have nearly
+balanced data (6, 5, 5) the levels of σ²(d) on facet of differentiation,
+i, are nearly equivalent to the balanced case (L=3 for 3 doctors).</p>
+<h4
+id="table-19.-g-coefficients-for-the-d-study-items-5-a-6-b-5-c-5">Table
+19. G Coefficients for the D-Study: {items: 5, {A: 6, B: 5, C: 5}}</h4>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 69%" />
+</colgroup>
+<thead>
+<tr>
+<th>Coefficient</th>
+<th>Facet of Differentiation = I</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Generalizability (G)</strong></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau + \delta)\)</span>
+<br><br><span class="math inline">\(\tau = \text{VC(I)} = 0.028\)</span>
+<br><br><span class="math inline">\(\delta =
+\text{VC(IxD)}/\text{Level}_I(\text{IxD}) +
+\text{VC(PI:D)}/\text{Level}_I(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0/2.98 + 0.157/16 = 0.010\)</span>
+<br><br><span class="math inline">\(E\rho^2 = 0.028/(0.028+0.010) =
+\mathbf{0.737}\)</span></td>
+</tr>
+<tr>
+<td><strong>Dependability (D)</strong></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau + \Delta)\)</span>
+<br><br><span class="math inline">\(\Delta = (0.002/2.98) + (0.092/16) +
+(0/2.98) + (0.157/16)\)</span> <br><span class="math inline">\(\Delta =
+0.016\)</span> <br><br><span class="math inline">\(\Phi = 0.028/(0.028 +
+0.016) = \mathbf{0.636}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Our generalizability coefficients, G and D remain the same as in the
+prior example! This is a direct result of the fact that the D and DI
+variances are so low that they hardly affect the calculation (in the
+first example or this one), thus for any reasonable choice of 16 p:d
+these coefficients will remain approximately the same. Of course, the
+numbers of P and D may be increased to reduce these variances and
+improve the generalizability coefficients, but those exercises will be
+left for the reader.</p>
+<p>Our generalizability coefficients, G and D remain the same as in the
+prior example! This is a direct result of the fact that the D and DI
+variances are so low that they hardly affect the calculation (in the
+first example or this one), thus for any reasonable choice of 16 p:d
+these coefficients will remain approximately the same. Of course, the
+numbers of P and D may be increased to reduce these variances and
+improve the generalizability coefficients, but those exercises will be
+left for the reader.</p>
+<h2 id="additional-notes-regarding-urgenova-and-g-string_v">Additional
+notes Regarding urGENOVA and G-String_V</h2>
+<p>urGENOVA and G-String_V programs also calculate the Estimated Mean
+Squares and from those the estimated Sums of Squares. However, neither
+of these are needed for calculating G and D coefficients. In addition,
+as Brennan (2001a) notes, because the Estimated Mean Square equations
+are complicated, expressions for estimators of the variance components
+in terms of mean square are also complicated. It is simpler to express
+the estimators of the variance components with respect to T-terms.</p>
+<h2 id="another-sample-data-set">Another Sample Data Set</h2>
+<p>Another data set (the Narayana et al., 2010 with changed values for
+Doctor B (all ratings for all items increased by 1 point) and Doctor C
+(all ratings for all items lowered by 1 point) was generated (Table 20).
+This, not surprisingly, dramatically increases the variance on the
+“Doctor” facet, and the subsequent generalizability coefficients on
+which they are based.</p>
+<h3
+id="table-20.-modified-narayanan-data-set-for-more-variance-on-the-doctor-variable">Table
+20. Modified Narayanan data set for more variance on the Doctor
+variable</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 16%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>item1</th>
+<th>item2</th>
+<th>item3</th>
+<th>item4</th>
+<th>item5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>7</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>A</td>
+<td>8</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>B</td>
+<td>9</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>4</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>B</td>
+<td>12</td>
+<td>5</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>B</td>
+<td>13</td>
+<td>5</td>
+<td>5</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>C</td>
+<td>14</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+<p>The resulting Table 21 shows that all the T-values change (as they
+would be expected to do), but not the “count”-based values for the
+coefficients, since these are only based on the count-relevant values
+for each coefficient.</p>
+<h3
+id="table-21.-facet-and-variance-coefficients-for-modified-narayanan-data-set">Table
+21. Facet and Variance Coefficients for modified Narayanan data set</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 9%" />
+<col style="width: 11%" />
+<col style="width: 12%" />
+<col style="width: 6%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Facet</th>
+<th>σ²(d)</th>
+<th>σ²(p:d)</th>
+<th>σ²(i)</th>
+<th>σ²(di)</th>
+<th>σ²(pi:d)</th>
+<th>μ²</th>
+<th>T-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>80</td>
+<td>15</td>
+<td>16</td>
+<td>16</td>
+<td>3</td>
+<td>80</td>
+<td>1103.18</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>80</td>
+<td>80</td>
+<td>16</td>
+<td>16</td>
+<td>16</td>
+<td>80</td>
+<td>1111.2</td>
+</tr>
+<tr>
+<td>I</td>
+<td>30.625</td>
+<td>5</td>
+<td>80</td>
+<td>30.625</td>
+<td>5</td>
+<td>80</td>
+<td>1053.25</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>80</td>
+<td>15</td>
+<td>80</td>
+<td>80</td>
+<td>15</td>
+<td>80</td>
+<td>1105.81</td>
+</tr>
+<tr>
+<td>PI:D (total for Henderson)</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>80</td>
+<td>1122</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>30.625</td>
+<td>5</td>
+<td>16</td>
+<td>6.125</td>
+<td>1</td>
+<td>80</td>
+<td>1051.25</td>
+</tr>
+</tbody>
+</table>
+<p>The resulting Table 22 of variance components demonstrates that while
+the D variance component is dramatically changed, the others remain
+exactly the same.</p>
+<h3
+id="table-22.-variance-components-from-modified-narayanan-et-al.-2010-data">Table
+22. Variance Components from modified Narayanan et al. (2010) data</h3>
+<table>
+<thead>
+<tr>
+<th>Facet</th>
+<th>Variance Component</th>
+<th>Proportion of Variance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>1.03</td>
+<td>0.788</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>0.092</td>
+<td>0.07</td>
+</tr>
+<tr>
+<td>I</td>
+<td>0.028</td>
+<td>0.021</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>-0.016</td>
+<td>0</td>
+</tr>
+<tr>
+<td>PI:D</td>
+<td>0.157</td>
+<td>0.12</td>
+</tr>
+</tbody>
+</table>
+<p>This is a much more easily-interpretable set of variance components:
+Most of the variance is due to different ratings of the doctors (79%).
+That is, the doctors are performing differently as rated by their
+patients. The P:D effect is 7%, indicating that the patients are very
+consistent (not much variance is ascribed to them) in rating the
+different doctors. The items are also internally consistent with only 2%
+of the variance in the data set ascribed to using different items. The
+resulting generalizability coefficients for the P:D and D facets goes up
+dramatically (Table 23):</p>
+<h3
+id="table-23.-g-and-d-coefficients-for-modified-narayanan-et-al.-2010-data">Table
+23. G and D Coefficients for modified Narayanan et al. (2010) data</h3>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 30%" />
+<col style="width: 28%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr>
+<th>Coefficient</th>
+<th>Facet of Differentiation = P:D</th>
+<th>Facet of Differentiation = I</th>
+<th>Facet of Differentiation = D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Generalizability (G)</strong></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau + \delta)\)</span>
+<br><br><span class="math inline">\(\tau = \text{VC(P:D)} +
+\text{VC(D)}\)</span> <br><span class="math inline">\(\tau = 0.092 +
+1.030 = 1.122\)</span> <br><br><span class="math inline">\(\delta =
+\text{VC(PI:D)}/\text{Level}_{P:D}(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0.157/5 = 0.031\)</span> <br><br><span
+class="math inline">\(E\rho^2 = 1.122/(1.122 + 0.031)\)</span> <br><span
+class="math inline">\(E\rho^2 = \mathbf{0.973}\)</span></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau + \delta)\)</span>
+<br><br><span class="math inline">\(\tau = \text{VC(I)}\)</span>
+<br><span class="math inline">\(\tau = 0.028\)</span> <br><br><span
+class="math inline">\(\delta = \text{VC(IxD)}/\text{Level}_I(\text{IxD})
++ \text{VC(PI:D)}/\text{Level}_I(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0/2.61 + 0.157/16 = 0.010\)</span>
+<br><br><span class="math inline">\(E\rho^2 = 0.028/(0.028 +
+0.010)\)</span> <br><span class="math inline">\(E\rho^2 =
+\mathbf{0.737}\)</span></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau + \delta)\)</span>
+<br><br><span class="math inline">\(\tau = \text{VC(D)}\)</span>
+<br><span class="math inline">\(\tau = 1.030\)</span> <br><br><span
+class="math inline">\(\delta = \text{VC(P:D)}/\text{Level}_D(\text{P:D})
++ \text{VC(IxD)}/\text{Level}_D(\text{IxD}) +
+\text{VC(PI:D)}/\text{Level}_D(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0.092/4.557 + 0/5 + 0.157/22.785 =
+0.027\)</span> <br><br><span class="math inline">\(E\rho^2 =
+1.030/(1.030 + 0.027)\)</span> <br><span class="math inline">\(E\rho^2 =
+\mathbf{0.974}\)</span></td>
+</tr>
+<tr>
+<td><strong>Dependability (D)</strong></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau + \Delta)\)</span>
+<br><br><span class="math inline">\(\Delta = (0.028/5) + (0/5) +
+(0.157/5) = 0.037\)</span> <br><br><span class="math inline">\(\Phi =
+1.122/(1.122 + 0.037)\)</span> <br><span class="math inline">\(\Phi =
+\mathbf{0.968}\)</span></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau + \Delta)\)</span>
+<br><br><span class="math inline">\(\Delta = (1.030/2.61) + (0.092/16) +
+(0/2.61) + (0.157/16) = 0.410\)</span> <br><br><span
+class="math inline">\(\Phi = 0.028/(0.028 + 0.410)\)</span> <br><span
+class="math inline">\(\Phi = \mathbf{0.064}\)</span></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau + \Delta)\)</span>
+<br><br><span class="math inline">\(\Delta = (0.028/5) + (0.092/4.557) +
+(0/5) + (0.157/22.785) = 0.033\)</span> <br><br><span
+class="math inline">\(\Phi = 1.030/(1.030 + 0.033)\)</span> <br><span
+class="math inline">\(\Phi = \mathbf{0.969}\)</span></td>
+</tr>
+</tbody>
+</table>
+<h2 id="missing-data">Missing Data</h2>
+<p>Up to this point, there have been no missing data points in the
+calculations. However, many data sets do have missing data (in fact
+Henderson’s 1953 data set is mostly missing data). The procedure for
+calculating the variance components and denominators for calculating G
+and D values is presented next. Note that NO Decision-study follow ups
+can be done with missing data sets. We will use Narayanan et al.’s
+original (2010) data set again to go through the example with the
+following changes: There is 1 data point missing for each “doctor”
+(highlighted in red) (see Table 24). Note that the “counts” of ratings
+that go into the denominator of the “Squared sums” VARIES as opposed to
+remaining constant across the facet.</p>
+<h3
+id="table-24.-narayanan-et-al.-2010-data-set-with-3-missing-data-points.">Table
+24. Narayanan et al. (2010) data set with 3 missing data points.</h3>
+<table>
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 18%" />
+<col style="width: 3%" />
+<col style="width: 4%" />
+<col style="width: 4%" />
+<col style="width: 3%" />
+<col style="width: 4%" />
+<col style="width: 13%" />
+<col style="width: 16%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Doctor</th>
+<th>Patient</th>
+<th>item1</th>
+<th>item2</th>
+<th>item3</th>
+<th>item4</th>
+<th>item5</th>
+<th>Sum across Patient Ratings</th>
+<th>Squared sum across Patient Ratings</th>
+<th>Squared sum across patient ratings/#ratings each completed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>1</td>
+<td>missing</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>16</td>
+<td>256</td>
+<td>64</td>
+</tr>
+<tr>
+<td>A</td>
+<td>2</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>18</td>
+<td>324</td>
+<td>64.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>4</td>
+<td>18</td>
+<td>324</td>
+<td>64.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>15</td>
+<td>225</td>
+<td>45</td>
+</tr>
+<tr>
+<td>A</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>6</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>A</td>
+<td>7</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>15</td>
+<td>225</td>
+<td>45</td>
+</tr>
+<tr>
+<td>A</td>
+<td>8</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>B</td>
+<td>9</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>19</td>
+<td>361</td>
+<td>72.2</td>
+</tr>
+<tr>
+<td>B</td>
+<td>10</td>
+<td>4</td>
+<td>missing</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>16</td>
+<td>256</td>
+<td>64</td>
+</tr>
+<tr>
+<td>B</td>
+<td>11</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>20</td>
+<td>400</td>
+<td>80</td>
+</tr>
+<tr>
+<td>B</td>
+<td>12</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>16</td>
+<td>256</td>
+<td>51.2</td>
+</tr>
+<tr>
+<td>B</td>
+<td>13</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>C</td>
+<td>14</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>17</td>
+<td>289</td>
+<td>57.8</td>
+</tr>
+<tr>
+<td>C</td>
+<td>15</td>
+<td>3</td>
+<td>3</td>
+<td>missing</td>
+<td>3</td>
+<td>3</td>
+<td>12</td>
+<td>144</td>
+<td>36</td>
+</tr>
+<tr>
+<td>C</td>
+<td>16</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>3</td>
+<td>19</td>
+<td>361</td>
+<td>72.2</td>
+</tr>
+<tr>
+<td></td>
+<td>Item Rating Sums</td>
+<td>55</td>
+<td>55</td>
+<td>52</td>
+<td>54</td>
+<td>53</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Item Rating sums squared</td>
+<td>3025</td>
+<td>3025</td>
+<td>2704</td>
+<td>2916</td>
+<td>2809</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Item sums squared/#ratings For each item</td>
+<td>201.667</td>
+<td>201.6667</td>
+<td>180.2667</td>
+<td>182.25</td>
+<td>175.562</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Next we calculate the T-Values for each facet:</p>
+<h3
+id="calculating-t-values-for-each-facet-for-missing-data">Calculating
+T-Values for Each Facet for Missing Data</h3>
+<ol type="1">
+<li>Doctor (D)</li>
+</ol>
+<p>Sum all ratings across each item for each Patient; Sum the individual
+patient ratings for each doctor; square these sums; divide by the number
+of rating counts within each doctor; add the quotients.</p>
+<p><span class="math display">\[\text{Doctor A} =
+\frac{(16+18+18+15+17+17+15+17)^2}{39} = 453.564\]</span></p>
+<p><span class="math display">\[\text{Doctor B} =
+\frac{(19+16+20+16+17)^2}{24} = 322.667\]</span></p>
+<p><span class="math display">\[\text{Doctor C} =
+\frac{(17+12+19)^2}{14} = 164.571\]</span></p>
+<p><span class="math display">\[\text{Sum across all 3 quotients} =
+940.802\]</span></p>
+<ol start="2" type="1">
+<li>Patient:Doctor (P:D)</li>
+</ol>
+<p>Sum all ratings across each item for each Patient; Square these sums;
+divide by the number of rating counts within each patient; sum across
+these quotients.</p>
+<p><span class="math display">\[\text{p:d 1} = \frac{16^2}{4} =
+\frac{256}{4} = 64\]</span></p>
+<p><span class="math display">\[\text{p:d 2} = \frac{18^2}{5} =
+\frac{324}{5} = 64.8\]</span></p>
+<p><span class="math display">\[\ldots\]</span></p>
+<p><span class="math display">\[\text{p:d 15} = \frac{12^2}{4} =
+\frac{144}{4} = 36\]</span></p>
+<p><span class="math display">\[\text{p:d 16} = \frac{19^2}{5} =
+\frac{361}{5} = 72.2\]</span></p>
+<p><span class="math display">\[\text{Sum across all 16 quotients} =
+948.2\]</span></p>
+<ol start="3" type="1">
+<li>Item (I)</li>
+</ol>
+<p>Sum all ratings down each item; Square these sums; divide by the
+number of rating counts within each item; sum across these
+quotients.</p>
+<p><span class="math display">\[\text{Item 1} = \frac{55^2}{15} =
+201.667\]</span></p>
+<p><span class="math display">\[\text{Item 2} = \frac{55^2}{15} =
+201.667\]</span></p>
+<p><span class="math display">\[\text{Item 3} = \frac{52^2}{15} =
+180.267\]</span></p>
+<p><span class="math display">\[\text{Item 4} = \frac{54^2}{16} =
+182.250\]</span></p>
+<p><span class="math display">\[\text{Item 5} = \frac{53^2}{16} =
+175.563\]</span></p>
+<p><span class="math display">\[\text{Sum across all 5 quotients} =
+941.413\]</span></p>
+<ol start="4" type="1">
+<li>Doctor X Item (DI)</li>
+</ol>
+<p>Sum down each set of items for each doctor (there will be 15
+combinations); square these sums; divide each sum by the number of
+ratings that go into each of the 15 combinations; sum the quotients.</p>
+<p><span class="math display">\[\text{di1} = (4+3+3+3+4+3+4) = 24;
+\frac{24^2}{7} = \frac{576}{7} = 82.286\]</span></p>
+<p><span class="math display">\[\text{di2} = (4+4+4+3+3+4+3+4) = 29;
+\frac{29^2}{8} = \frac{841}{8} = 105.125\]</span></p>
+<p><span class="math display">\[\ldots\]</span></p>
+<p><span class="math display">\[\text{di6} = (4+4+4+4+4) = 20;
+\frac{20^2}{5} = \frac{400}{5} = 80.000\]</span></p>
+<p><span class="math display">\[\text{di7} = (4+4+3+4) = 15;
+\frac{15^2}{4} = \frac{225}{4} = 56.250\]</span></p>
+<p><span class="math display">\[\ldots\]</span></p>
+<p><span class="math display">\[\text{di14} = (3+3+4) = 10;
+\frac{10^2}{3} = \frac{100}{3} = 33.333\]</span></p>
+<p><span class="math display">\[\text{di15} = (3+3+3) = 9; \frac{9^2}{3}
+= \frac{81}{3} = 27.000\]</span></p>
+<p><span class="math display">\[\text{Sum across all quotients} =
+943.311\]</span></p>
+<ol start="5" type="1">
+<li>Patient X Item:Doctor (PI:D)</li>
+</ol>
+<p>Note that this is the total uncorrected sums of squares. Each
+individual rating is first squared. Then these are summed across all
+ratings.</p>
+<p>Going across each row:</p>
+<p><span class="math display">\[0^2 + 4^2 + 4^2 + 4^2 + 4^2 + 4^2 + 4^2
++ 4^2 + 4^2 + 3^2 + \ldots + 3^2 + 3^2 + 0^2 + 3^2 + 3^2 + 4^2 + 4^2 +
+4^2 + 4^2 + 3^2\]</span></p>
+<p><span class="math display">\[\text{Summing across all values} =
+959.00\]</span></p>
+<ol start="6" type="1">
+<li>Mean</li>
+</ol>
+<p>Sum FIRST across all values; square this sum; divide by the total
+number of ratings that went into the sum.</p>
+<p><span class="math display">\[\frac{(0 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4
++ 3 + \ldots + 3 + 3 + 0 + 3 + 3 + 4 + 4 + 4 + 4 + 3)^2}{77} =
+\frac{269^2}{77} = 939.753\]</span></p>
+<p>We can now put our Facet T-values into Table 25.</p>
+<h3 id="table-25.-facets-and-t-values-for-the-narayanan-data-set">Table
+25. Facets and T-values for the Narayanan data set</h3>
+<table>
+<thead>
+<tr>
+<th>Facet</th>
+<th>T-Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D (doctor)</td>
+<td>940.802</td>
+</tr>
+<tr>
+<td>P:D (patient nested in doctor)</td>
+<td>948.2</td>
+</tr>
+<tr>
+<td>I (item)</td>
+<td>941.413</td>
+</tr>
+<tr>
+<td>DI (doctor X item)</td>
+<td>943.311</td>
+</tr>
+<tr>
+<td>PI:D (patient X item nested in doctor)</td>
+<td>959</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>939.753</td>
+</tr>
+</tbody>
+</table>
+<p>As always, obtaining the “counts” that go into the analysis of the
+variance components, is tedious. It becomes even more tedious when there
+are missing values. Let’s begin….</p>
+<p>As before, we first put in the “easy” ones.</p>
+<ol type="1">
+<li>For the μ² term, ALL coefficients are based on the total number of
+data points involved in the study (denoted N; 77 for this data
+set).</li>
+<li>For the PI:D (Total which includes the highest level term plus
+error) facet, all coefficients are also based on the total number of
+data points involved in the study (N).</li>
+<li>For each facet (except the Mean), the coefficient for that variance
+is also the total number of data points involved in the study (N). For
+example, the coefficient for σ²(d) for effect D is N.</li>
+<li>For the σ²(pi:d) term column, the sample sizes are equal to the
+number of levels of that facet (D = 3, P:D = 16, I = 5, DI = 15 (there
+are 15 different DI combinations), for the Mean is always = 1, and for
+the highest order effect (PI:D – also known as the total by Henderson)
+is always = N.</li>
+</ol>
+<p>This leaves 16 “?” values to “fill in” (Table 26).</p>
+<h3
+id="table-26.-counts-for-use-in-calculating-the-variance-components-with-narayanan-et-al.-2010-with-missing-data">Table
+26. “Counts” for use in calculating the Variance Components with
+Narayanan et al. (2010) with missing data</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 11%" />
+<col style="width: 12%" />
+<col style="width: 15%" />
+<col style="width: 12%" />
+<col style="width: 11%" />
+</colgroup>
+<thead>
+<tr>
+<th>effect</th>
+<th>counts D</th>
+<th>counts P:D</th>
+<th>counts I</th>
+<th>counts DI</th>
+<th>counts pi:d</th>
+<th>counts mu</th>
+<th>T-values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>77</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>3</td>
+<td>77</td>
+<td>940.802</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>?</td>
+<td>77</td>
+<td>?</td>
+<td>?</td>
+<td>16</td>
+<td>77</td>
+<td>948.200</td>
+</tr>
+<tr>
+<td>I</td>
+<td>?</td>
+<td>?</td>
+<td>77</td>
+<td>?</td>
+<td>5</td>
+<td>77</td>
+<td>941.413</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>77</td>
+<td>15</td>
+<td>77</td>
+<td>943.311</td>
+</tr>
+<tr>
+<td>pi:D,e</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>959.000</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>?</td>
+<td>1</td>
+<td>77</td>
+<td>939.753</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li><p>The σ²(p:d) term on D (data are collapsed across Items). Sample
+size starts by calculating the squared sum of:</p>
+<p>counts of each p:d term within each D, divided by the total number of
+counts for that D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{D1}: \frac{(4^2) + (5^2) + (5^2) + (5^2) + (5^2) + (5^2) + (5^2) +
+(5^2)}{39} = \frac{191}{39} = 4.897
+\]</span></p>
+<p><span class="math display">\[
+\text{D2}: \frac{(5^2) + (4^2) + (5^2) + (5^2) + (5^2)}{24} =
+\frac{116}{24} = 4.833
+\]</span></p>
+<p><span class="math display">\[
+\text{D3}: \frac{(5^2) + (4^2) + (5^2)}{14} = \frac{66}{14} = 4.714
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 4.897 + 4.833 + 4.714 = 14.444
+\]</span></p>
+<ol start="2" type="1">
+<li><p>The σ²(i) term on D (data are collapsed across P:D). Sample size
+starts by calculating the squared sum of:</p>
+<p>counts of each i term within each D, divided by the total number of
+counts for that D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{D}_1: \frac{(7^2) + (8^2) + (8^2) + (8^2) + (8^2)}{39} =
+\frac{305}{39} = 7.820
+\]</span></p>
+<p><span class="math display">\[
+\text{D}_2: \frac{(5^2) + (4^2) + (5^2) + (5^2) + (5^2)}{24} =
+\frac{116}{24} = 4.833
+\]</span></p>
+<p><span class="math display">\[
+\text{D}_3: \frac{(3^2) + (3^2) + (2^2) + (3^2) + (3^2)}{14} =
+\frac{40}{14} = 2.857
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 7.820 + 4.833 + 2.857 = 15.510
+\]</span></p>
+<ol start="3" type="1">
+<li><p>The σ²(di) term on D (data are collapsed across P:D). Sample size
+starts by calculating the squared sum of:</p>
+<p>counts of each di term within each D, divided by the total number of
+counts for that D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{D}_1: \frac{(7^2) + (8^2) + (8^2) + (8^2) + (8^2)}{39} =
+\frac{305}{39} = 7.820
+\]</span></p>
+<p><span class="math display">\[
+\text{D}_2: \frac{(5^2) + (4^2) + (5^2) + (5^2) + (5^2)}{24} =
+\frac{116}{24} = 4.833
+\]</span></p>
+<p><span class="math display">\[
+\text{D}_3: \frac{(3^2) + (3^2) + (2^2) + (3^2) + (3^2)}{14} =
+\frac{40}{14} = 2.857
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 7.820 + 4.833 + 2.857 = 15.510
+\]</span></p>
+<ol start="4" type="1">
+<li><p>The σ²(d) term on P:D (data are collapsed across Items). Sample
+size starts by calculating the squared sum of:</p>
+<p>counts of each d term within each P:D, divided by the total number of
+counts for that P:D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{PD}_1 = \frac{(4^2)}{4} = 4
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_2 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_3 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_4 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_5 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_6 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_7 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_8 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_9 = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{10} = \frac{(4^2)}{4} = 4
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{11} = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{12} = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{13} = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{14} = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{15} = \frac{(4^2)}{4} = 4
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{16} = \frac{(5^2)}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 77
+\]</span></p>
+<ol start="5" type="1">
+<li><p>The σ²(i) term on P:D. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each i term within each P:D, divided by the total number of
+counts for that P:D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{PD}_1 = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_2 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_3 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_4 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_5 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_6 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_7 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_8 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_9 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{10} = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{11} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{12} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{13} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{14} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{15} = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{16} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
+1 = 16
+\]</span></p>
+<ol start="6" type="1">
+<li><p>The σ²(di) term on P:D. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each di term within each P:D, divided by the total number
+of counts for that P:D. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{PD}_1 = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_2 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_3 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_4 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_5 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_6 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_7 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_8 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_9 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{10} = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{11} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{12} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{13} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{14} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{15} = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{PD}_{16} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 +
+1 = 16
+\]</span></p>
+<ol start="7" type="1">
+<li><p>The σ²(d) term on I. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each d term within each I, divided by the total number of
+counts for that I. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{I}_1 = \frac{(7^2) + (5^2) + (3^2)}{15} = \frac{83}{15} = 5.533
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_2 = \frac{(8^2) + (4^2) + (3^2)}{15} = \frac{89}{15} = 5.933
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_3 = \frac{(8^2) + (5^2) + (2^2)}{15} = \frac{93}{15} = 6.200
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_4 = \frac{(8^2) + (5^2) + (3^2)}{16} = \frac{98}{16} = 6.125
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_5 = \frac{(8^2) + (5^2) + (3^2)}{16} = \frac{98}{16} = 6.125
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 5.533 + 5.933 + 6.200 + 6.125 + 6.125 = 29.916
+\]</span></p>
+<ol start="8" type="1">
+<li><p>The σ²(p:d) term on I. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each p:d term within each I, divided by the total number of
+counts for that I. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{I}_1 = \frac{\sum_{v=1}^{15}(1^2)}{15} = \frac{15}{15} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_2 = \frac{\sum_{v=1}^{15}(1^2)}{15} = \frac{15}{15} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_3 = \frac{\sum_{v=1}^{15}(1^2)}{15} = \frac{15}{15} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_4 = \frac{\sum_{v=1}^{16}(1^2)}{16} = \frac{16}{16} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_5 = \frac{\sum_{v=1}^{16}(1^2)}{16} = \frac{16}{16} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 1 + 1 + 1 + 1 + 1 = 5
+\]</span></p>
+<ol start="9" type="1">
+<li><p>The σ²(di) term on I. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each di term within each I, divided by the total number of
+counts for that I. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{I}_1 = \frac{(7^2) + (5^2) + (3^2)}{15} = \frac{83}{15} = 5.533
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_2 = \frac{(8^2) + (4^2) + (3^2)}{15} = \frac{89}{15} = 5.933
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_3 = \frac{(8^2) + (5^2) + (2^2)}{15} = \frac{93}{15} = 6.200
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_4 = \frac{(8^2) + (5^2) + (3^2)}{16} = \frac{98}{16} = 6.125
+\]</span></p>
+<p><span class="math display">\[
+\text{I}_5 = \frac{(8^2) + (5^2) + (3^2)}{16} = \frac{98}{16} = 6.125
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 5.533 + 5.933 + 6.200 + 6.125 + 6.125 = 29.916
+\]</span></p>
+<ol start="10" type="1">
+<li><p>The σ²(d) term on DI. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each d term within each DI, divided by the total number of
+counts for that DI. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{DI}_1 = \frac{7^2}{7} = 7
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_2 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_3 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_4 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_5 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_6 = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_7 = \frac{4^2}{4} = 4
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_8 = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_9 = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{10} = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{11} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{12} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{13} = \frac{2^2}{2} = 2
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{14} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{15} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 7 + 8 + 8 + 8 + 8 + 5 + 4 + 5 + 5 + 5 + 3 + 3 + 2 + 3 + 3 =
+77
+\]</span></p>
+<ol start="11" type="1">
+<li><p>The σ²(p:d) term on DI. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each p:d term within each DI, divided by the total number
+of counts for that DI. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{DI}_1 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2) +
+(1^2)}{7} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_2 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2) +
+(1^2) + (1^2)}{8} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_3 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2) +
+(1^2) + (1^2)}{8} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_4 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2) +
+(1^2) + (1^2)}{8} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_5 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2) + (1^2) +
+(1^2) + (1^2)}{8} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_6 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_7 = \frac{(1^2) + (1^2) + (1^2) + (1^2)}{4} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_8 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_9 = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{10} = \frac{(1^2) + (1^2) + (1^2) + (1^2) + (1^2)}{5} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{11} = \frac{(1^2) + (1^2) + (1^2)}{3} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{12} = \frac{(1^2) + (1^2) + (1^2)}{3} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{13} = \frac{(1^2) + (1^2)}{2} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{14} = \frac{(1^2) + (1^2) + (1^2)}{3} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{15} = \frac{(1^2) + (1^2) + (1^2)}{3} = 1
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 =
+15
+\]</span></p>
+<ol start="12" type="1">
+<li><p>The σ²(i) term on DI. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each i term within each DI, divided by the total number of
+counts for that DI. Then sum the quotients.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{DI}_1 = \frac{7^2}{7} = 7
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_2 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_3 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_4 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_5 = \frac{8^2}{8} = 8
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_6 = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_7 = \frac{4^2}{4} = 4
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_8 = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_9 = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{10} = \frac{5^2}{5} = 5
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{11} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{12} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{13} = \frac{2^2}{2} = 2
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{14} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{DI}_{15} = \frac{3^2}{3} = 3
+\]</span></p>
+<p><span class="math display">\[
+\text{Sum} = 7 + 8 + 8 + 8 + 8 + 5 + 4 + 5 + 5 + 5 + 3 + 3 + 2 + 3 + 3 =
+77
+\]</span></p>
+<ol start="13" type="1">
+<li><p>The σ²(d) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each d term within each mean, divided by the total number
+of counts for the mean.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{Mean} = \frac{(39^2) + (24^2) + (14^2)}{77} = \frac{1521 + 576 +
+196}{77} = \frac{2293}{77} = 29.779
+\]</span></p>
+<ol start="14" type="1">
+<li><p>The σ²(p:d) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each p:d term within each mean, divided by the total number
+of counts for the mean.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{Mean} = \frac{(4^2) + (5^2) + (5^2) + (5^2) + (5^2) + (5^2) +
+(5^2) + (5^2) + (4^2) + (5^2) + (5^2) + (5^2) + (5^2) + (5^2) + (4^2) +
+(5^2)}{77}
+\]</span></p>
+<p><span class="math display">\[
+= \frac{(16 \times 3) + (25 \times 13)}{77}
+\]</span></p>
+<p><span class="math display">\[
+= \frac{48 + 325}{77}
+\]</span></p>
+<p><span class="math display">\[
+= \frac{373}{77} = 4.844
+\]</span></p>
+<ol start="15" type="1">
+<li><p>The σ²(i) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each i term within each mean, divided by the total number
+of counts for the mean</p></li>
+</ol>
+<p><span class="math display">\[
+\text{Mean} = \frac{(15^2) + (15^2) + (15^2) + (16^2) + (16^2)}{77} =
+\frac{(225 \times 3) + (256 \times 2)}{77} = \frac{675 + 512}{77} =
+\frac{1187}{77} = 15.416
+\]</span></p>
+<ol start="16" type="1">
+<li><p>The σ²(di) term on mean. Sample size starts by calculating the
+squared sum of:</p>
+<p>counts of each di term within each mean, divided by the total number
+of counts for the mean.</p></li>
+</ol>
+<p><span class="math display">\[
+\text{Mean} = \frac{(7^2) + (5^2) + (3^2) + (8^2) + (4^2) + (3^2) +
+(8^2) + (5^2) + (2^2) + (8^2) + (5^2) + (3^2) + (8^2) + (5^2) +
+(3^2)}{77}
+\]</span></p>
+<p><span class="math display">\[
+= \frac{(64 \times 4) + (25 \times 4) + (9 \times 4) + 49 + 16 + 4}{77}
+\]</span></p>
+<p><span class="math display">\[
+= \frac{256 + 100 + 36 + 69}{77}
+\]</span></p>
+<p><span class="math display">\[
+= \frac{461}{77} = 5.987
+\]</span></p>
+<p>We can now insert the calculated values into our “?” cells (Table 27)
+and using matrix equations or regression, solve for the Variance
+Components.</p>
+<h3
+id="table-27.-completed-counts-and-variance-components-for-narayanan-2010-with-missing-data">Table
+27. Completed “Counts” and Variance Components for Narayanan (2010) with
+missing data</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 7%" />
+<col style="width: 8%" />
+<col style="width: 10%" />
+<col style="width: 8%" />
+<col style="width: 7%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr>
+<th>effect</th>
+<th>counts D</th>
+<th>counts P:D</th>
+<th>counts I</th>
+<th>counts DI</th>
+<th>counts pi:d</th>
+<th>counts mu</th>
+<th>T-values</th>
+<th>variance component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D</td>
+<td>77</td>
+<td>14.444</td>
+<td>15.510</td>
+<td>15.510</td>
+<td>3</td>
+<td>77</td>
+<td>940.802</td>
+<td>0.001</td>
+</tr>
+<tr>
+<td>P:D</td>
+<td>77</td>
+<td>77</td>
+<td>16</td>
+<td>16</td>
+<td>16</td>
+<td>77</td>
+<td>948.200</td>
+<td>0.083</td>
+</tr>
+<tr>
+<td>I</td>
+<td>29.916</td>
+<td>5</td>
+<td>77</td>
+<td>29.916</td>
+<td>5</td>
+<td>77</td>
+<td>941.413</td>
+<td>0.021</td>
+</tr>
+<tr>
+<td>DI</td>
+<td>77</td>
+<td>15</td>
+<td>77</td>
+<td>77</td>
+<td>15</td>
+<td>77</td>
+<td>943.311</td>
+<td>-0.014</td>
+</tr>
+<tr>
+<td>PI:D,e</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>77</td>
+<td>959.000</td>
+<td>0.170</td>
+</tr>
+<tr>
+<td>Mean</td>
+<td>29.779</td>
+<td>4.844</td>
+<td>15.416</td>
+<td>5.987</td>
+<td>1</td>
+<td>77</td>
+<td>939.753</td>
+<td>12.1936</td>
+</tr>
+</tbody>
+</table>
+<p>We now need the denominators to use when calculating G and D
+coefficients. They are calculated using the same approach as that used
+for unbalanced designs with the results in Table 28.</p>
+<ol type="1">
+<li><p>Level of the σ²(d) term on facet of differentiation P:D. Since d
+is included in P:D, there is a single unique D for each P:D. L =
+1</p></li>
+<li><p>Level of the σ²(p:d) term on facet of differentiation P:D. Again
+p:d is included in P:D, there is a single unique P:D for each P:D. L =
+1</p></li>
+<li><p>Level of the σ²(i) term on facet of differentiation P:D. The sum
+of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(p:d, i) = 1, v = <span
+class="math inline">\(\left|items_{g}\right|\)</span> : 1 count of item
+for each unique combinations of p:d, however since there is missing data
+the length of items for each combination varies (for this data set,
+either 4 or 5). Thus two potential calculations exist:</p></li>
+</ol>
+<p><span class="math display">\[
+Lg =  \frac{\left(\sum_{v=1}^{5}1\right)^{2}}{\sum_{v=1}^{5}1^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+Lg’ =  \frac{\left(\sum_{v=1}^{4}1\right)^{2}}{\sum_{v=1}^{4}1^{2}}  = 4
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{16}{\frac{1}{4}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{4}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{4}+\frac{1}{5}}  =
+4.78
+\]</span></p>
+<ol start="4" type="1">
+<li><p>Level of the σ²(i x d) term on facet of differentiation P:D. The
+sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(p:d, ixd) = 1, v = <span
+class="math inline">\(\left|items_{g}\right|\)</span> : Again, 1 count
+of item x d for each unique combinations of p:d, however since there is
+missing data the length of items for each combination varies (for this
+data set, either 4 or 5). Thus two potential calculations
+exist:</p></li>
+</ol>
+<p><span class="math display">\[
+Lg =  \frac{\left(\sum_{v=1}^{5}1\right)^{2}}{\sum_{v=1}^{5}1^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+Lg’ =  \frac{\left(\sum_{v=1}^{4}1\right)^{2}}{\sum_{v=1}^{4}1^{2}}  = 4
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{16}{\frac{1}{4}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{4}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{4}+\frac{1}{5}}  =
+4.78
+\]</span></p>
+<ol start="5" type="1">
+<li><p>Level of the σ²(i x (p:d)) term on facet of differentiation P:D.
+The sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(p:d, pi:d) = 1, v =[1, <span
+class="math inline">\(\left|items_{g}\right|\)</span> ]: Similarly, 1
+count of items x (p:d) for each unique combinations of p:d, however
+since there is missing data the length of items for each combination
+varies (for this data set, either 4 or 5). Thus two potential
+calculations exist:</p></li>
+</ol>
+<p><span class="math display">\[
+Lg =  \frac{\left(\sum_{v=1}^{5}1\right)^{2}}{\sum_{v=1}^{5}1^{2}}  = 5
+\]</span></p>
+<p><span class="math display">\[
+Lg’ =  \frac{\left(\sum_{v=1}^{4}1\right)^{2}}{\sum_{v=1}^{4}1^{2}}  = 4
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{16}{\frac{1}{4}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{4}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{5}+\frac{1}{4}+\frac{1}{5}}  =
+4.78
+\]</span></p>
+<ol start="6" type="1">
+<li><p>Level of the σ²(d) term on facet of differentiation I. The sum of
+counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, d) = <span class="math inline">\(\left|p_{v}\right|\)</span> ,
+for p = [8<em>, 5</em>, 3*] with v ∈ [1, 3]; g ∈ [1, 5] and *indicating
+missing data. Since i is not involved with the unbalanced nesting, all
+levels of i, i ∈ [1, 5], will be the same.</p></li>
+</ol>
+<p><span class="math display">\[
+L = L1
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(7+5+3\right)^{2}}{(7^{2}+5^{2}+3^{2})}  =  \frac{225}{83}  =
+2.71
+\]</span></p>
+<p><span class="math display">\[
+L = L2
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+4+3\right)^{2}}{(8^{2}+4^{2}+3^{2})}  =  \frac{225}{89}  =
+2.53
+\]</span></p>
+<p><span class="math display">\[
+L = L3
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+5+2\right)^{2}}{(8^{2}+5^{2}+2^{2})}  =  \frac{225}{93}  =
+2.42
+\]</span></p>
+<p><span class="math display">\[
+L4 = L5
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+5+3\right)^{2}}{(8^{2}+5^{2}+3^{2})}  =  \frac{256}{98}  =
+2.612
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{5}{\frac{1}{2.71}+\frac{1}{2.53}+\frac{1}{2.42}+\frac{1}{2.61}+\frac{1}{2.61}}  =
+2.57
+\]</span></p>
+<ol start="7" type="1">
+<li><p>Level of the σ²(p:d) term on facet of differentiation I. The sum
+of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, p:d) = 1, v ∈ [1, <span
+class="math inline">\(\sum_{}^{}g\)</span> ]. For each unique i, there
+will be 1 count up to the total counts for that i.</p></li>
+</ol>
+<p><span class="math display">\[
+L1 = L2 = L3
+=  \frac{\left(\sum_{v=1}^{15}1\right)^{2}}{\sum_{v=1}^{15}1^{2}}  =  \frac{\left(1+1+1+1+1+1+1+1+1+1+1+1+1+1+1\right)^{2}}{(1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2})}  =  \frac{225}{15}  =
+15
+\]</span></p>
+<p><span class="math display">\[
+L4 = L5
+=  \frac{\left(\sum_{v=1}^{16}1\right)^{2}}{\sum_{v=1}^{16}1^{2}}  =  \frac{\left(1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1\right)^{2}}{(1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2})}  =  \frac{256}{16}  =
+16
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{5}{\frac{1}{15}+\frac{1}{15}+\frac{1}{15}+\frac{1}{16}+\frac{1}{16}}  =
+15.38
+\]</span></p>
+<ol start="8" type="1">
+<li><p>Level of the σ²(i) term on facet of differentiation I. Since i is
+included in I, there is a single unique i for each I. L = 1</p></li>
+<li><p>Level of the σ²(i x d) term on facet of differentiation I. The
+sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, d) = <span class="math inline">\(\left|p_{v}\right|\)</span> ,
+for p = [8<em>, 5</em>, 3*] with v ∈ [1, 3]; g ∈ [1, 5] and *indicating
+missing data, similar to 6. Since i is not involved with the unbalanced
+nesting, all levels of i, i ∈ [1, 5], will be the same.</p></li>
+</ol>
+<p><span class="math display">\[
+L = L1
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(7+5+3\right)^{2}}{(7^{2}+5^{2}+3^{2})}  =  \frac{225}{83}  =
+2.71
+\]</span></p>
+<p><span class="math display">\[
+L = L2
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+4+3\right)^{2}}{(8^{2}+4^{2}+3^{2})}  =  \frac{225}{89}  =
+2.53
+\]</span></p>
+<p><span class="math display">\[
+L = L3
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+5+2\right)^{2}}{(8^{2}+5^{2}+2^{2})}  =  \frac{225}{93}  =
+2.42
+\]</span></p>
+<p><span class="math display">\[
+L4 = L5
+=  \frac{\left(\sum_{v=1}^{3}p_{v}\right)^{2}}{\sum_{v=1}^{3}p_{v}^{2}}  =  \frac{\left(8+5+3\right)^{2}}{(8^{2}+5^{2}+3^{2})}  =  \frac{256}{98}  =
+2.612
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{5}{\frac{1}{2.71}+\frac{1}{2.53}+\frac{1}{2.42}+\frac{1}{2.61}+\frac{1}{2.61}}  =
+2.57
+\]</span></p>
+<ol start="10" type="1">
+<li><p>Level of the σ²(i x (p:d)) term on facet of differentiation I.
+The sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(i, p:d) = 1, v ∈ [1, <span
+class="math inline">\(\sum_{}^{}g\)</span> ]. Similar to 7, For each
+unique i, there will be 1 count up to the total counts for that
+i.</p></li>
+</ol>
+<p><span class="math display">\[
+L1 = L2 = L3
+=  \frac{\left(\sum_{v=1}^{15}1\right)^{2}}{\sum_{v=1}^{15}1^{2}}  =  \frac{\left(1+1+1+1+1+1+1+1+1+1+1+1+1+1+1\right)^{2}}{(1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2})}  =  \frac{225}{15}  =
+15
+\]</span></p>
+<p><span class="math display">\[
+L4 = L5
+=  \frac{\left(\sum_{v=1}^{16}1\right)^{2}}{\sum_{v=1}^{16}1^{2}}  =  \frac{\left(1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1\right)^{2}}{(1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2}+1^{2})}  =  \frac{256}{16}  =
+16
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{5}{\frac{1}{15}+\frac{1}{15}+\frac{1}{15}+\frac{1}{16}+\frac{1}{16}}  =
+15.38
+\]</span></p>
+<ol start="11" type="1">
+<li>Level of the σ²(d) term on facet of differentiation D. Since d is
+included in D, there is a single unique D for each D.</li>
+</ol>
+<p><span class="math display">\[
+L = 1
+\]</span></p>
+<ol start="12" type="1">
+<li><p>Level of the σ²(p:d) term on facet of differentiation D. The sum
+of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, p:d) = <span class="math inline">\(i_{v}\)</span> , where =
+<span class="math inline">\(i_{v}\)</span> is the number of items in v
+for [g =A, v ∈ [1, 8]; g=B, v ∈ [1, 5]; g=C, v ∈ [1, 3]]. Thus we have
+different levels of patients:doctors for each unique doctor.</p></li>
+</ol>
+<p><span class="math display">\[
+L_A =  \frac{\left(\sum_{v=1}^{8}i_{v}, \right)^{2}}{\sum_{v=1}^{8}i_{v}
+^{2}}  =   \frac{\left(4+5+5+5+5+5+5+5\right)^{2}}{(4^{2}+5^{2}+5^{2}+5^{2}+5^{2}+5^{2}+5^{2}+5^{2})}   =
+7.96
+\]</span></p>
+<p><span class="math display">\[
+L_B
+=  \frac{\left(\sum_{v=1}^{5}i_{v}\right)^{2}}{\sum_{v=1}^{5}i_{v}^{2}}  =   \frac{\left(4+5+5+5+5\right)^{2}}{(4^{2}+5^{2}+5^{2}+5^{2}+5^{2})}  =
+4.97
+\]</span></p>
+<p><span class="math display">\[
+L_C
+=  \frac{\left(\sum_{v=1}^{3}i_{v}\right)^{2}}{\sum_{v=1}^{3}i_{v}^{2}}  =  \frac{\left(4+5+5\right)^{2}}{(4^{2}+5^{2}+5^{2})}   =
+2.97
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{3}{\frac{1}{7.96}+\frac{1}{4.97}+\frac{1}{2.97}}  =
+4.52
+\]</span></p>
+<ol start="13" type="1">
+<li><p>Level of the σ²(i) term on facet of differentiation D. The sum of
+counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, i) = <span class="math inline">\(\left|g_{v}\right|\)</span> ,
+for g=[8, 5, 3] and v = 5. There are g counts of each item [1, 5]. For
+example there are 7 counts of item [1] for doctor A because 7 patients
+returned surveys including item 1 for doctor A.</p></li>
+</ol>
+<p><span class="math display">\[
+L_A =  \frac{\left(\sum_{v=1}^{5}g_{v} \right)^{2}}{\sum_{v=1}^{5}g_{v}
+^{2}}  =   \frac{\left(7+8+8+8+8\right)^{2}}{(7^{2}+8^{2}+8^{2}+8^{2}+8^{2})}   =
+4.99
+\]</span></p>
+<p><span class="math display">\[
+L_B
+=  \frac{\left(\sum_{v=1}^{5}g_{v}\right)^{2}}{\sum_{v=1}^{5}g_{v}^{2}}  =   \frac{\left(5+4+5+5+5\right)^{2}}{(5^{2}+4^{2}+5^{2}+5^{2}+5^{2})}  =
+4.97
+\]</span></p>
+<p><span class="math display">\[
+L_C
+=  \frac{\left(\sum_{v=1}^{5}g_{v}\right)^{2}}{\sum_{v=1}^{5}g_{v}^{2}}  =  \frac{\left(3+3+2+3+3\right)^{2}}{(3^{2}+3^{2}+2^{2}+3^{2}+3^{2})}   =
+4.9
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{3}{\frac{1}{4.99}+\frac{1}{4.97}+\frac{1}{4.90}}  =
+4.95
+\]</span></p>
+<ol start="14" type="1">
+<li><p>Level of the σ²(i x d) term on facet of differentiation D. The
+sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, ixd) = <span class="math inline">\(\left|g_{v}\right|\)</span> ,
+for g=[8, 5, 3] and v = 5. There are g counts of each item [1, 5]. This
+is identical to the uncrossed items, C(d, i).</p></li>
+</ol>
+<p><span class="math display">\[
+L_A =  \frac{\left(\sum_{v=1}^{5}g_{v} \right)^{2}}{\sum_{v=1}^{5}g_{v}
+^{2}}  =   \frac{\left(7+8+8+8+8\right)^{2}}{(7^{2}+8^{2}+8^{2}+8^{2}+8^{2})}   =
+4.99
+\]</span></p>
+<p><span class="math display">\[
+L_B
+=  \frac{\left(\sum_{v=1}^{5}g_{v}\right)^{2}}{\sum_{v=1}^{5}g_{v}^{2}}  =   \frac{\left(5+4+5+5+5\right)^{2}}{(5^{2}+4^{2}+5^{2}+5^{2}+5^{2})}  =
+4.97
+\]</span></p>
+<p><span class="math display">\[
+L_C
+=  \frac{\left(\sum_{v=1}^{5}g_{v}\right)^{2}}{\sum_{v=1}^{5}g_{v}^{2}}  =  \frac{\left(3+3+2+3+3\right)^{2}}{(3^{2}+3^{2}+2^{2}+3^{2}+3^{2})}   =
+4.9
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{3}{\frac{1}{4.99}+\frac{1}{4.97}+\frac{1}{4.90}}  =
+4.95
+\]</span></p>
+<ol start="15" type="1">
+<li><p>Level of the σ²(i x (p:d)) term on facet of differentiation D.
+The sum of counts squared and sum of squared counts can be determined as
+follows:</p>
+<p>C(d, i x (p:d)) = 1, for v=[ <span
+class="math inline">\(\sum_{}^{}g\)</span> ] with g=[A, B, C]. For each
+doctor, there is a single unique count of items crossed with the nested
+patient:doctor. Thus to obtain the level for each unique facet of
+differentiation, g, we must sum over v, which is the sum of counts for
+each doctor (marginalizing over doctor).</p></li>
+</ol>
+<p><span class="math display">\[
+L_A
+=  \frac{\left(\sum_{v=1}^{39}1\right)^{2}}{\sum_{v=1}^{39}1^{2}}  =  \frac{1521}{39}  =
+39
+\]</span></p>
+<p><span class="math display">\[
+L_A
+=  \frac{\left(\sum_{v=1}^{24}1\right)^{2}}{\sum_{v=1}^{24}1^{2}}  =  \frac{576}{24}  =
+24
+\]</span></p>
+<p><span class="math display">\[
+L_A
+=  \frac{\left(\sum_{v=1}^{14}1\right)^{2}}{\sum_{v=1}^{14}1^{2}}  =  \frac{196}{14}  =
+14
+\]</span></p>
+<p><span class="math display">\[
+L
+=  \frac{\left|G\right|}{\sum_{g=1}^{G}\frac{1}{L_{g}}}  =  \frac{3}{\frac{1}{39}+\frac{1}{24}+\frac{1}{14}}  =
+21.62
+\]</span></p>
+<h3
+id="table-28.-denominators-for-each-effect-when-the-facet-of-differentiation-changes-when-calculating-g-and-d">Table
+28. Denominators for each effect when the facet of differentiation
+changes when calculating G and D</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 27%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Variance Term</th>
+<th style="text-align: right;">P:D Facet of Differentiation</th>
+<th style="text-align: right;">I Facet of Differentiation</th>
+<th style="text-align: right;">D Facet of Differentiation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">σ²(d)</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">2.573</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr>
+<td style="text-align: left;">σ²(p:d)</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">15.385</td>
+<td style="text-align: right;">4.520</td>
+</tr>
+<tr>
+<td style="text-align: left;">σ²(i)</td>
+<td style="text-align: right;">4.776</td>
+<td style="text-align: right;">1.000</td>
+<td style="text-align: right;">4.951</td>
+</tr>
+<tr>
+<td style="text-align: left;">σ²(i × d)</td>
+<td style="text-align: right;">4.776</td>
+<td style="text-align: right;">2.573</td>
+<td style="text-align: right;">4.951</td>
+</tr>
+<tr>
+<td style="text-align: left;">σ²(i × (p:d))</td>
+<td style="text-align: right;">4.776</td>
+<td style="text-align: right;">15.385</td>
+<td style="text-align: right;">21.624</td>
+</tr>
+</tbody>
+</table>
+<p>These values can now be used to calculate the G and D coefficients.
+We will complete the one for P:D (Table 29). Note that the values for G
+and D are slightly lower (.700 and .675, respectively) than those with
+no missing data (.752 and .718, respectively), which is to be
+expected.</p>
+<h3
+id="table-29.-calculating-g-and-d-coefficients-for-pd-narayanan-et-al.-2010-missing-data">Table
+29. Calculating G and D Coefficients for P:D Narayanan et al. (2010)
+missing data</h3>
+<table>
+<colgroup>
+<col style="width: 48%" />
+<col style="width: 51%" />
+</colgroup>
+<thead>
+<tr>
+<th>Generalizability Coefficient</th>
+<th>Facet of Differentiation = P:D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Generalizability (G)</strong></td>
+<td><span class="math inline">\(E\rho^2 = \tau/(\tau + \delta)\)</span>
+<br><br><span class="math inline">\(\tau = \text{VC(P:D)} +
+\text{VC(D)}\)</span> <br><span class="math inline">\(\tau = 0.083 +
+0.001 = 0.084\)</span> <br><br><span class="math inline">\(\delta =
+\text{VC(PI:D)}/\text{Level}_{P:D}(\text{PI:D})\)</span> <br><span
+class="math inline">\(\delta = 0.170/4.776 = 0.036\)</span>
+<br><br><span class="math inline">\(E\rho^2 =
+0.084/(0.084+0.036)\)</span> <br><span class="math inline">\(E\rho^2 =
+\mathbf{0.700}\)</span></td>
+</tr>
+<tr>
+<td><strong>Dependability (D)</strong></td>
+<td><span class="math inline">\(\Phi = \tau/(\tau + \Delta)\)</span>
+<br><br><span class="math inline">\(\Delta = (0.021/4.776) + (0/4.776) +
+(0.170/4.776) = 0.040\)</span> <br><br><span class="math inline">\(\Phi
+= 0.084/(0.084 + 0.040)\)</span> <br><span class="math inline">\(\Phi =
+\mathbf{0.675}\)</span></td>
+</tr>
+</tbody>
+</table>
+<h2 id="limitations-of-this-procedure">Limitations of this
+Procedure</h2>
+<ol type="1">
+<li>All effects are assumed to be random. This is a very difficult issue
+to get around when data are unbalanced/have missing data points.</li>
+<li>Sample sizes are uncorrelated with effects.</li>
+<li>All effects (except the grand mean) are uncorrelated with each
+other, have means of 0 and have variances.</li>
+</ol>
+<p>While the only design that has been examined in great detail in this
+tutorial is the <span class="math inline">\(i \times (p:d)\)</span>
+design, <strong>all other designs</strong> (crossed, nested, etc. –
+perhaps using many more terms) are theoretically sound with tests
+passing for many different synthetic datasets (see <a
+href="https://github.com/tylerjsmith111/GeneralizIT">GeneralizIT GitHub
+repository</a>). The only limiting factor for the automated calculation
+of generalizability coefficients for any study design is the data
+analyst’s ability to properly specify the linear random effects
+relationships present in a given study. For example, in the <span
+class="math inline">\(i \times (p:d)\)</span> design:</p>
+<p><span class="math display">\[X = \mu + \sigma_{i}^{2} +
+\sigma_{d}^{2} + \sigma_{p:d}^{2} + \sigma_{id}^{2} +
+\sigma_{pi:d}^{2}\]</span></p>
+<h2 id="conclusion">Conclusion</h2>
+<p>The utility in creating a generalizability program allows for: 1)
+missing data, 2) unbalanced data, 3) providing both generalizability and
+dependability coefficients, and 4) D-values for designs with no missing
+data is very useful addition to the toolbox of researchers. There is
+currently not a freely-available one that does all of these things.</p>
+<p>References</p>
+<p>Bloch, R. &amp; Norman, G. (2023). G String V User Manual. Hamilton,
+Ontario, Canada.</p>
+<p>Bloch, R. &amp; Norman, G. (2012). Generalizability theory for the
+perplexed: A practical introduction and guide: AMEE Guide No. 68.
+Medical Teacher, 34 (11), 960-992. DOI: 10.3109/0142159X.2012.703791</p>
+<p>Brennan, R. L. (2001a). Generalizability Theory. New York:
+Springer.</p>
+<p>B Brennan, R. L. (2001b). Manual for urGENOVA (Version 2.1) (Iowa
+Testing Programs Occasional Paper Number 49). Iowa City, IA: Iowa
+Testing Programs, University of Iowa.</p>
+<p>Riesch, A.M., Swaminathan, H., Welsh, M. &amp; Chafouleas, S.M.
+(2014). Generalizability theory: A practical guide to study design,
+implementation, and interpretation, Journal of School Psychology, 52
+(1), 13-35.</p>
+<p>Henderson, C.R. (1953). Estimation of variance and covariance
+components. Biometrics, 9(2), 226-252.</p>
+<p>Narayanan, A., Greco, M., &amp; Campbell, J.L. (2010).
+Generalisability in unbalanced, uncrossed and fully nested studies.
+Medical Education, 44(4), 367-387.</p>
+<p>Water Quality Division (2010). Procedures to Implement the Texas
+Surface-Water-Quality Standards: TCEQ RG–194, p. 81.</p>
+<h2 id="appendix-a-harmonic-mean-discussion">Appendix A: Harmonic Mean
+Discussion</h2>
+<p>Harmonic means are an average. It is calculated by:</p>
+<ol type="1">
+<li>Taking the sum of the reciprocals of each value in a data
+series</li>
+<li>Dividing the sum by the number of values in the data series (that is
+the averaging part)</li>
+<li>Taking the reciprocal of that number</li>
+</ol>
+<p>Mathematically equivalently: taking the sum of the number of values
+in the data series and dividing it by the sum of the reciprocals of each
+value in a data series.</p>
+<p>Harmonic means are most useful when you are dealing with a set of
+values based on rates and ratios (i.e., working with reciprocal
+relationships). Ratios (such as speed (km/hr); Price/Earnings ratios;
+and Nested variables #items/form, #patients/doctor) are such instances.
+Harmonic means are thus useful in unbalanced data designs where there
+are non-equivalent numbers of items nested within another factor (e.g.,
+i:h or p:h). Clearly, these are ratios.</p>
+<p>These websites are useful to differentiate between arithmetic,
+geometric and harmonic means:</p>
+<ul>
+<li><a href="https://www.datacamp.com/tutorial/harmonic-mean">DataCamp’s
+Tutorial on Harmonic Mean</a></li>
+<li><a
+href="https://ryxcommar.com/2023/01/13/intuitive-explanation-of-arithmetic-geometric-harmonic-mean/">Intuitive
+Explanation of Arithmetic, Geometric, and Harmonic Mean</a></li>
+</ul>
+<p>Using the simple example of: What is the average speed of a vehicle
+that drives out 60 km at 60/km/hr and back the same distance at 20
+km/hr?</p>
+<p>The arithmetic mean would be (60+20)/2hrs = 80/2 = 40 km/hr. However,
+this is NOT the average speed travelled over a fixed distance (i.e.,
+“there and back”). The problem is that on the way back, the driver would
+have only covered only 1/3 of the distance back since they are going at
+20/km/hr. To cover the while distance, they would have to drive 3 hours.
+We CAN mentally work this through and take the weighted arithmetic mean
+to get at the correct average speed: (60+20+20+20)/4 hrs = 120/4 = 30
+km/hr is the average speed for the fixed distance when travelling 60
+km/hr out and 20 km/hr back.</p>
+<p>While this worked with a simple example, a much more elegant way to
+do this with many numbers that don’t evenly work out for weighting, is
+to take the reciprocal of the values (1/60 and 1/20), then average
+them:</p>
+<p><span class="math display">\[\frac{1/60 + 1/20}{2} = \frac{0.016667 +
+0.05}{2} = \frac{0.066667}{2} = 0.033333\]</span></p>
+<p>Then to “get back” to our original units of km/hr, we take the
+reciprocal of this value:</p>
+<p><span class="math display">\[\frac{1}{0.033333} = 29.99999 \approx
+30\]</span></p>
+<p>We could also skip a step and when we get to 0.066667/2, simply take
+the reciprocal of it:</p>
+<p><span class="math display">\[\frac{2}{0.0666667} = 29.999999 \approx
+30\]</span></p>
+<p>In looking at the reciprocal values, you can see that the larger the
+value to start with, the smaller its reciprocal value. By taking the
+average of the reciprocals, you are equally weighting each value before
+averaging them. This dampens the effect of larger values in the data set
+that is exerted with the arithmetic mean.</p>
+<p>For example: The arithmetic mean of Brennan’s (2001a) data set (Table
+7.5, p. 224) with 3 h’s (let’s refer to them as Forms) and within each
+Form there are 2, 4, and 2 items. So, in effect we have three ratio
+values: 2items/1 form, 4items/1 form, 2items/1 form.</p>
+<p>The arithmetic mean of these values is: <span
+class="math display">\[\frac{2+4+2}{3} = \frac{8}{3} =
+2.667\]</span></p>
+<p>The harmonic mean of these values is: <span
+class="math display">\[\frac{3}{(1/2 + 1/4 + 1/2)} =
+\frac{3}{(0.5+0.25+0.5)} = \frac{3}{1.25} = 2.4\]</span></p>
+<p>Why would we want the arithmetic versus the harmonic means?</p>
+<p>The arithmetic mean (2.667) tells us that there are, on average,
+2.667 items for each form for this data set. There are 8 persons (p) who
+take all the items in all the forms. If we take 2.667 and multiply it by
+the number of persons (8) we get 21.336 “counts” estimated for each
+form. If we multiply this value by the number of forms (3), we get 64 –
+the number of counts in the entire data set FOR PERSONS. In addition,
+for each person, (person 1 has 2.667 items for Form 1, 2.667 items for
+Form 2 and 2.667 items for Form 3) returns 8 counts (2.667 × 3) per
+person. This symmetry is useful to know and works when there are no
+missing data.</p>
+<p>The harmonic mean “weights” the forms equally so that the effect of
+forms “assumes” they all have the same number of items in them (are
+pseudo-balanced). For example, Form 2 has 4 items in it; if we weight
+Forms 1 and 3 by doubling their number of items, then we can calculate
+the arithmetic average of:</p>
+<p><span class="math display">\[
+Form_{h1}(2+2) +  Form_{h2}(4) +  Form_{h3}(2+2)  = 12
+\]</span></p>
+<p>5 values in the data set</p>
+<p><span class="math display">\[\frac{12}{5} = 2.4\]</span></p>
+<p>This equally weights the contribution of each of the forms when using
+the term in the denominators of the Generalizability equations.</p>
+</body>
+</html>
