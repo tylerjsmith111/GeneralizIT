@@ -1,6 +1,7 @@
 # Unbalanced and Missing Data Generalizability Analyses: A tutorial based on Henderson (1953), Brennan (2001a)
 
-By: Tyler J. Smith and Theresa J.B. Kline 15 January 2025
+**By:** Tyler J. Smith and Theresa J.B. Kline  
+**Date:** April 8, 2025
 
 This tutorial assumes a fairly good working knowledge of generalizability theory and the terms used in its analysis. If the terms “facet”, “variance component”, “generalizability”, “dependability”, “G-Study” and “D-study” are unfamiliar, it is strongly advised that the reader review an introduction to generalizability procedures using balanced/non-missing data. There are many choices for this such as Briesch, Swaminathan, Welsh, and Chafouleas (2014).
 
@@ -14,7 +15,7 @@ The first step in this document is to “walk” the reader through the “Metho
 
 Table 1 below shows the data from Henderson’s (1953) Table 1. Its cells contain the butterfat levels at first lactations of 4 cow herds inseminated by 3 different sires over 4 years. The entries in each cell are somewhat unique – they represent number of cows in each herd (first number) and butterfat content (second number) in the first lactation of the year. The entry “3 – 1414” represents the total butterfat (1414) summed over 3 different cows. Thus, cows are nested within Herd/Sire combinations (C: HS).
 
-Table 1. Henderson’s butterfat data set “Year(A) X Herd (H) X Sire (S)”
+### Table 1. Henderson’s butterfat data set “Year(A) X Herd (H) X Sire (S)”
 
 | HERD   | SIRE   | YEAR     | YEAR     | YEAR      | YEAR      | TOTAL    |
 |--------|--------|----------|----------|-----------|-----------|----------|
@@ -47,13 +48,21 @@ Assumptions:
 
 Step 1: Obtain the “T” values (uncorrected sums of squares) for each facet by summing over the squared values for each level of the facet and divide by each level’s relevant sample size (“^” indicates exponential). Henderson uses summation notation in his article – however actual values will make the computations more concrete.
 
-$$A \text{ (year)} = \sum \frac{(2931^2)}{7} + \frac{(9983^2)}{21} + \frac{(6959^2)}{16} + \frac{(4806^2)}{13} = 10,776,451$$
+$$
+A \text{ (year)} =
+\sum \frac{(2931^2)}{7} + \frac{(9983^2)}{21} + \frac{(6959^2)}{16} + \frac{(4806^2)}{13}
+= 10,776,451
+$$
 
-$$H \text{ (herd)} = \sum \frac{(2395+2628+1609)^2}{(5+6+5)} + \frac{(1674+2109+2303)^2}{(4+5+6)} + \frac{(1705+3444)^2}{(3+6)} + \frac{(3064+3748)^2}{(8+9)} = 10,893,666$$
+$$
+H \text{ (herd)} =
+\sum \frac{(2395+2628+1609)^2}{(5+6+5)} + \frac{(1674+2109+2303)^2}{(4+5+6)} + \frac{(1705+3444)^2}{(3+6)} + \frac{(3064+3748)^2}{(8+9)}
+= 10,893,666
+$$
 
 $$S \text{ (sire)} = \sum \frac{(2395+1674+1705+3064)^2}{(5+4+3+8)} + \frac{(2628+2109+3444)^2}{(6+5+6)} + \frac{(1609+2303+3748)^2}{(5+6+9)} = 10,776,278$$
 
-$$HS \text{ (herd} \times \text{sire)} = \sum \frac{2395^2}{5} + \frac{2628^2}{6} + \frac{1609^2}{5} + \frac{1674^2}{4} + \frac{2109^2}{5} + \frac{2303^2}{6} + \frac{1705^2}{3} + \frac{3444^2}{6} + \frac{3064^2}{8} + \frac{3748^2}{9} = 10,970,369$$
+$$HS \text{ (herd)} \times \text{(sire)} = \sum \frac{2395^2}{5} + \frac{2628^2}{6} + \frac{1609^2}{5} + \frac{1674^2}{4} + \frac{2109^2}{5} + \frac{2303^2}{6} + \frac{1705^2}{3} + \frac{3444^2}{6} + \frac{3064^2}{8} + \frac{3748^2}{9} = 10,970,369$$
 
 $$\text{Mean} \text{ (Henderson uses "CF" for this term)} = \sum \text{ over all values } \frac{24679^2}{57} = 10,685,141$$
 
@@ -81,7 +90,7 @@ So far, things have been straightforward. The next step is more complicated and 
 4. For the σ²(error) term column, the facet sample sizes are equal to the number of levels of that effect (Year = 4, Herd = 4, Sire = 3, HS = 10 (there are 10 different HS combinations), for the Mean it is always = 1, and for the Total it is always = N.
 5. This leaves 16 "non-easy" ones that require calculation and are noted as such.
 
-Table 2. Henderson's T-values (uncorrected Sums of Squares) for each facet and coefficient sample size bases
+### Table 2. Henderson's T-values (uncorrected Sums of Squares) for each facet and coefficient sample size bases
 
 | Facet           | T-Value     | μ²    | σ²(Year)     | σ²(Herd)    | σ²(Sire)    |  σ²(HS)    | σ²(error)                 |
 |-----------------|-------------|-------|---------------|-------------|-------------|------------|---------------------------|
@@ -268,7 +277,7 @@ $$= \frac{((5^2) + (6^2) + (5^2) +(4^2) + (5^2) + (6^2) + (3^2) + (6^2) + (8^2) 
 
 All these calculated values can now be put into Table 2 and are presented in Table 3.
 
-Table 3. Completed Hendersons T-values (uncorrected Sums of Squares) and coefficient sample size bases (contains the same data found in Table 6 p. 233 in Henderson 1953)
+### Table 3. Completed Hendersons T-values (uncorrected Sums of Squares) and coefficient sample size bases (contains the same data found in Table 6 p. 233 in Henderson 1953)
 
 | Facet           | T-Values   |   μ² |   ^2(year)   |   σ²(herd) |   σ²(sire) |    σ²(HS) |   σ²(error) |
 |-----------------|------------|-------|---------------|-------------|-------------|------------|--------------|
@@ -307,7 +316,7 @@ $$
 
 Using the data in Table 3, solve these equations simultaneously via matrix procedures to solve a system of equations (solving by linear least squares method). Alternatively, they can be solved by regressing the 6 T-values on the 6 variance estimates in a direct regression (all predictors entered simultaneously), and requesting to include an intercept in the model). This produces the following output (from SPSS – although other programs will provide the same results). Note that there is no “Mean” variance component calculated, as μ² is a constant and has no variance so is eliminated from the analysis. Since there are 6 predictors and 6 outcomes the data will “fit perfectly” (in fact, Excel WILL NOT run the regression because there are equal numbers of predictors and cell entries in the outcome). However, this is not relevant, as we are interested solely in the unstandardized B-values associated with each effect, which are the variance components. We now have the variance components (see Table 4) for Henderson’s data.
 
-Table 4a. SPSS output of Henderson’s data
+### Table 4a. SPSS output of Henderson’s data
 
 | Model      | Unstandardized Coefficients |                           | Standardized Coefficients |
 |------------|----------------------------|---------------------------|--------------------------|
@@ -319,7 +328,7 @@ Table 4a. SPSS output of Henderson’s data
 | HS         | -164.329                   | .000                      | -.023                    |
 | Error      | 2949.830                   | .000                      | .402                     |
 
-Table 4b. Variance Components from Henderson 1953 data
+### Table 4b. Variance Components from Henderson 1953 data
 
 | Facet    | Variance Component   | Proportion of Variance   |
 |----------|----------------------|--------------------------|
@@ -346,7 +355,7 @@ The G-String\_V program is more restrictive in input than urGENOVA. It does NOT 
 
 With this as a backdrop, the next step in this tutorial is to use a data set from Narayanan et al. (2010) (Table 5) to calculate the variance components using Henderson’s Method 1. It will be noted at this point that Narayanan uses a completely different approach to calculating generalizability in the paper. It is based on the variance, not the variance components, which is the hallmark of traditional approaches to calculating Generalizability. These data are unbalanced, but no data points are missing. There are 3 different doctors (d); rated by 16 patients (p) - note that patients are nested in doctors, and this facet is unbalanced; 8 patients rate Doctor A, 5 rate Doctor B and 3 rate Doctor C); all use 5 items (i) to rate the doctor. The model then is: i X (p:d). The dependent variable is “rating on a scale of 1-5” for each item.
 
-Table 5. Narayanan et al. (2010) data set (i X p:d)
+### Table 5. Narayanan et al. (2010) data set (i X p:d)
 
 | Doctor   |   Patient |   item1 |   item2 |   item3 |   item4 |   item5 |
 |----------|-----------|---------|---------|---------|---------|---------|
@@ -371,7 +380,7 @@ Table 5. Narayanan et al. (2010) data set (i X p:d)
 
 We are going to need a number of sums and their squares for the next analyses (Table 6):
 
-Table 6. Narayanan et al. (2010) data set with added rows and columns
+#### Table 6. Narayanan et al. (2010) data set with added rows and columns
 
 | Doctor   | Patient                                  |    item1 |    item2 |    item3 |   item4 |    item5 | Sum across Patient Ratings   | Squared sum across Patient Ratings   | Squared sum across patient ratings/#ratings each completed   |
 |----------|------------------------------------------|----------|----------|----------|---------|----------|------------------------------|--------------------------------------|--------------------------------------------------------------|
@@ -471,7 +480,7 @@ $$\frac{(4 + 4 + 4 + 4 + 4 + ... + 3 + 3 + 3 + 3 + 3 + 4 + 4 + 4 + 4 + 3)^2}{80}
 
 We can now put our Facet T-values into Table 7. below.
 
-Table 7. Facets and T-values for the Narayanan et al. (2010) data set
+#### Table 7. Facets and T-values for the Narayanan et al. (2010) data set
 
 | Facet                                                                      |   T-Value |
 |----------------------------------------------------------------------------|-----------|
@@ -501,7 +510,7 @@ $$
 
 The results from Brennan’s notation are shown in Table 8 for this design. However, as noted, the entries ONLY work in a balanced design. When there are missing data, we need to go back to the Henderson approach.
 
-Table 8. Facets and Variance Coefficients for Narayanan et al. (2010) data set with Brennan (2001a) Notation
+#### Table 8. Facets and Variance Coefficients for Narayanan et al. (2010) data set with Brennan (2001a) Notation
 
 | Facet                      | σ²(d)     | σ²(p:d)   | σ²(i)   |  σ²(di)   | σ²(pi:d)   | μ²   |
 |----------------------------|------------|------------|----------|------------|-------------|-------|
@@ -514,7 +523,7 @@ Table 8. Facets and Variance Coefficients for Narayanan et al. (2010) data set w
 
 Henderson’s approach to completing the “non-simple” cells in the coefficient matrix follows. It allows for missing data in the calculations. There are 16 unique values (highlighted) to calculate.
 
-Table 9. Facets and Variance Coefficients for Narayanan et al. (2010) data set with needed values 1-16 noted
+#### Table 9. Facets and Variance Coefficients for Narayanan et al. (2010) data set with needed values 1-16 noted
 
 | Facet                      | σ²(d)     | σ²(p:d)   | σ²(i)   |  σ²(di)   | σ²(pi:d)   | μ²   |
 |----------------------------|------------|------------|----------|------------|-------------|-------|
@@ -536,7 +545,7 @@ $$\text{D2: } \frac{(5^2) + (5^2) + (5^2) + (5^2) + (5^2)}{25} = \frac{125}{25} 
 $$\text{D3: } \frac{(5^2) + (5^2) + (5^2)}{15} = \frac{75}{15} = 5$$
 
 $$= 15$$
-2. The σ²(i) term on D (data are collapsed across P:D). Sample size starts by calculating the squared sum of: 
+2. The σ²(i) term on D (data are collapsed across P:D). Sample size starts by calculating the squared sum of:
 
     counts of each i term within each D, divided by the total number of counts for that D. Then sum the quotients.
 
@@ -865,7 +874,7 @@ $$= \frac{490}{80} = 6.125$$
 
 We insert the calculated values into their respective cells (Table 10) and bring the T-values down to complete the table.
 
-Table 10. Facet and Variance Coefficients for Narayanan et al. (2010) data set
+#### Table 10. Facet and Variance Coefficients for Narayanan et al. (2010) data set
 
 | Facet                      |   σ²(d)   |   σ²(p:d) |   σ²(i) |    σ²(di) |   σ²(pi:d) |   μ² |   T-Value |
 |----------------------------|------------|------------|----------|------------|-------------|-------|-----------|
@@ -890,7 +899,7 @@ Using the data in Table 10, (via matrix procedures or regressing the T-values on
 
 Examination of the variance components of the facets and their relative contribution to variance away from the mean (Table 11), we can see that most of the variance (56%) in this data set is due to the PI:D facet. This is problematic from an interpretive standpoint, indicating it is not possible to really understand the variance in the data set. 33% of the variance is due to the P:D facet – within patient ratings of the doctors. In examining the raw data, we see that the doctors are all rated similarly by all patients (very little variance in the data set with which to work).
 
-Table 11. Variance Components from Narayanan et al. (2010) data
+#### Table 11. Variance Components from Narayanan et al. (2010) data
 
 | Facet   | Variance Component   |   Proportion of Variance |
 |---------|----------------------|--------------------------|
@@ -936,7 +945,7 @@ The harmonic mean is necessary as we are accounting for the ratio between the co
 
 Table 12 shows the denominators to be used in our unbalanced data set with the complete worked examples following.
 
-Table 12. Denominators for each effect when the facet of differentiation changes when calculating G and D
+### Table 12. Denominators for each effect when the facet of differentiation changes when calculating G and D
 
 | Variance Term   |   P:D Facet of Differentiation Denominator for G and D |   I Facet of Differentiation Denominator for G and D |   D Facet of Differentiation Denominator for G and D |
 |-----------------|--------------------------------------------------------|------------------------------------------------------|------------------------------------------------------|
@@ -2405,9 +2414,8 @@ Water Quality Division (2010). Procedures to Implement the Texas Surface-Water-Q
 
 ## Appendix A: Harmonic Mean Discussion
 
-## Appendix A: Harmonic Mean Discussion
-
 Harmonic means are an average. It is calculated by:
+
 1. Taking the sum of the reciprocals of each value in a data series
 2. Dividing the sum by the number of values in the data series (that is the averaging part)
 3. Taking the reciprocal of that number
