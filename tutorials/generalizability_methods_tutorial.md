@@ -2394,7 +2394,7 @@ $$X = \mu + \sigma_{i}^{2} + \sigma_{d}^{2} + \sigma_{p:d}^{2} + \sigma_{id}^{2}
 
 The utility in creating a generalizability program allows for: 1) missing data, 2) unbalanced data, 3) providing both generalizability and dependability coefficients, and 4) D-values for designs with no missing data is very useful addition to the toolbox of researchers. There is currently not a freely-available one that does all of these things.
 
-References
+## References
 
 Bloch, R. &amp; Norman, G. (2023). G String V User Manual. Hamilton, Ontario, Canada.
 
@@ -2411,6 +2411,19 @@ Henderson, C.R. (1953). Estimation of variance and covariance components. Biomet
 Narayanan, A., Greco, M., &amp; Campbell, J.L. (2010). Generalisability in unbalanced, uncrossed and fully nested studies. Medical Education, 44(4), 367-387.
 
 Water Quality Division (2010). Procedures to Implement the Texas Surface-Water-Quality Standards: TCEQ RG–194, p. 81.
+
+## Citation
+
+```bibtex
+@misc{smith2025unbalanced,
+    author       = {Tyler J. Smith and Theresa J.B. Kline},
+    title        = {Unbalanced and Missing Data Generalizability Analyses: A tutorial based on Henderson (1953), Brennan (2001a)},
+    year         = {2025},
+    month        = {April},
+    note         = {Blog post},
+    howpublished = {\url{https://tylerjsmith111.github.io/GeneralizIT/methods.html}}
+}
+```
 
 ## Appendix A: Harmonic Mean Discussion
 
