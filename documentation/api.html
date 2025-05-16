@@ -1,0 +1,945 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; GeneralizIT 0.1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=92734c54"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to GeneralizIT’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GeneralizIT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generalizit-class">GeneralizIT Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.GeneralizIT"><code class="docutils literal notranslate"><span class="pre">GeneralizIT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.design"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.design</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.anova_summary"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.anova_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.calculate_anova"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.calculate_anova()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.calculate_confidence_intervals"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.calculate_confidence_intervals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.calculate_d_study"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.calculate_d_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.calculate_g_coefficients"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.calculate_g_coefficients()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.confidence_intervals_summary"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.confidence_intervals_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.d_study_summary"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.d_study_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.g_coefficients_summary"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.g_coefficients_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.g_coeffs"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.g_coeffs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.GeneralizIT.variance_summary"><code class="docutils literal notranslate"><span class="pre">GeneralizIT.variance_summary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-generalizit.design">Design Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design.Design"><code class="docutils literal notranslate"><span class="pre">Design</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.anova_summary"><code class="docutils literal notranslate"><span class="pre">Design.anova_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.calculate_anova"><code class="docutils literal notranslate"><span class="pre">Design.calculate_anova()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.calculate_confidence_intervals"><code class="docutils literal notranslate"><span class="pre">Design.calculate_confidence_intervals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.calculate_d_study"><code class="docutils literal notranslate"><span class="pre">Design.calculate_d_study()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.confidence_intervals_summary"><code class="docutils literal notranslate"><span class="pre">Design.confidence_intervals_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.d_study_summary"><code class="docutils literal notranslate"><span class="pre">Design.d_study_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.g_coeff_summary"><code class="docutils literal notranslate"><span class="pre">Design.g_coeff_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.g_coeffs"><code class="docutils literal notranslate"><span class="pre">Design.g_coeffs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#generalizit.design.Design.variance_summary"><code class="docutils literal notranslate"><span class="pre">Design.variance_summary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-generalizit.design_utils">Design Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design_utils.create_corollary_dictionary"><code class="docutils literal notranslate"><span class="pre">create_corollary_dictionary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design_utils.create_variance_tuple_dictionary"><code class="docutils literal notranslate"><span class="pre">create_variance_tuple_dictionary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design_utils.get_facets_from_variance_tuple_dictionary"><code class="docutils literal notranslate"><span class="pre">get_facets_from_variance_tuple_dictionary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design_utils.match_research_design"><code class="docutils literal notranslate"><span class="pre">match_research_design()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design_utils.parse_facets"><code class="docutils literal notranslate"><span class="pre">parse_facets()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.design_utils.validate_research_design"><code class="docutils literal notranslate"><span class="pre">validate_research_design()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-generalizit.g_theory_utils">G-Theory Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#generalizit.g_theory_utils.create_pseudo_df"><code class="docutils literal notranslate"><span class="pre">create_pseudo_df()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GeneralizIT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<section id="generalizit-class">
+<h2>GeneralizIT Class<a class="headerlink" href="#generalizit-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">generalizit.</span></span><span class="sig-name descname"><span class="pre">GeneralizIT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance_tuple_dictionary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>High-level API for Generalizability Theory analysis.</p>
+<p>GeneralizIT provides a user-friendly interface for conducting Generalizability Theory (G-Theory)
+analyses, including variance component estimation, reliability coefficient calculation,
+Decision studies (D-studies), and confidence interval estimation.</p>
+<p>This class serves as a wrapper around the core analytical engine (Design class),
+handling data preparation, research design interpretation, and result presentation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Dataset containing facet variables and response measurements.</p></li>
+<li><p><strong>design_str</strong> (<em>str</em>) – String specifying the research design in standard notation
+(e.g., “p x i” for persons crossed with items).</p></li>
+<li><p><strong>response</strong> (<em>str</em>) – Column name in data containing the response/measurement values.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.design">
+<span class="sig-name descname"><span class="pre">design</span></span><a class="headerlink" href="#generalizit.GeneralizIT.design" title="Link to this definition"></a></dt>
+<dd><p>The underlying Design object that performs calculations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#generalizit.design.Design" title="generalizit.design.Design">Design</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">generalizit</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneralizIT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;my_data.csv&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gt</span> <span class="o">=</span> <span class="n">GeneralizIT</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;p x i&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gt</span><span class="o">.</span><span class="n">calculate_anova</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gt</span><span class="o">.</span><span class="n">calculate_g_coefficients</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gt</span><span class="o">.</span><span class="n">g_coefficients_summary</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.anova_summary">
+<span class="sig-name descname"><span class="pre">anova_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.anova_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.anova_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the ANOVA results, including string indices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.calculate_anova">
+<span class="sig-name descname"><span class="pre">calculate_anova</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.calculate_anova"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.calculate_anova" title="Link to this definition"></a></dt>
+<dd><p>Calculate variance components using ANOVA.</p>
+<p>This method is a wrapper for the Design.calculate_anova() method, which
+implements Henderson’s Method 1 to estimate variance components for each facet
+in the specified research design.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Results are stored in the underlying Design object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This method must be called before calculating G-coefficients,
+confidence intervals, or D-study scenarios.</p>
+<p>Print a summary of the ANOVA results, including string indices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.calculate_confidence_intervals">
+<span class="sig-name descname"><span class="pre">calculate_confidence_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.calculate_confidence_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.calculate_confidence_intervals" title="Link to this definition"></a></dt>
+<dd><p>Calculate confidence intervals for facet level means.</p>
+<p>This method is a wrapper for the Design.calculate_confidence_intervals() method,
+which computes confidence intervals for individual facets based on variance
+component analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for confidence intervals.
+Default is 0.05 (producing 95% confidence intervals).</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword arguments passed to Design.calculate_confidence_intervals().</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in the underlying Design object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If ANOVA table hasn’t been calculated first.</p>
+</dd>
+</dl>
+<p>Calculate confidence intervals for means of each facet level.</p>
+<p>This method computes confidence intervals for individual facets based on
+variance component analysis using the formula from Cardinet et al. (1976):</p>
+<p>X ± z_(α/2) × √(σ²)</p>
+<p>where σ² represents the sum of variance components adjusted by the
+appropriate levels coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for confidence intervals.
+Default is 0.05 (producing 95% confidence intervals).</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword arguments.
+- variance_dictionary (dict): Custom variance components to use.
+If not provided, components from the ANOVA table are used.
+- levels_df (pd.DataFrame): Custom levels coefficients table.
+If not provided, self.levels_coeffs is used or calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in self.confidence_intervals</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.self.confidence_intervals">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">confidence_intervals</span></span><a class="headerlink" href="#generalizit.GeneralizIT.self.confidence_intervals" title="Link to this definition"></a></dt>
+<dd><p>Dictionary where keys are facet names and
+values are DataFrames containing confidence intervals for each level.
+Each DataFrame contains columns:
+- lower_bound: Lower CI boundary
+- mean: Observed mean
+- upper_bound: Upper CI boundary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Confidence intervals are not calculated for the facet with the largest</p></li>
+</ul>
+<p>dimensionality (typically the interaction term containing all facets).
+- Negative variance components are automatically set to zero with a warning.
+- The method requires the ANOVA table to be calculated first unless
+a custom variance_dictionary is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If alpha is not between 0 and 1, ANOVA hasn’t been calculated,
+    or if invalid parameters are provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.calculate_d_study">
+<span class="sig-name descname"><span class="pre">calculate_d_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_study_design</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.calculate_d_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.calculate_d_study" title="Link to this definition"></a></dt>
+<dd><p>Calculate G-coefficients for alternative research designs (D-Study).</p>
+<p>This method is a wrapper for the Design.calculate_d_study() method, which examines
+multiple possible study designs by generating combinations of provided facet levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_study_design</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary where keys are facet names and values are
+lists of integers representing different numbers of levels to test.</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword arguments passed to Design.calculate_d_study().</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in the underlying Design object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If ANOVA table hasn’t been calculated first.</p>
+</dd>
+</dl>
+<p>Implement a D-Study to determine optimal facet levels based on G-Study variance components.</p>
+<p>This method examines multiple possible study designs by generating all combinations
+of the provided facet levels. It calculates G-coefficients for each design scenario
+using the variance components from a previously conducted G-Study.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_study_design</strong> (<em>dict</em>) – <p>Dictionary where keys are facet names and values are
+lists of integers representing different numbers of levels to test.
+For example:
+{</p>
+<blockquote>
+<div><p>’person’: [10],        # Only testing 10 persons
+‘item’: [2, 3],        # Testing either 2 or 3 items
+‘rater’: [2, 4, 6]     # Testing 2, 4, or 6 raters</p>
+</div></blockquote>
+<p>}
+This would generate 6 different study designs (1×2×3 combinations).</p>
+</p></li>
+<li><p><strong>**kwargs</strong> – Optional additional parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in self.d_study_dict, where keys are string
+representations of each design scenario and values are DataFrames
+containing the corresponding G-coefficients.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If d_study_design is not properly formatted or if required</p></li>
+<li><p><strong>precalculations haven't been performed.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This method requires that variance components have been calculated via a G-Study</p></li>
+<li><p>For each design scenario, new levels coefficients are calculated</p></li>
+<li><p>All facet combinations in the original design must be maintained</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.calculate_g_coefficients">
+<span class="sig-name descname"><span class="pre">calculate_g_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.calculate_g_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.calculate_g_coefficients" title="Link to this definition"></a></dt>
+<dd><p>Calculate generalizability coefficients.</p>
+<p>This method is a wrapper for the Design.g_coeffs() method, which computes
+phi-squared (Φ²) and rho-squared (ρ²) coefficients for each potential
+object of measurement in the design.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments passed to Design.g_coeffs().
+- error_variance (bool): If True, prints detailed information about</p>
+<blockquote>
+<div><p>error variances during calculation. Default is False.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>Other parameters as documented in Design.g_coeffs().</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in the underlying Design object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If ANOVA table hasn’t been calculated first.</p>
+</dd>
+</dl>
+<p>Calculate G-coefficients for various scenarios of fixed and random facets.</p>
+<p>This method computes rho^2 (relative) and phi^2 (absolute) coefficients for each
+potential object of measurement in the design. The coefficients quantify the
+reliability of measurements across different facets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments.
+- variance_dictionary (dict): Custom variance components to use.</p>
+<blockquote>
+<div><p>If provided, values must be non-negative. If not provided,
+components from the ANOVA table are used.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>levels_df (pd.DataFrame): Custom levels coefficients table.</dt><dd><p>If not provided, self.levels_coeffs is used or calculated.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>variance_tuple_dictionary (dict): Custom variance tuple dictionary.</dt><dd><p>If not provided, self.variance_tuple_dictionary is used.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>d_study (bool): If True, returns the G-coefficients DataFrame directly</dt><dd><p>instead of storing it in self.g_coeffs_table. Default is False.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>error_variance (bool): If True, prints detailed information about</dt><dd><p>the error variances for Tau (τ), Delta (Δ), and delta (δ) during
+the calculation of phi-squared and rho-squared coefficients.
+Default is False.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If d_study=True, returns the G-coefficients DataFrame directly.
+Otherwise, results are stored in self.g_coeffs_table and None is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame or None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If:
+    - ANOVA table hasn’t been calculated and no variance_dictionary is provided
+    - Any variance component is negative
+    - Levels coefficients are invalid (non-square, negative values)
+    - Keys in variance_dictionary don’t match variance_tuple_dictionary
+    - Levels coefficients don’t match variance components</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Negative variance components are automatically set to zero with a warning</p></li>
+<li><p>The ‘mean’ component is removed from calculations</p></li>
+<li><p>The method produces a DataFrame with rho^2 and phi^2 values for each facet</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.confidence_intervals_summary">
+<span class="sig-name descname"><span class="pre">confidence_intervals_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.confidence_intervals_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.confidence_intervals_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the confidence intervals for each facet.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.d_study_summary">
+<span class="sig-name descname"><span class="pre">d_study_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.d_study_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.d_study_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the D-Study results.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.g_coefficients_summary">
+<span class="sig-name descname"><span class="pre">g_coefficients_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.g_coefficients_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.g_coefficients_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the g_coeff results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.g_coeffs">
+<span class="sig-name descname"><span class="pre">g_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.g_coeffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.g_coeffs" title="Link to this definition"></a></dt>
+<dd><p>[DEPRECATED] Calculate generalizability coefficients.</p>
+<p>This method is deprecated and will be removed in a future version.
+Please use <cite>calculate_g_coefficients()</cite> instead.</p>
+<p>See <cite>calculate_g_coefficients()</cite> for parameter details.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.GeneralizIT.variance_summary">
+<span class="sig-name descname"><span class="pre">variance_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/generalizit.html#GeneralizIT.variance_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.GeneralizIT.variance_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the variance components.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-generalizit.design">
+<span id="design-module"></span><h2>Design Module<a class="headerlink" href="#module-generalizit.design" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="generalizit.design.Design">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">generalizit.design.</span></span><span class="sig-name descname"><span class="pre">Design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance_tuple_dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.anova_summary">
+<span class="sig-name descname"><span class="pre">anova_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.anova_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.anova_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the ANOVA results, including string indices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.calculate_anova">
+<span class="sig-name descname"><span class="pre">calculate_anova</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.calculate_anova"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.calculate_anova" title="Link to this definition"></a></dt>
+<dd><p>Performs analogous ANOVA calculations using Henderson 1953 Method 1.
+Determines the variance components from variance coefficients and
+uncorrected sum of squares (T values) for each facet, iteractions, and means.</p>
+<p>This method executes the steps necessary to estimate variance components based
+on Generalizability Theory. This method does not require corrected Sum of Squares or Mean Squares,
+and thus they are not calculated. It also does not calculate hypothesis tests or F-statistics,
+as these are not relevant in G-Theory.</p>
+<dl class="simple">
+<dt>Steps:</dt><dd><ol class="arabic simple">
+<li><p>Calculate the T values using <cite>_calculate_T_values</cite>.</p></li>
+<li><p>Create the variance coefficients table with <cite>_create_variance_coefficients_table</cite>.</p></li>
+<li><p>Estimate variance components using <cite>_calculate_variance</cite>.</p></li>
+</ol>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>This method does not require and does not calculate Sum of Squares or Mean Squares.</p></li>
+<li><p>This method emphasizes variance component estimation over hypothesis testing.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.calculate_confidence_intervals">
+<span class="sig-name descname"><span class="pre">calculate_confidence_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.calculate_confidence_intervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.calculate_confidence_intervals" title="Link to this definition"></a></dt>
+<dd><p>Calculate confidence intervals for means of each facet level.</p>
+<p>This method computes confidence intervals for individual facets based on
+variance component analysis using the formula from Cardinet et al. (1976):</p>
+<p>X ± z_(α/2) × √(σ²)</p>
+<p>where σ² represents the sum of variance components adjusted by the
+appropriate levels coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for confidence intervals.
+Default is 0.05 (producing 95% confidence intervals).</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword arguments.
+- variance_dictionary (dict): Custom variance components to use.
+If not provided, components from the ANOVA table are used.
+- levels_df (pd.DataFrame): Custom levels coefficients table.
+If not provided, self.levels_coeffs is used or calculated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in self.confidence_intervals</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="generalizit.design.Design.self.confidence_intervals">
+<span class="sig-prename descclassname"><span class="pre">self.</span></span><span class="sig-name descname"><span class="pre">confidence_intervals</span></span><a class="headerlink" href="#generalizit.design.Design.self.confidence_intervals" title="Link to this definition"></a></dt>
+<dd><p>Dictionary where keys are facet names and
+values are DataFrames containing confidence intervals for each level.
+Each DataFrame contains columns:
+- lower_bound: Lower CI boundary
+- mean: Observed mean
+- upper_bound: Upper CI boundary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Confidence intervals are not calculated for the facet with the largest</p></li>
+</ul>
+<p>dimensionality (typically the interaction term containing all facets).
+- Negative variance components are automatically set to zero with a warning.
+- The method requires the ANOVA table to be calculated first unless
+a custom variance_dictionary is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If alpha is not between 0 and 1, ANOVA hasn’t been calculated,
+    or if invalid parameters are provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.calculate_d_study">
+<span class="sig-name descname"><span class="pre">calculate_d_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_study_design</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.calculate_d_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.calculate_d_study" title="Link to this definition"></a></dt>
+<dd><p>Implement a D-Study to determine optimal facet levels based on G-Study variance components.</p>
+<p>This method examines multiple possible study designs by generating all combinations
+of the provided facet levels. It calculates G-coefficients for each design scenario
+using the variance components from a previously conducted G-Study.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_study_design</strong> (<em>dict</em>) – <p>Dictionary where keys are facet names and values are
+lists of integers representing different numbers of levels to test.
+For example:
+{</p>
+<blockquote>
+<div><p>’person’: [10],        # Only testing 10 persons
+‘item’: [2, 3],        # Testing either 2 or 3 items
+‘rater’: [2, 4, 6]     # Testing 2, 4, or 6 raters</p>
+</div></blockquote>
+<p>}
+This would generate 6 different study designs (1×2×3 combinations).</p>
+</p></li>
+<li><p><strong>**kwargs</strong> – Optional additional parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Results are stored in self.d_study_dict, where keys are string
+representations of each design scenario and values are DataFrames
+containing the corresponding G-coefficients.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If d_study_design is not properly formatted or if required</p></li>
+<li><p><strong>precalculations haven't been performed.</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This method requires that variance components have been calculated via a G-Study</p></li>
+<li><p>For each design scenario, new levels coefficients are calculated</p></li>
+<li><p>All facet combinations in the original design must be maintained</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.confidence_intervals_summary">
+<span class="sig-name descname"><span class="pre">confidence_intervals_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.confidence_intervals_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.confidence_intervals_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the confidence intervals for each facet.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.d_study_summary">
+<span class="sig-name descname"><span class="pre">d_study_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.d_study_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.d_study_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the D-Study results.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.g_coeff_summary">
+<span class="sig-name descname"><span class="pre">g_coeff_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.g_coeff_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.g_coeff_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the g_coeff results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.g_coeffs">
+<span class="sig-name descname"><span class="pre">g_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.g_coeffs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.g_coeffs" title="Link to this definition"></a></dt>
+<dd><p>Calculate G-coefficients for various scenarios of fixed and random facets.</p>
+<p>This method computes rho^2 (relative) and phi^2 (absolute) coefficients for each
+potential object of measurement in the design. The coefficients quantify the
+reliability of measurements across different facets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – <p>Optional keyword arguments.
+- variance_dictionary (dict): Custom variance components to use.</p>
+<blockquote>
+<div><p>If provided, values must be non-negative. If not provided,
+components from the ANOVA table are used.</p>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>levels_df (pd.DataFrame): Custom levels coefficients table.</dt><dd><p>If not provided, self.levels_coeffs is used or calculated.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>variance_tuple_dictionary (dict): Custom variance tuple dictionary.</dt><dd><p>If not provided, self.variance_tuple_dictionary is used.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>d_study (bool): If True, returns the G-coefficients DataFrame directly</dt><dd><p>instead of storing it in self.g_coeffs_table. Default is False.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>error_variance (bool): If True, prints detailed information about</dt><dd><p>the error variances for Tau (τ), Delta (Δ), and delta (δ) during
+the calculation of phi-squared and rho-squared coefficients.
+Default is False.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If d_study=True, returns the G-coefficients DataFrame directly.
+Otherwise, results are stored in self.g_coeffs_table and None is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame or None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If:
+    - ANOVA table hasn’t been calculated and no variance_dictionary is provided
+    - Any variance component is negative
+    - Levels coefficients are invalid (non-square, negative values)
+    - Keys in variance_dictionary don’t match variance_tuple_dictionary
+    - Levels coefficients don’t match variance components</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Negative variance components are automatically set to zero with a warning</p></li>
+<li><p>The ‘mean’ component is removed from calculations</p></li>
+<li><p>The method produces a DataFrame with rho^2 and phi^2 values for each facet</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="generalizit.design.Design.variance_summary">
+<span class="sig-name descname"><span class="pre">variance_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design.html#Design.variance_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design.Design.variance_summary" title="Link to this definition"></a></dt>
+<dd><p>Print a summary of the variance components.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-generalizit.design_utils">
+<span id="design-utilities"></span><h2>Design Utilities<a class="headerlink" href="#module-generalizit.design_utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.design_utils.create_corollary_dictionary">
+<span class="sig-prename descclassname"><span class="pre">generalizit.design_utils.</span></span><span class="sig-name descname"><span class="pre">create_corollary_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design_facets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design_utils.html#create_corollary_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design_utils.create_corollary_dictionary" title="Link to this definition"></a></dt>
+<dd><p>Parse a research design string and return a dictionary mapping facet types
+(p, i, h) to their actual values based on the design pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>design_num</strong> (<em>int</em>) – The design number</p></li>
+<li><p><strong>design_facets</strong> (<em>list</em>) – List of facets extracted from the design string</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping facet names from the research design to base design facets.
+Keys are ‘p’, ‘i’, and/or ‘h’</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the design pattern is invalid or can’t be parsed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.design_utils.create_variance_tuple_dictionary">
+<span class="sig-prename descclassname"><span class="pre">generalizit.design_utils.</span></span><span class="sig-name descname"><span class="pre">create_variance_tuple_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corollary_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design_utils.html#create_variance_tuple_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design_utils.create_variance_tuple_dictionary" title="Link to this definition"></a></dt>
+<dd><p>Create a variance tuple dictionary for a given study design structure.</p>
+<p>This function constructs a dictionary representing variance components for a
+given study design, for example Brennan Design 2 <cite>(i:p)</cite>,
+where <cite>p</cite> and <cite>i</cite> represent facets of variation. The dictionary maps each
+variance component to a tuple of relevant facets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>design_num</strong> (<em>int</em>) – The design number (2,4-8) or ‘crossed’ for fully crossed designs.</p></li>
+<li><p><strong>corollary_dict</strong> (<em>dict</em>) – A dictionary mapping corollary names to actual facet names.
+For example, {‘p’: ‘persons’, ‘i’: ‘items’}.</p></li>
+<li><p><strong>```</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A dictionary where keys are variance component names (strings), and</dt><dd><p>values are tuples of the corresponding facets.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">create_variance_tuple_dictionary</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="s1">&#39;persons&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="s1">&#39;items&#39;</span><span class="p">})</span>
+<span class="go">{</span>
+<span class="go">    &#39;p&#39;: (&#39;p&#39;,),</span>
+<span class="go">    &#39;i:p&#39;: (&#39;i&#39;, &#39;p&#39;),</span>
+<span class="go">    &#39;mean&#39;: ()</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.design_utils.get_facets_from_variance_tuple_dictionary">
+<span class="sig-prename descclassname"><span class="pre">generalizit.design_utils.</span></span><span class="sig-name descname"><span class="pre">get_facets_from_variance_tuple_dictionary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variance_tuple_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design_utils.html#get_facets_from_variance_tuple_dictionary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design_utils.get_facets_from_variance_tuple_dictionary" title="Link to this definition"></a></dt>
+<dd><p>Extracts the facets from a variance tuple dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>variance_tuple_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>tuple</em><em>]</em>) – A dictionary where keys are variance component names (strings),
+and values are tuples of the corresponding facets.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of unique facets extracted from the variance tuple dictionary.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.design_utils.match_research_design">
+<span class="sig-prename descclassname"><span class="pre">generalizit.design_utils.</span></span><span class="sig-name descname"><span class="pre">match_research_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design_utils.html#match_research_design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design_utils.match_research_design" title="Link to this definition"></a></dt>
+<dd><p>Matches a string input of a research design to one of 8 predefined designs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_string</strong> (<em>str</em>) – The research design input as a string.
+Valid operators are ‘x’ for crossing and ‘:’ for nesting.
+Some designs require parentheses to indicate grouping.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The design number (1 to 8) that matches the input
+List: List of facets extracted from the design string</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int or str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If the input string is invalid or malformed</p></li>
+<li><p><strong>TypeError</strong> – If the input is not a string</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">match_research_design</span><span class="p">(</span><span class="s2">&quot;persons x raters&quot;</span><span class="p">)</span>  <span class="c1"># Design 1</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">match_research_design</span><span class="p">(</span><span class="s2">&quot;items:persons&quot;</span><span class="p">)</span>     <span class="c1"># Design 2</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">match_research_design</span><span class="p">(</span><span class="s2">&quot;p x i x h&quot;</span><span class="p">)</span>         <span class="c1"># Design 3</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">match_research_design</span><span class="p">(</span><span class="s2">&quot;p x (i:h)&quot;</span><span class="p">)</span>         <span class="c1"># Design 4</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.design_utils.parse_facets">
+<span class="sig-prename descclassname"><span class="pre">generalizit.design_utils.</span></span><span class="sig-name descname"><span class="pre">parse_facets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">design_facets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design_utils.html#parse_facets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design_utils.parse_facets" title="Link to this definition"></a></dt>
+<dd><p>Parses the facets of a research design and returns a dictionary of variance components.</p>
+<p>This function combines the functionality of <cite>create_corollary_dictionary</cite> and
+<cite>create_variance_tuple_dictionary</cite> to generate a comprehensive dictionary of
+variance components for a given research design.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>design_num</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em>) – The design number or ‘crossed’ for fully crossed designs.</p></li>
+<li><p><strong>design_facets</strong> (<em>list</em>) – List of facets extracted from the design string.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A dictionary where keys are variance component names (strings), and</dt><dd><p>values are tuples of the corresponding facets.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, tuple]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the design pattern is invalid or can’t be parsed.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_facets</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">,</span> <span class="s1">&#39;persons&#39;</span><span class="p">])</span>
+<span class="go">{</span>
+<span class="go">    &#39;p&#39;: (&#39;persons&#39;,),</span>
+<span class="go">    &#39;i:p&#39;: (&#39;items&#39;, &#39;persons&#39;),</span>
+<span class="go">    &#39;mean&#39;: ()</span>
+<span class="go">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.design_utils.validate_research_design">
+<span class="sig-prename descclassname"><span class="pre">generalizit.design_utils.</span></span><span class="sig-name descname"><span class="pre">validate_research_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/design_utils.html#validate_research_design"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.design_utils.validate_research_design" title="Link to this definition"></a></dt>
+<dd><p>Validates if a design number is valid (1-8).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>design_number</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – The design number to validate</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if valid, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-generalizit.g_theory_utils">
+<span id="g-theory-utilities"></span><h2>G-Theory Utilities<a class="headerlink" href="#module-generalizit.g_theory_utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="generalizit.g_theory_utils.create_pseudo_df">
+<span class="sig-prename descclassname"><span class="pre">generalizit.g_theory_utils.</span></span><span class="sig-name descname"><span class="pre">create_pseudo_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d_study</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance_tup_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/generalizit/g_theory_utils.html#create_pseudo_df"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#generalizit.g_theory_utils.create_pseudo_df" title="Link to this definition"></a></dt>
+<dd><p>Create a pseudo DataFrame with all possible combinations of facet levels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_study</strong> (<em>dict</em>) – A dictionary representing the study design with facets as keys and
+the number of levels for each facet as values. Values can be either
+integers or lists of integers.</p></li>
+<li><p><strong>variance_tup_dict</strong> (<em>dict</em>) – A dictionary mapping facet names to tuples containing the
+component facets.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pseudo DataFrame with all possible combinations of facet levels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to GeneralizIT’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Tyler Smith.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>generalizit.g_theory_utils &mdash; GeneralizIT 0.1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeneralizIT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeneralizIT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">generalizit.g_theory_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for generalizit.g_theory_utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<div class="viewcode-block" id="create_pseudo_df">
+<a class="viewcode-back" href="../../api.html#generalizit.g_theory_utils.create_pseudo_df">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_pseudo_df</span><span class="p">(</span><span class="n">d_study</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">variance_tup_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a pseudo DataFrame with all possible combinations of facet levels.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        d_study (dict): A dictionary representing the study design with facets as keys and </span>
+<span class="sd">                        the number of levels for each facet as values. Values can be either</span>
+<span class="sd">                        integers or lists of integers.</span>
+<span class="sd">        variance_tup_dict (dict): A dictionary mapping facet names to tuples containing the </span>
+<span class="sd">                                 component facets.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: A pseudo DataFrame with all possible combinations of facet levels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1"># Identify nested structure from variance_tup_dict</span>
+    <span class="n">nested_vars</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">crossed_vars</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">comp_name</span><span class="p">,</span> <span class="n">components</span> <span class="ow">in</span> <span class="n">variance_tup_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">comp_name</span> <span class="ow">and</span> <span class="s2">&quot; x &quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">comp_name</span><span class="p">:</span>
+            <span class="c1"># This is a nested relationship</span>
+            <span class="c1"># For a string like &quot;i:p&quot;, components would be (&quot;i&quot;, &quot;p&quot;)</span>
+            <span class="c1"># where i is nested within p</span>
+            <span class="n">nested_relationship</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nested_relationship</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="n">nested_relationship</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">nested_relationship</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">child</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested_vars</span><span class="p">:</span>
+                    <span class="n">nested_vars</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">nested_vars</span><span class="p">[</span><span class="n">child</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot; x &quot;</span> <span class="ow">in</span> <span class="n">comp_name</span><span class="p">:</span>
+            <span class="c1"># This is a crossed relationship</span>
+            <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+                <span class="n">crossed_vars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">component</span><span class="p">)</span>
+    
+    <span class="c1"># Find all facets</span>
+    <span class="n">all_facets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d_study</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    
+    <span class="c1"># Order facets based on nesting</span>
+    <span class="n">ordered_facets</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># First add facets that are not nested within anything (top level)</span>
+    <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">all_facets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">facet</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested_vars</span><span class="p">:</span>
+            <span class="n">ordered_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+            
+    <span class="c1"># print(f&quot;Top level facets: {ordered_facets}&quot;)</span>
+    
+    <span class="c1"># Then add nested facets in order of nesting depth</span>
+    <span class="n">remaining_facets</span> <span class="o">=</span> <span class="n">all_facets</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">ordered_facets</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">remaining_facets</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">remaining_facets</span><span class="p">):</span>
+            <span class="c1"># If all parents of this facet are already in ordered_facets</span>
+            <span class="k">if</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">nested_vars</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">parent</span> <span class="ow">in</span> <span class="n">ordered_facets</span> <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">nested_vars</span><span class="p">[</span><span class="n">facet</span><span class="p">]):</span>
+                <span class="n">ordered_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+                <span class="n">remaining_facets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+        
+        <span class="c1"># If we couldn&#39;t add any more facets, there might be a circular dependency</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">ordered_facets</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">remaining_facets</span><span class="p">:</span>
+            <span class="c1"># Add remaining facets in arbitrary order</span>
+            <span class="n">ordered_facets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">remaining_facets</span><span class="p">))</span>
+            <span class="k">break</span>
+
+    <span class="c1"># print(f&quot;Ordered facets after processing: {ordered_facets}&quot;)</span>
+    <span class="c1"># Reverse the order for proper nesting in for loops</span>
+    <span class="c1"># In a design like i:p, we want loops ordered as p then i</span>
+    <span class="n">ordered_facets</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    
+    <span class="c1"># print(f&quot;Ordered facets for nested structure: {ordered_facets}&quot;)</span>
+    
+    <span class="c1"># Generate all combinations</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">facet</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">all_facets</span><span class="p">}</span>
+    
+    <span class="c1"># Use nested loops to generate combinations</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate_combinations</span><span class="p">(</span><span class="n">facet_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">current_values</span><span class="o">=</span><span class="p">{}):</span>
+        <span class="k">if</span> <span class="n">facet_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ordered_facets</span><span class="p">):</span>
+            <span class="c1"># We&#39;ve assigned values to all facets, add to data</span>
+            <span class="k">for</span> <span class="n">facet</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">facet</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span>
+        
+        <span class="n">current_facet</span> <span class="o">=</span> <span class="n">ordered_facets</span><span class="p">[</span><span class="n">facet_index</span><span class="p">]</span>
+        <span class="n">num_levels</span> <span class="o">=</span> <span class="n">d_study</span><span class="p">[</span><span class="n">current_facet</span><span class="p">]</span>
+        
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">new_values</span> <span class="o">=</span> <span class="n">current_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">new_values</span><span class="p">[</span><span class="n">current_facet</span><span class="p">]</span> <span class="o">=</span> <span class="n">level</span>
+            <span class="n">generate_combinations</span><span class="p">(</span><span class="n">facet_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">new_values</span><span class="p">)</span>
+    
+    <span class="n">generate_combinations</span><span class="p">()</span>
+    
+    <span class="c1"># Create DataFrame</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Tyler Smith.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

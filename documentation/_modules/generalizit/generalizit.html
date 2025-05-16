@@ -1,0 +1,426 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>generalizit.generalizit &mdash; GeneralizIT 0.1.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=92734c54"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeneralizIT
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeneralizIT</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">generalizit.generalizit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for generalizit.generalizit</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">generalizit.design</span><span class="w"> </span><span class="kn">import</span> <span class="n">Design</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">generalizit.design_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_facets</span><span class="p">,</span> <span class="n">match_research_design</span><span class="p">,</span> <span class="n">validate_research_design</span><span class="p">,</span> <span class="n">get_facets_from_variance_tuple_dictionary</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<div class="viewcode-block" id="GeneralizIT">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GeneralizIT</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    High-level API for Generalizability Theory analysis.</span>
+<span class="sd">    </span>
+<span class="sd">    GeneralizIT provides a user-friendly interface for conducting Generalizability Theory (G-Theory) </span>
+<span class="sd">    analyses, including variance component estimation, reliability coefficient calculation,</span>
+<span class="sd">    Decision studies (D-studies), and confidence interval estimation.</span>
+<span class="sd">    </span>
+<span class="sd">    This class serves as a wrapper around the core analytical engine (Design class),</span>
+<span class="sd">    handling data preparation, research design interpretation, and result presentation.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (pd.DataFrame): Dataset containing facet variables and response measurements.</span>
+<span class="sd">        design_str (str): String specifying the research design in standard notation </span>
+<span class="sd">                        (e.g., &quot;p x i&quot; for persons crossed with items).</span>
+<span class="sd">        response (str): Column name in data containing the response/measurement values.</span>
+<span class="sd">        </span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        design (Design): The underlying Design object that performs calculations.</span>
+<span class="sd">        </span>
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">        &gt;&gt;&gt; from generalizit import GeneralizIT</span>
+<span class="sd">        &gt;&gt;&gt; data = pd.read_csv(&quot;my_data.csv&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; gt = GeneralizIT(data, &quot;p x i&quot;, &quot;score&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; gt.calculate_anova()</span>
+<span class="sd">        &gt;&gt;&gt; gt.calculate_g_coefficients()</span>
+<span class="sd">        &gt;&gt;&gt; gt.g_coefficients_summary()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">design_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">variance_tuple_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Initialize the GeneralizIT class</span>
+
+        <span class="c1"># If a variance tuple dictionary is not provided, create one</span>
+        <span class="k">if</span> <span class="n">variance_tuple_dictionary</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># First we parse the input string to get the research design</span>
+            <span class="n">design_num</span><span class="p">,</span> <span class="n">facets</span> <span class="o">=</span> <span class="n">match_research_design</span><span class="p">(</span><span class="n">design_str</span><span class="p">)</span>
+            
+            <span class="c1"># Validate the research design</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">validate_research_design</span><span class="p">(</span><span class="n">design_num</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            
+            <span class="n">variance_tuple_dictionary</span> <span class="o">=</span> <span class="n">parse_facets</span><span class="p">(</span><span class="n">design_num</span><span class="o">=</span><span class="n">design_num</span><span class="p">,</span> <span class="n">design_facets</span><span class="o">=</span><span class="n">facets</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Validate the provided variance tuple dictionary</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variance_tuple_dictionary</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;variance_tuple_dictionary must be a dictionary.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variance_tuple_dictionary</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;variance_tuple_dictionary must contain string keys and tuple values.&quot;</span><span class="p">)</span>
+            <span class="n">facets</span> <span class="o">=</span> <span class="n">get_facets_from_variance_tuple_dictionary</span><span class="p">(</span><span class="n">variance_tuple_dictionary</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="p">,</span> <span class="n">missing_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_data</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">facets</span><span class="o">=</span><span class="n">facets</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span>
+
+        <span class="c1"># Initialize the design class based on the research design</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">Design</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">variance_tuple_dictionary</span><span class="o">=</span><span class="n">variance_tuple_dictionary</span><span class="p">,</span>
+            <span class="n">missing_data</span><span class="o">=</span><span class="n">missing_data</span><span class="p">,</span>
+            <span class="n">response_col</span><span class="o">=</span><span class="n">response</span>
+        <span class="p">)</span>
+            
+    <span class="k">def</span><span class="w"> </span><span class="nf">_clean_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">facets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">response</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Prunes the input DataFrame by dropping columns that are not in the list of facets or the response variable. </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (pd.DataFrame): The input DataFrame to be pruned.</span>
+<span class="sd">            facets (list[str]): The list of facet column names.</span>
+<span class="sd">            response (str): The response variable column name.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: The pruned DataFrame containing only the columns specified in facets and the response variable.</span>
+<span class="sd">            bool: A boolean indicating whether there are missing values in the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">col</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())})</span>  <span class="c1"># Normalize the column names</span>
+        
+        <span class="c1"># Combine factors and response variable into a single list</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">facets</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">response</span><span class="p">]</span>
+        <span class="c1"># Create a list of columns to drop</span>
+        <span class="n">drop_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
+        
+        <span class="c1"># Create a warning message if any columns are dropped</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">drop_cols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: The following columns have been dropped from the data:&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">drop_cols</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        
+        <span class="c1"># Drop the columns</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">drop_cols</span><span class="p">)</span>
+
+        <span class="c1"># Check for missing values</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Missing values detected in the data.&quot;</span><span class="p">)</span>
+            <span class="n">missing_data</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">missing_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">missing_data</span>
+    
+<div class="viewcode-block" id="GeneralizIT.calculate_anova">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.calculate_anova">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_anova</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate variance components using ANOVA.</span>
+<span class="sd">        </span>
+<span class="sd">        This method is a wrapper for the Design.calculate_anova() method, which</span>
+<span class="sd">        implements Henderson&#39;s Method 1 to estimate variance components for each facet</span>
+<span class="sd">        in the specified research design.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None: Results are stored in the underlying Design object.</span>
+<span class="sd">            </span>
+<span class="sd">        Notes:</span>
+<span class="sd">            This method must be called before calculating G-coefficients,</span>
+<span class="sd">            confidence intervals, or D-study scenarios.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Calculate the ANOVA table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">calculate_anova</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="GeneralizIT.calculate_g_coefficients">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.calculate_g_coefficients">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_g_coefficients</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate generalizability coefficients.</span>
+<span class="sd">        </span>
+<span class="sd">        This method is a wrapper for the Design.g_coeffs() method, which computes </span>
+<span class="sd">        phi-squared (Φ²) and rho-squared (ρ²) coefficients for each potential</span>
+<span class="sd">        object of measurement in the design.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            **kwargs: Optional keyword arguments passed to Design.g_coeffs().</span>
+<span class="sd">                - error_variance (bool): If True, prints detailed information about</span>
+<span class="sd">                  error variances during calculation. Default is False.</span>
+<span class="sd">                - Other parameters as documented in Design.g_coeffs().</span>
+<span class="sd">                </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None: Results are stored in the underlying Design object.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If ANOVA table hasn&#39;t been calculated first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First check that the ANOVA table has been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">anova_table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ANOVA table must be calculated first. Please run the calculate_anova() method.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate the G coefficients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">g_coeffs</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="GeneralizIT.g_coeffs">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.g_coeffs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">g_coeffs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        [DEPRECATED] Calculate generalizability coefficients.</span>
+<span class="sd">        </span>
+<span class="sd">        This method is deprecated and will be removed in a future version.</span>
+<span class="sd">        Please use `calculate_g_coefficients()` instead.</span>
+<span class="sd">        </span>
+<span class="sd">        See `calculate_g_coefficients()` for parameter details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;The g_coeffs() method is deprecated and will be removed in a future version. &quot;</span>
+            <span class="s2">&quot;Please use calculate_g_coefficients() instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_g_coefficients</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="GeneralizIT.calculate_d_study">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.calculate_d_study">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_d_study</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_study_design</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate G-coefficients for alternative research designs (D-Study).</span>
+<span class="sd">        </span>
+<span class="sd">        This method is a wrapper for the Design.calculate_d_study() method, which examines</span>
+<span class="sd">        multiple possible study designs by generating combinations of provided facet levels.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            d_study_design (dict, optional): Dictionary where keys are facet names and values are </span>
+<span class="sd">                lists of integers representing different numbers of levels to test.</span>
+<span class="sd">            **kwargs: Optional keyword arguments passed to Design.calculate_d_study().</span>
+<span class="sd">                </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None: Results are stored in the underlying Design object.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If ANOVA table hasn&#39;t been calculated first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First check that the ANOVA table has been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">anova_table</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ANOVA table must be calculated first. Please run the calculate_anova() method.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate the D study</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">calculate_d_study</span><span class="p">(</span><span class="n">d_study_design</span><span class="o">=</span><span class="n">d_study_design</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="GeneralizIT.calculate_confidence_intervals">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.calculate_confidence_intervals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_confidence_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate confidence intervals for facet level means.</span>
+<span class="sd">        </span>
+<span class="sd">        This method is a wrapper for the Design.calculate_confidence_intervals() method,</span>
+<span class="sd">        which computes confidence intervals for individual facets based on variance </span>
+<span class="sd">        component analysis.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            alpha (float, optional): Significance level for confidence intervals.</span>
+<span class="sd">                Default is 0.05 (producing 95% confidence intervals).</span>
+<span class="sd">            **kwargs: Optional keyword arguments passed to Design.calculate_confidence_intervals().</span>
+<span class="sd">                </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            None: Results are stored in the underlying Design object.</span>
+<span class="sd">            </span>
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If ANOVA table hasn&#39;t been calculated first.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># First check that the ANOVA table has been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">anova_table</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ANOVA table must be calculated first. Please run the calculate_anova() method.&quot;</span><span class="p">)</span>
+            
+        <span class="c1"># Calculate the confidence intervals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">calculate_confidence_intervals</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+        
+    <span class="c1"># ----------------- Summary Methods -----------------  </span>
+<div class="viewcode-block" id="GeneralizIT.anova_summary">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.anova_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">anova_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># First check that the ANOVA table has been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">anova_table</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ANOVA table must be calculated first. Please run the calculate_anova() method.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Print the ANOVA table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">anova_summary</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GeneralizIT.variance_summary">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.variance_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">variance_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># First check that the ANOVA table has been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">anova_table</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ANOVA table must be calculated first. Please run the calculate_anova() method.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Print the variance components</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">variance_summary</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="GeneralizIT.g_coefficients_summary">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.g_coefficients_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">g_coefficients_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># First check that the G coefficients have been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">g_coeffs_table</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;G coefficients must be calculated first. Please run the g_coeffs() method.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Print the G coefficients</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">g_coeff_summary</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GeneralizIT.d_study_summary">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.d_study_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">d_study_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># First check that the D study has been calculated</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">d_study_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;D study must be calculated first. Please run the calculate_d_study() method.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Print the D study</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">d_study_summary</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="GeneralizIT.confidence_intervals_summary">
+<a class="viewcode-back" href="../../api.html#generalizit.GeneralizIT.confidence_intervals_summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">confidence_intervals_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># First check that the confidence intervals have been calculated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">confidence_intervals</span> <span class="ow">is</span> <span class="p">{}:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Confidence intervals must be calculated first. Please run the calculate_confidence_intervals() method.&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Print the confidence intervals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">confidence_intervals_summary</span><span class="p">()</span></div>
+</div>
+
+<span class="c1"># ---- End of GeneralizIT Class ----</span>
+
+<span class="c1"># ---- Wrapper Documentation ----</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_anova</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_anova</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> 
+    <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> 
+    <span class="n">Design</span><span class="o">.</span><span class="n">anova_summary</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="p">)</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_g_coefficients</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_g_coefficients</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> 
+    <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> 
+    <span class="n">Design</span><span class="o">.</span><span class="n">g_coeffs</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="p">)</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_d_study</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_d_study</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> 
+    <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> 
+    <span class="n">Design</span><span class="o">.</span><span class="n">calculate_d_study</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="p">)</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_confidence_intervals</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">GeneralizIT</span><span class="o">.</span><span class="n">calculate_confidence_intervals</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+</span> 
+    <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> 
+    <span class="n">Design</span><span class="o">.</span><span class="n">calculate_confidence_intervals</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="p">)</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">anova_summary</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Design</span><span class="o">.</span><span class="n">anova_summary</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">variance_summary</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Design</span><span class="o">.</span><span class="n">variance_summary</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">g_coefficients_summary</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Design</span><span class="o">.</span><span class="n">g_coeff_summary</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">d_study_summary</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Design</span><span class="o">.</span><span class="n">d_study_summary</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="n">GeneralizIT</span><span class="o">.</span><span class="n">confidence_intervals_summary</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">Design</span><span class="o">.</span><span class="n">confidence_intervals_summary</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="c1"># ---- End of Wrapper Documentation ----</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Tyler Smith.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
