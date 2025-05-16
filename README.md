@@ -79,6 +79,7 @@ GT.confidence_intervals_summary()
 ```
 
 ### Input Data Format
+
 The data should be structureda as a pandas DataFrame in a long format, where each row corresponds to a unique combination of the facets and the response variable.
 
  ```markdown
@@ -146,8 +147,8 @@ The `input_str` parameter specifies the research design. Supported formats inclu
 
 - **ANOVA Table:** Provides variance component estimates for each facet.
 - **G Coefficients:**
-  - Phi (Φ): Absolute coefficient for dependability
-  - Rho² (ρ²): Relative coefficient for generalizability
+  - **Phi** (Φ): Absolute coefficient for dependability (also known as *G<sub>a</sub>*)
+  - **Rho²** (ρ²): Relative coefficient for generalizability (also known as *G<sub>r</sub>*)
 - **D Studies:** Offers predictions of generalizability for specified facet levels to optimize measurement protocols
 - **Confidence Intervals:** Calculates confidence intervals for means of each facet.
 - **Summaries:** Concise summaries of ANOVA, G coefficients, D studies, and Confidence Intervals.
@@ -158,6 +159,10 @@ Advanced package usage and G-Theory methodology tutorials are available in our G
 
 - Generalizability Theory Tutorial [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tylerjsmith111/GeneralizIT/blob/main/tutorials/generaliz_tutorial.ipynb)
 - MNIST Variance Analysis Tutorial [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tylerjsmith111/GeneralizIT/blob/main/tutorials/mnist_variance_tutorial.ipynb)
+
+## Documentation
+
+The full API documentation is available at [GeneralizIT Documentation](https://tylerjsmith111.github.io/GeneralizIT/documentation/index.html).
 
 ## Notes
 
