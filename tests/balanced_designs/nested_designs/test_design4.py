@@ -30,11 +30,11 @@ def test_anova_calculations(test_design4):
 def test_g_coefficients(test_design4):
     """Tests the calculation of G coefficients."""
     test_design4.set_tolerance(0.01).test__calculate_g_coeffs()
-    
+        
 @pytest.mark.balanced
 @pytest.mark.nested
 def test_d_coefficients(test_design4):
-    """Tests the calculation of G coefficients."""
+    """Tests the calculation of D coefficients."""
     test_design4.set_tolerance(0.01).test__calculate_d_study(d_study_design={'person': [10], 't': [3], 'r': [4]}, utils=True)
     
 @pytest.mark.balanced
