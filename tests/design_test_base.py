@@ -223,7 +223,7 @@ class DesignTestBase:
         return self # Allow method chaining
     
     # ---- G Coefficient Tests ----
-    def test__calculate_g_coeffs(self):
+    def test__calculate_g_coeffs(self, fixed_facets: Optional[list[str]] = None):
         """
         Test the G-coefficient calculations.
         
@@ -238,7 +238,7 @@ class DesignTestBase:
             self.design.calculate_anova()
 
         # Call the method being tested
-        self.design.g_coeffs()
+        self.design.g_coeffs(fixed_facets=fixed_facets)
 
         # Check the resulting DataFrame
         assert not self.design.g_coeffs_table.empty, "G coefficient DataFrame should not be empty."

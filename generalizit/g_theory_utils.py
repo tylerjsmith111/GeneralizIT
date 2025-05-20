@@ -1,6 +1,7 @@
 import pandas as pd
-from typing import Dict, Union, List, Tuple, Any
+from typing import Dict, Union, List, Tuple, Any, Optional
 import itertools
+from itertools import combinations
 
 def create_pseudo_df(d_study: Dict[str, int], variance_tup_dict: Dict[str, tuple]) -> pd.DataFrame:
     """
@@ -95,3 +96,92 @@ def create_pseudo_df(d_study: Dict[str, int], variance_tup_dict: Dict[str, tuple
     
     # Create DataFrame
     return pd.DataFrame(data)
+
+
+def adjust_for_fixed_effects(
+    variance_tup_dict: Dict[str, tuple], 
+    variance_df: pd.DataFrame, 
+    levels_df: pd.DataFrame, 
+    fixed_facets: Optional[List[str]],
+    verbose: bool = False
+) -> Tuple[Dict[str, tuple], pd.DataFrame]:
+    
+    """
+    Adjust variance components for fixed facets in any design.
+    Follows Brennan's rule 4.3.1: For every alpha, absorb any variance component with alpha and fixed facet into the lower-order component.
+    Args:
+        variance_tup_dict: dict mapping component names to tuples of facets.
+        variance_df: DataFrame with index as variance component names and a 'Variance' column.
+        levels_df: DataFrame of levels coefficients (1/levels).
+        fixed_facets: list of facets to fix (e.g., ['i']).
+        verbose: bool, if True, print debug information.
+    Returns:
+        adjusted_variance_tup_dict: dict mapping adjusted component names to tuples of facets.
+        adjusted_variance_df: DataFrame with adjusted variance components.
+    """
+    def vprint(*args, **kwargs):
+        """Verbose print function."""
+        if verbose:
+            print(*args, **kwargs)
+            
+    if fixed_facets is None:
+        vprint("No fixed facets provided. Returning original variance components.")
+        return variance_tup_dict, variance_df
+    else:
+        # Gather all unique facets
+        all_facets = set()
+        for facets in variance_tup_dict.values():
+            all_facets.update(facets)
+        all_facets = list(all_facets)
+        vprint(f"All facets: {all_facets}")
+
+        # Identify random facets
+        random_facets = [facet for facet in all_facets if facet not in fixed_facets]
+        vprint(f"Random facets: {random_facets}")
+
+        # Prepare variance dict
+        adjusted_variance_dict = variance_df['Variance'].to_dict()
+        adjusted_variance_dict.pop('mean', None)
+        vprint(f"Initial variance dict: {adjusted_variance_dict}")
+
+        # Remove fixed facet main effects
+        for fixed_facet in fixed_facets:
+            adjusted_variance_dict.pop(fixed_facet, None)
+        vprint(f"Variance dict after removing fixed facets: {adjusted_variance_dict}")
+
+        # Only keep keys not involving fixed facets
+        key_list = [
+            key for key in adjusted_variance_dict
+            if not any(facet in variance_tup_dict[key] for facet in fixed_facets)
+        ]
+        vprint(f"Keys to keep: {key_list}")
+
+        # Absorb higher-order interactions with fixed facets
+        for variance in key_list:
+            facets = list(variance_tup_dict[variance])
+            initial_var = adjusted_variance_dict[variance]
+            combinations_list = facets + list(fixed_facets)
+            interaction_tuples = []
+            for r in range(len(facets) + 1, len(combinations_list) + 1):
+                for combo in combinations(combinations_list, r):
+                    interaction_tuples.append(combo)
+            vprint(f"Interactions for {variance}: {interaction_tuples}")
+
+            for interaction in interaction_tuples:
+                for key, tup in variance_tup_dict.items():
+                    if set(interaction) == set(tup) and key in adjusted_variance_dict:
+                        vprint(f"Absorbing {key} into {variance}")
+                        initial_var += adjusted_variance_dict[key] * levels_df.at[variance, key]
+                        adjusted_variance_dict[key] = None  # Mark for removal
+                        break
+            adjusted_variance_dict[variance] = round(initial_var, 4)
+
+        # Remove absorbed keys
+        adjusted_variance_dict = {k: v for k, v in adjusted_variance_dict.items() if v is not None}
+        vprint(f"Final adjusted variance dict: {adjusted_variance_dict}")
+
+        # Build adjusted tuple dict and DataFrame
+        adjusted_variance_tup_dict = {k: variance_tup_dict[k] for k in adjusted_variance_dict}
+        adjusted_variance_df = pd.DataFrame.from_dict(adjusted_variance_dict, orient='index', columns=['Variance'])
+
+        return adjusted_variance_tup_dict, adjusted_variance_df

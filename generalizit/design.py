@@ -9,7 +9,7 @@ import numpy as np
 from itertools import product, combinations
 from scipy.stats import norm
 from typing import Union, Optional
-from generalizit.g_theory_utils import create_pseudo_df
+from generalizit.g_theory_utils import create_pseudo_df, adjust_for_fixed_effects
 
 class Design:
     def __init__(
@@ -740,6 +740,7 @@ class Design:
         variance_df: pd.DataFrame, 
         levels_df: pd.DataFrame, 
         variance_tup_dict: dict,
+        fixed_facets: Optional[list] = None,
         error_variance: Optional[bool] = False
     ) -> pd.DataFrame:
         """
@@ -752,8 +753,14 @@ class Design:
 
         # Step 2: Calculate the G coefficients for each facet up until the largest facet
         largest_facet = max(variance_tup_dict, key=lambda x: len(variance_tup_dict[x]))
+        
         for facet in variance_df.index:
             if facet == 'mean' or facet == largest_facet:
+                continue
+            
+            # Check if there is a fixed facet in the variance tuple
+            if fixed_facets and any(f in variance_tup_dict[facet] for f in fixed_facets):
+                print(f"Skipping G-coefficients calculation as {facet} contains fixed facets.")
                 continue
             
             if error_variance:
@@ -835,10 +842,11 @@ class Design:
             variance_tup_dict = kwargs['variance_tuple_dictionary']
             if not isinstance(variance_tup_dict, dict):
                 raise ValueError("Variance tuple dictionary must be a dictionary.")
-            for value in variance_tup_dict.values():
+            for key, value in variance_tup_dict.items():
                 if not isinstance(value, tuple):
                     raise ValueError(
-                        f"Variance tuple dictionary component '{key}' is not a tuple.")
+                    f"Variance tuple dictionary component '{key}' is not a tuple."
+                    )
             print("Using user-provided variance tuple dictionary")
         else:
             # Use the default variance tuple dictionary
@@ -888,6 +896,7 @@ class Design:
         if set(variance_df.index) != set(variance_tup_dict.keys()):
             raise ValueError(f"ANOVA table indices do not match the variance tuple dictionary keys. Mismatched indices: {self.anova_table.index.tolist()} and {variance_tup_dict.keys()}")
         
+        
         # ---- Level Coefficients kwargs ----            
         # Check if the levels coefficients have been calculated
         if 'levels_df' in kwargs:
@@ -914,6 +923,33 @@ class Design:
                 raise ValueError(f"Levels coefficients must match the variance components. Mismatched indices: {self.levels_coeffs.index.tolist()} and {variance_df.index.tolist()}")
             
             levels_df = self.levels_coeffs
+            
+        # ---- Fixed Facets kwargs ----
+        # Check if there a list of fixed facets has been provided and adjust the variance coefficients accordingly
+        fixed_facets = kwargs.get('fixed_facets', None)
+        if fixed_facets is not None:
+            # Apply Whimbey's correction for fixed facets
+            for facet in fixed_facets:
+                # Get the unique levels for the fixed facet in the df
+                universe_size = self.data[facet].nunique()
+                # Adjust the variance coefficients for the fixed facet
+                variance_df.at[facet, 'Variance'] = variance_df.at[facet, 'Variance'] * (universe_size - 1) / universe_size
+            
+            
+            print("Fixing the effects of the following facets: ", kwargs['fixed_facets'])
+            fixed_facets = kwargs['fixed_facets']
+            variance_tup_dict, variance_df = adjust_for_fixed_effects(
+                variance_tup_dict=variance_tup_dict,
+                variance_df=variance_df,
+                levels_df=levels_df,
+                fixed_facets=fixed_facets
+            )
+            
+            # Print the adjusted variance coefficients
+            variance_table = variance_df[['Variance']]
+            headers = [''] + [col for col in variance_df.columns]
+
+            self._summary_helper("Corrected Variance Components", headers, variance_table)
 
         # ---- Boolean Kwargs ----
         # Check if error_variance is provided and set to True
@@ -933,6 +969,7 @@ class Design:
             variance_df=variance_df, 
             levels_df=levels_df, 
             variance_tup_dict=variance_tup_dict,
+            fixed_facets=fixed_facets,
             error_variance=error_variance
         )
 
@@ -948,7 +985,8 @@ class Design:
         self, 
         pseudo_counts_df: pd.DataFrame, 
         variance_tuple_dictionary: dict, 
-        variance_dictionary: Optional[dict] =None, 
+        variance_dictionary: Optional[dict] =None,
+        fixed_facets: Optional[list] =None, 
         scenario_label: Optional[str] =None,
         ) -> None:
         """
@@ -980,6 +1018,10 @@ class Design:
         if variance_dictionary is not None:
             g_coeffs_kwargs['variance_dictionary'] = variance_dictionary
             
+        # Add fixed_facets if provided
+        if fixed_facets is not None:
+            g_coeffs_kwargs['fixed_facets'] = fixed_facets
+            
         # Get G-coefficients table
         pseudo_g_coeffs_table = self.g_coeffs(**g_coeffs_kwargs)
         
@@ -1010,7 +1052,8 @@ class Design:
                 }
                 This would generate 6 different study designs (1×2×3 combinations).
                         
-            **kwargs: Optional additional parameters.
+            **kwargs: Optional additional parameters
+                - fixed_facets Optional[List[str]]: Facets to be treated as fixed instead of random
         
         Returns:
             None: Results are stored in self.d_study_dict, where keys are string
@@ -1027,9 +1070,12 @@ class Design:
             - All facet combinations in the original design must be maintained
         """
         
+        # Check for any fixed facets
+        fixed_facets = kwargs.get('fixed_facets', None)
+        
         # Check if a d_study_design dictionary is provided
         # If not, check if pseudo_counts_dfs is provided
-        # If neither is provided, raise an error
+        # If neither is provided, raise an error    
         if d_study_design is not None:
             # ---- Balanced D Study Design ----
             print("Performing Balanced D-Study Design for the provided designs")
@@ -1071,6 +1117,8 @@ class Design:
             for study_design in study_designs:
                 # create a label by turning the study_design dictionary into a string
                 label = ', '.join([f"{key}: {value}" for key, value in study_design.items()])
+                if fixed_facets is not None:
+                    label += f" | fixed_facets: {fixed_facets}"
                 
                 # Create the pseudo count df
                 # Use the variance tuple dictionary from the G study's design
@@ -1080,11 +1128,12 @@ class Design:
                 )
                                 
                 # Use the helper function to process the D-Study scenario
-                # and add to the d_study_dict
+                # and add to the d_study_dict                
                 self._process_d_study_helper(
                     pseudo_counts_df=pseudo_counts_df,
                     variance_tuple_dictionary=self.variance_tuple_dictionary,
                     scenario_label=label,
+                    fixed_facets=fixed_facets
                 )
         else:
             # ---- Advanced D Study Design ----
@@ -1167,6 +1216,8 @@ class Design:
             for pseudo_counts_df in pseudo_counts_dfs:
                 # create a label by turning the study_design dictionary into a string
                 label = ', '.join([f"{key}: {value}" for key, value in pseudo_counts_df.items()])
+                if fixed_facets is not None:
+                    label += f" | fixed_facets: {fixed_facets}"
                 
                 # Use the helper function to process the D-Study scenario
                 # and add to the d_study_dict
@@ -1175,6 +1226,7 @@ class Design:
                     variance_tuple_dictionary=variance_tuple_dictionary,
                     variance_dictionary=variance_dictionary,
                     scenario_label=label,
+                    fixed_facets=fixed_facets
                 )
         
     # ----------------- Confidence Intervals -----------------

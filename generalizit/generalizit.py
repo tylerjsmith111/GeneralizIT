@@ -1,5 +1,5 @@
 import re
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Optional, Dict, List
 import numpy as np
 import pandas as pd
 from generalizit.design import Design
@@ -126,7 +126,7 @@ class GeneralizIT:
         # Calculate the ANOVA table
         self.design.calculate_anova()
     
-    def calculate_g_coefficients(self, **kwargs):
+    def calculate_g_coefficients(self, fixed_facets: Optional[List[str]] = None, **kwargs):
         """
         Calculate generalizability coefficients.
         
@@ -135,6 +135,7 @@ class GeneralizIT:
         object of measurement in the design.
         
         Parameters:
+            - fixed_facets Optional(List[str]): List of facets to be treated as fixed.
             **kwargs: Optional keyword arguments passed to Design.g_coeffs().
                 - error_variance (bool): If True, prints detailed information about
                   error variances during calculation. Default is False.
@@ -150,8 +151,21 @@ class GeneralizIT:
         if self.design.anova_table is None:
             raise RuntimeError("ANOVA table must be calculated first. Please run the calculate_anova() method.")
         
+        # Check that the fixed facets are valid
+        if fixed_facets is not None:
+            if not isinstance(fixed_facets, list):
+                raise ValueError("fixed_facets must be a list.")
+            max_tuple = max(self.design.variance_tuple_dictionary.values(), key=len)
+            if len(fixed_facets) > len(max_tuple) - 2:
+                raise ValueError("The number of fixed facets cannot exceed the number of facets in the design minus 2.")
+            all_facets = set(f for t in self.design.variance_tuple_dictionary.values() for f in t)
+            for facet in fixed_facets:
+                if facet not in all_facets:
+                    raise ValueError(f"Fixed facet '{facet}' not found in the design facets: {all_facets}")
+            print("Warning: Fixed facets should only be used with balanced designs without missing data.")
+                
         # Calculate the G coefficients
-        self.design.g_coeffs(**kwargs)
+        self.design.g_coeffs(fixed_facets=fixed_facets, **kwargs)
         
     def g_coeffs(self, **kwargs):
         """
@@ -170,7 +184,7 @@ class GeneralizIT:
         )
         return self.calculate_g_coefficients(**kwargs)
         
-    def calculate_d_study(self, d_study_design: Optional[dict] = None, **kwargs):
+    def calculate_d_study(self, d_study_design: Optional[dict] = None, fixed_facets: Optional[List[str]] = None, **kwargs):
         """
         Calculate G-coefficients for alternative research designs (D-Study).
         
@@ -178,9 +192,10 @@ class GeneralizIT:
         multiple possible study designs by generating combinations of provided facet levels.
         
         Parameters:
-            d_study_design (dict, optional): Dictionary where keys are facet names and values are 
+            - d_study_design (dict, optional): Dictionary where keys are facet names and values are 
                 lists of integers representing different numbers of levels to test.
-            **kwargs: Optional keyword arguments passed to Design.calculate_d_study().
+            - fixed_facets Optional(List[str]): List of facets to be treated as fixed.
+            - **kwargs: Optional keyword arguments passed to Design.calculate_d_study().
                 
         Returns:
             None: Results are stored in the underlying Design object.
@@ -192,8 +207,21 @@ class GeneralizIT:
         if self.design.anova_table.empty:
             raise RuntimeError("ANOVA table must be calculated first. Please run the calculate_anova() method.")
         
+        # Check that the fixed facets are valid
+        if fixed_facets is not None:
+            if not isinstance(fixed_facets, list):
+                raise ValueError("fixed_facets must be a list.")
+            max_tuple = max(self.design.variance_tuple_dictionary.values(), key=len)
+            if len(fixed_facets) > len(max_tuple) - 2:
+                raise ValueError("The number of fixed facets cannot exceed the number of facets in the design minus 2.")
+            all_facets = set(f for t in self.design.variance_tuple_dictionary.values() for f in t)
+            for facet in fixed_facets:
+                if facet not in all_facets:
+                    raise ValueError(f"Fixed facet '{facet}' not found in the design facets: {all_facets}")
+            print("Warning: Fixed facets should only be used with balanced designs without missing data.")
+        
         # Calculate the D study
-        self.design.calculate_d_study(d_study_design=d_study_design, **kwargs)
+        self.design.calculate_d_study(d_study_design=d_study_design, fixed_facets=fixed_facets, **kwargs)
         
     def calculate_confidence_intervals(self, alpha: float = 0.05, **kwargs):
         """
@@ -263,30 +291,30 @@ class GeneralizIT:
         self.design.confidence_intervals_summary()
 # ---- End of GeneralizIT Class ----
 
-# ---- Wrapper Documentation ----
-GeneralizIT.calculate_anova.__doc__ = (
-    GeneralizIT.calculate_anova.__doc__ + 
-    "\n\n" + 
-    Design.anova_summary.__doc__
-)
-GeneralizIT.calculate_g_coefficients.__doc__ = (
-    GeneralizIT.calculate_g_coefficients.__doc__ + 
-    "\n\n" + 
-    Design.g_coeffs.__doc__
-)
-GeneralizIT.calculate_d_study.__doc__ = (
-    GeneralizIT.calculate_d_study.__doc__ + 
-    "\n\n" + 
-    Design.calculate_d_study.__doc__
-)
-GeneralizIT.calculate_confidence_intervals.__doc__ = (
-    GeneralizIT.calculate_confidence_intervals.__doc__ + 
-    "\n\n" + 
-    Design.calculate_confidence_intervals.__doc__
-)
-GeneralizIT.anova_summary.__doc__ = Design.anova_summary.__doc__
-GeneralizIT.variance_summary.__doc__ = Design.variance_summary.__doc__
-GeneralizIT.g_coefficients_summary.__doc__ = Design.g_coeff_summary.__doc__
-GeneralizIT.d_study_summary.__doc__ = Design.d_study_summary.__doc__
-GeneralizIT.confidence_intervals_summary.__doc__ = Design.confidence_intervals_summary.__doc__
-# ---- End of Wrapper Documentation ----
+# # ---- Wrapper Documentation ----
+# GeneralizIT.calculate_anova.__doc__ = (
+#     GeneralizIT.calculate_anova.__doc__ + 
+#     "\n\n" + 
+#     Design.anova_summary.__doc__
+# )
+# GeneralizIT.calculate_g_coefficients.__doc__ = (
+#     GeneralizIT.calculate_g_coefficients.__doc__ + 
+#     "\n\n" + 
+#     Design.g_coeffs.__doc__
+# )
+# GeneralizIT.calculate_d_study.__doc__ = (
+#     GeneralizIT.calculate_d_study.__doc__ + 
+#     "\n\n" + 
+#     Design.calculate_d_study.__doc__
+# )
+# GeneralizIT.calculate_confidence_intervals.__doc__ = (
+#     GeneralizIT.calculate_confidence_intervals.__doc__ + 
+#     "\n\n" + 
+#     Design.calculate_confidence_intervals.__doc__
+# )
+# GeneralizIT.anova_summary.__doc__ = Design.anova_summary.__doc__
+# GeneralizIT.variance_summary.__doc__ = Design.variance_summary.__doc__
+# GeneralizIT.g_coefficients_summary.__doc__ = Design.g_coeff_summary.__doc__
+# GeneralizIT.d_study_summary.__doc__ = Design.d_study_summary.__doc__
+# GeneralizIT.confidence_intervals_summary.__doc__ = Design.confidence_intervals_summary.__doc__
+# # ---- End of Wrapper Documentation ----

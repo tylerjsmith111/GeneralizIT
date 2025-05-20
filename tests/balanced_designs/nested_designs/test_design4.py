@@ -1,5 +1,6 @@
 import pytest
 from tests.fixtures.design4_fixtures import test_design4
+from tests.fixtures.design4_fixed_fixtures import test_design4_fixed
 
 @pytest.mark.balanced
 @pytest.mark.nested
@@ -28,13 +29,19 @@ def test_anova_calculations(test_design4):
 @pytest.mark.balanced
 @pytest.mark.nested
 def test_g_coefficients(test_design4):
-    """Tests the calculation of G coefficients."""
+    """Tests the calculation of random G coefficients."""
     test_design4.set_tolerance(0.01).test__calculate_g_coeffs()
     
 @pytest.mark.balanced
 @pytest.mark.nested
+def test_g_coefficients(test_design4_fixed):
+    """Tests the calculation of random G coefficients with tasks fixed."""
+    test_design4_fixed.set_tolerance(0.01).test__calculate_g_coeffs(fixed_facets=['t'])
+        
+@pytest.mark.balanced
+@pytest.mark.nested
 def test_d_coefficients(test_design4):
-    """Tests the calculation of G coefficients."""
+    """Tests the calculation of D coefficients."""
     test_design4.set_tolerance(0.01).test__calculate_d_study(d_study_design={'person': [10], 't': [3], 'r': [4]}, utils=True)
     
 @pytest.mark.balanced
