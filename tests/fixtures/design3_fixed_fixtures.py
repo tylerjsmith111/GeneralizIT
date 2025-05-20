@@ -7,8 +7,6 @@
 # 	title = {Generalizability {Theory}},
 # 	year = {2001}}
 # --------
-
-
 import pytest
 import pandas as pd
 from tests.design_test_base import DesignTestBase

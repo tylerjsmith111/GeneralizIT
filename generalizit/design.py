@@ -927,7 +927,15 @@ class Design:
         # ---- Fixed Facets kwargs ----
         # Check if there a list of fixed facets has been provided and adjust the variance coefficients accordingly
         fixed_facets = kwargs.get('fixed_facets', None)
-        if 'fixed_facets' in kwargs:
+        if fixed_facets is not None:
+            # Apply Whimbey's correction for fixed facets
+            for facet in fixed_facets:
+                # Get the unique levels for the fixed facet in the df
+                universe_size = self.data[facet].nunique()
+                # Adjust the variance coefficients for the fixed facet
+                variance_df.at[facet, 'Variance'] = variance_df.at[facet, 'Variance'] * (universe_size - 1) / universe_size
+            
+            
             print("Fixing the effects of the following facets: ", kwargs['fixed_facets'])
             fixed_facets = kwargs['fixed_facets']
             variance_tup_dict, variance_df = adjust_for_fixed_effects(
@@ -936,6 +944,12 @@ class Design:
                 levels_df=levels_df,
                 fixed_facets=fixed_facets
             )
+            
+            # Print the adjusted variance coefficients
+            variance_table = variance_df[['Variance']]
+            headers = [''] + [col for col in variance_df.columns]
+
+            self._summary_helper("Corrected Variance Components", headers, variance_table)
 
         # ---- Boolean Kwargs ----
         # Check if error_variance is provided and set to True
@@ -1038,7 +1052,8 @@ class Design:
                 }
                 This would generate 6 different study designs (1×2×3 combinations).
                         
-            **kwargs: Optional additional parameters.
+            **kwargs: Optional additional parameters
+                - fixed_facets Optional[List[str]]: Facets to be treated as fixed instead of random
         
         Returns:
             None: Results are stored in self.d_study_dict, where keys are string
@@ -1055,9 +1070,12 @@ class Design:
             - All facet combinations in the original design must be maintained
         """
         
+        # Check for any fixed facets
+        fixed_facets = kwargs.get('fixed_facets', None)
+        
         # Check if a d_study_design dictionary is provided
         # If not, check if pseudo_counts_dfs is provided
-        # If neither is provided, raise an error
+        # If neither is provided, raise an error    
         if d_study_design is not None:
             # ---- Balanced D Study Design ----
             print("Performing Balanced D-Study Design for the provided designs")
@@ -1099,6 +1117,8 @@ class Design:
             for study_design in study_designs:
                 # create a label by turning the study_design dictionary into a string
                 label = ', '.join([f"{key}: {value}" for key, value in study_design.items()])
+                if fixed_facets is not None:
+                    label += f" | fixed_facets: {fixed_facets}"
                 
                 # Create the pseudo count df
                 # Use the variance tuple dictionary from the G study's design
@@ -1108,11 +1128,12 @@ class Design:
                 )
                                 
                 # Use the helper function to process the D-Study scenario
-                # and add to the d_study_dict
+                # and add to the d_study_dict                
                 self._process_d_study_helper(
                     pseudo_counts_df=pseudo_counts_df,
                     variance_tuple_dictionary=self.variance_tuple_dictionary,
                     scenario_label=label,
+                    fixed_facets=fixed_facets
                 )
         else:
             # ---- Advanced D Study Design ----
@@ -1195,6 +1216,8 @@ class Design:
             for pseudo_counts_df in pseudo_counts_dfs:
                 # create a label by turning the study_design dictionary into a string
                 label = ', '.join([f"{key}: {value}" for key, value in pseudo_counts_df.items()])
+                if fixed_facets is not None:
+                    label += f" | fixed_facets: {fixed_facets}"
                 
                 # Use the helper function to process the D-Study scenario
                 # and add to the d_study_dict
@@ -1203,6 +1226,7 @@ class Design:
                     variance_tuple_dictionary=variance_tuple_dictionary,
                     variance_dictionary=variance_dictionary,
                     scenario_label=label,
+                    fixed_facets=fixed_facets
                 )
         
     # ----------------- Confidence Intervals -----------------

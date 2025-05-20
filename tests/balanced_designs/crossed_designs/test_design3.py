@@ -34,9 +34,9 @@ def test_g_coefficients(test_design3):
     
 @pytest.mark.crossed
 @pytest.mark.balanced
-def test_fixed_g_coefficients(test_design3):
+def test_fixed_g_coefficients(test_design3_fixed):
     """Tests the calculation of Random G coefficients with items fixed."""
-    test_design3.set_tolerance(0.01).test__calculate_g_coeffs(fixed_facets=['i'])
+    test_design3_fixed.set_tolerance(0.01).test__calculate_g_coeffs(fixed_facets=['i'])
     
 @pytest.mark.crossed
 @pytest.mark.balanced
