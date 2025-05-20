@@ -80,7 +80,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span><span class="p">,</span> <span class="n">combinations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">norm</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">generalizit.g_theory_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_pseudo_df</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">generalizit.g_theory_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_pseudo_df</span><span class="p">,</span> <span class="n">adjust_for_fixed_effects</span>
 
 <div class="viewcode-block" id="Design">
 <a class="viewcode-back" href="../../api.html#generalizit.design.Design">[docs]</a>
@@ -816,6 +816,7 @@
         <span class="n">variance_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> 
         <span class="n">levels_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> 
         <span class="n">variance_tup_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">fixed_facets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">error_variance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -828,8 +829,14 @@
 
         <span class="c1"># Step 2: Calculate the G coefficients for each facet up until the largest facet</span>
         <span class="n">largest_facet</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">variance_tup_dict</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">variance_tup_dict</span><span class="p">[</span><span class="n">x</span><span class="p">]))</span>
+        
         <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">variance_df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">facet</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span> <span class="ow">or</span> <span class="n">facet</span> <span class="o">==</span> <span class="n">largest_facet</span><span class="p">:</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># Check if there is a fixed facet in the variance tuple</span>
+            <span class="k">if</span> <span class="n">fixed_facets</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span> <span class="ow">in</span> <span class="n">variance_tup_dict</span><span class="p">[</span><span class="n">facet</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fixed_facets</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping G-coefficients calculation as </span><span class="si">{</span><span class="n">facet</span><span class="si">}</span><span class="s2"> contains fixed facets.&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
             
             <span class="k">if</span> <span class="n">error_variance</span><span class="p">:</span>
@@ -913,10 +920,11 @@
             <span class="n">variance_tup_dict</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;variance_tuple_dictionary&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variance_tup_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Variance tuple dictionary must be a dictionary.&quot;</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variance_tup_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variance_tup_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Variance tuple dictionary component &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is not a tuple.&quot;</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s2">&quot;Variance tuple dictionary component &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39; is not a tuple.&quot;</span>
+                    <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Using user-provided variance tuple dictionary&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Use the default variance tuple dictionary</span>
@@ -966,6 +974,7 @@
         <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">variance_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">variance_tup_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ANOVA table indices do not match the variance tuple dictionary keys. Mismatched indices: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">anova_table</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">variance_tup_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
+        
         <span class="c1"># ---- Level Coefficients kwargs ----            </span>
         <span class="c1"># Check if the levels coefficients have been calculated</span>
         <span class="k">if</span> <span class="s1">&#39;levels_df&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -992,6 +1001,33 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Levels coefficients must match the variance components. Mismatched indices: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">levels_coeffs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">variance_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             
             <span class="n">levels_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels_coeffs</span>
+            
+        <span class="c1"># ---- Fixed Facets kwargs ----</span>
+        <span class="c1"># Check if there a list of fixed facets has been provided and adjust the variance coefficients accordingly</span>
+        <span class="n">fixed_facets</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_facets&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fixed_facets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Apply Whimbey&#39;s correction for fixed facets</span>
+            <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">fixed_facets</span><span class="p">:</span>
+                <span class="c1"># Get the unique levels for the fixed facet in the df</span>
+                <span class="n">universe_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">facet</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+                <span class="c1"># Adjust the variance coefficients for the fixed facet</span>
+                <span class="n">variance_df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">facet</span><span class="p">,</span> <span class="s1">&#39;Variance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">variance_df</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">facet</span><span class="p">,</span> <span class="s1">&#39;Variance&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">universe_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">universe_size</span>
+            
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fixing the effects of the following facets: &quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fixed_facets&#39;</span><span class="p">])</span>
+            <span class="n">fixed_facets</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;fixed_facets&#39;</span><span class="p">]</span>
+            <span class="n">variance_tup_dict</span><span class="p">,</span> <span class="n">variance_df</span> <span class="o">=</span> <span class="n">adjust_for_fixed_effects</span><span class="p">(</span>
+                <span class="n">variance_tup_dict</span><span class="o">=</span><span class="n">variance_tup_dict</span><span class="p">,</span>
+                <span class="n">variance_df</span><span class="o">=</span><span class="n">variance_df</span><span class="p">,</span>
+                <span class="n">levels_df</span><span class="o">=</span><span class="n">levels_df</span><span class="p">,</span>
+                <span class="n">fixed_facets</span><span class="o">=</span><span class="n">fixed_facets</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Print the adjusted variance coefficients</span>
+            <span class="n">variance_table</span> <span class="o">=</span> <span class="n">variance_df</span><span class="p">[[</span><span class="s1">&#39;Variance&#39;</span><span class="p">]]</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">variance_df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_summary_helper</span><span class="p">(</span><span class="s2">&quot;Corrected Variance Components&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">variance_table</span><span class="p">)</span>
 
         <span class="c1"># ---- Boolean Kwargs ----</span>
         <span class="c1"># Check if error_variance is provided and set to True</span>
@@ -1011,6 +1047,7 @@
             <span class="n">variance_df</span><span class="o">=</span><span class="n">variance_df</span><span class="p">,</span> 
             <span class="n">levels_df</span><span class="o">=</span><span class="n">levels_df</span><span class="p">,</span> 
             <span class="n">variance_tup_dict</span><span class="o">=</span><span class="n">variance_tup_dict</span><span class="p">,</span>
+            <span class="n">fixed_facets</span><span class="o">=</span><span class="n">fixed_facets</span><span class="p">,</span>
             <span class="n">error_variance</span><span class="o">=</span><span class="n">error_variance</span>
         <span class="p">)</span>
 
@@ -1027,7 +1064,8 @@
         <span class="bp">self</span><span class="p">,</span> 
         <span class="n">pseudo_counts_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> 
         <span class="n">variance_tuple_dictionary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> 
-        <span class="n">variance_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">variance_dictionary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fixed_facets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">scenario_label</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1058,6 +1096,10 @@
         <span class="c1"># Add variance_dictionary if provided</span>
         <span class="k">if</span> <span class="n">variance_dictionary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">g_coeffs_kwargs</span><span class="p">[</span><span class="s1">&#39;variance_dictionary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">variance_dictionary</span>
+            
+        <span class="c1"># Add fixed_facets if provided</span>
+        <span class="k">if</span> <span class="n">fixed_facets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g_coeffs_kwargs</span><span class="p">[</span><span class="s1">&#39;fixed_facets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed_facets</span>
             
         <span class="c1"># Get G-coefficients table</span>
         <span class="n">pseudo_g_coeffs_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_coeffs</span><span class="p">(</span><span class="o">**</span><span class="n">g_coeffs_kwargs</span><span class="p">)</span>
@@ -1091,7 +1133,8 @@
 <span class="sd">                }</span>
 <span class="sd">                This would generate 6 different study designs (1×2×3 combinations).</span>
 <span class="sd">                        </span>
-<span class="sd">            **kwargs: Optional additional parameters.</span>
+<span class="sd">            **kwargs: Optional additional parameters</span>
+<span class="sd">                - fixed_facets Optional[List[str]]: Facets to be treated as fixed instead of random</span>
 <span class="sd">        </span>
 <span class="sd">        Returns:</span>
 <span class="sd">            None: Results are stored in self.d_study_dict, where keys are string</span>
@@ -1108,9 +1151,12 @@
 <span class="sd">            - All facet combinations in the original design must be maintained</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
+        <span class="c1"># Check for any fixed facets</span>
+        <span class="n">fixed_facets</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fixed_facets&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        
         <span class="c1"># Check if a d_study_design dictionary is provided</span>
         <span class="c1"># If not, check if pseudo_counts_dfs is provided</span>
-        <span class="c1"># If neither is provided, raise an error</span>
+        <span class="c1"># If neither is provided, raise an error    </span>
         <span class="k">if</span> <span class="n">d_study_design</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># ---- Balanced D Study Design ----</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Performing Balanced D-Study Design for the provided designs&quot;</span><span class="p">)</span>
@@ -1152,6 +1198,8 @@
             <span class="k">for</span> <span class="n">study_design</span> <span class="ow">in</span> <span class="n">study_designs</span><span class="p">:</span>
                 <span class="c1"># create a label by turning the study_design dictionary into a string</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">study_design</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+                <span class="k">if</span> <span class="n">fixed_facets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; | fixed_facets: </span><span class="si">{</span><span class="n">fixed_facets</span><span class="si">}</span><span class="s2">&quot;</span>
                 
                 <span class="c1"># Create the pseudo count df</span>
                 <span class="c1"># Use the variance tuple dictionary from the G study&#39;s design</span>
@@ -1161,11 +1209,12 @@
                 <span class="p">)</span>
                                 
                 <span class="c1"># Use the helper function to process the D-Study scenario</span>
-                <span class="c1"># and add to the d_study_dict</span>
+                <span class="c1"># and add to the d_study_dict                </span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_process_d_study_helper</span><span class="p">(</span>
                     <span class="n">pseudo_counts_df</span><span class="o">=</span><span class="n">pseudo_counts_df</span><span class="p">,</span>
                     <span class="n">variance_tuple_dictionary</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variance_tuple_dictionary</span><span class="p">,</span>
                     <span class="n">scenario_label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                    <span class="n">fixed_facets</span><span class="o">=</span><span class="n">fixed_facets</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># ---- Advanced D Study Design ----</span>
@@ -1248,6 +1297,8 @@
             <span class="k">for</span> <span class="n">pseudo_counts_df</span> <span class="ow">in</span> <span class="n">pseudo_counts_dfs</span><span class="p">:</span>
                 <span class="c1"># create a label by turning the study_design dictionary into a string</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pseudo_counts_df</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+                <span class="k">if</span> <span class="n">fixed_facets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">label</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; | fixed_facets: </span><span class="si">{</span><span class="n">fixed_facets</span><span class="si">}</span><span class="s2">&quot;</span>
                 
                 <span class="c1"># Use the helper function to process the D-Study scenario</span>
                 <span class="c1"># and add to the d_study_dict</span>
@@ -1256,6 +1307,7 @@
                     <span class="n">variance_tuple_dictionary</span><span class="o">=</span><span class="n">variance_tuple_dictionary</span><span class="p">,</span>
                     <span class="n">variance_dictionary</span><span class="o">=</span><span class="n">variance_dictionary</span><span class="p">,</span>
                     <span class="n">scenario_label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                    <span class="n">fixed_facets</span><span class="o">=</span><span class="n">fixed_facets</span>
                 <span class="p">)</span></div>
 
         
