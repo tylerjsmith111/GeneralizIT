@@ -65,8 +65,12 @@ GT = GeneralizIT(data=data, input_str='Person x i x o', response='Response')
 GT.calculate_anova()
 GT.anova_summary()
 
-# 2. Compute G Coefficients
+# 2a. Compute G Coefficients with Random Facets
 GT.calculate_g_coefficients()
+GT.g_coefficients_summary()
+
+# 2b. Compute G Coefficients with a Fixed Facet (i.e. Items 'i')
+GT.calculate_g_coefficients(fixed_facets=['i'])
 GT.g_coefficients_summary()
 
 # 3. Perform a D Study with different facet levels

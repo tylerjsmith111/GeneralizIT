@@ -7,7 +7,7 @@ packages = {find = {include = ["generalizit"], exclude = ["tests*", "tutorials*"
 
 [project]
 name = "generalizit"
-version = "0.1.1"
+version = "0.1.2"
 description = "Generalizability theory fully crossed and nested"
 keywords = ["generalizability theory", "classical test theory", "unbalanced design"]
 readme = "README.md"
